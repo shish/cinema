@@ -35,16 +35,30 @@ const SyncAction = function (state: State, event: Event) {
     sync_movie_state(state);
     return state;
 }
+function iOS() {
+    return [
+      'iPad Simulator',
+      'iPhone Simulator',
+      'iPod Simulator',
+      'iPad',
+      'iPhone',
+      'iPod'
+    ].includes(navigator.platform)
+    // iPad on iOS 13 detection
+    || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
+  }
 const MainVideo = ({ state, admin }: { state: RoomState, admin: boolean }) => (
     (state.playing || state.paused) ?
         <video
             id="movie"
             src={"/movies/" + (state.playing || state.paused)[0]}
-            controls={admin}
+            controls={admin || iOS()}
             onplay={admin && PlayAction}
             onpause={admin && PauseAction}
             onseeked={admin && PauseAction}
             onloadedmetadata={SyncAction}
+            playsinline={true}
+            muted={iOS()}
         ></video> : <div class="blackout" />
 );
 
