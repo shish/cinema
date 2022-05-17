@@ -37,14 +37,21 @@ MAIN.room.admin {
 
   @media (orientation: portrait) {
     grid-template-columns: 1fr;
-    grid-template-rows: 4em 2em 1fr 1fr 3em;
+    grid-template-rows: 4em 2em min-content 1fr 3em;
     grid-template-areas:
       "header"
       "movies"
       "video"
       "chat"
       "viewers";
-  }
+      VIDEO {
+        height: auto;
+        border-bottom: 1px solid #666;
+      }
+      .chat {
+        border-left: 0;
+      }
+    }
 }
 
 MAIN.room.user {
@@ -58,12 +65,19 @@ MAIN.room.user {
 
   @media (orientation: portrait) {
     grid-template-columns: 1fr;
-    grid-template-rows: 4em 1fr 1fr;
+    grid-template-rows: 4em min-content 1fr;
     grid-template-areas:
       "header"
       "video"
       "chat";
 
+    VIDEO {
+      height: auto;
+      border-bottom: 1px solid #666;
+    }
+    .chat {
+      border-left: 0;
+    }
     .viewers {
       display: none;
     }
