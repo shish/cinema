@@ -7,6 +7,7 @@ use axum::{
     routing::{get, get_service},
     Json, Router,
 };
+use clap::Parser;
 use futures::stream::StreamExt;
 use futures::SinkExt;
 use serde::{Deserialize, Serialize};
@@ -72,12 +73,22 @@ struct AppState {
     movies: String,
 }
 
+#[derive(Parser)]
+#[clap(author, version, about, long_about = None)]
+pub struct Args {
+    /// Where the source videos are
+    #[clap(short = 'm', default_value = "/data")]
+    pub movies: String,
+}
+
 #[tokio::main]
 async fn main() {
+    let args = Args::parse();
+
     tracing_subscriber::registry()
         .with(tracing_subscriber::EnvFilter::new(
             std::env::var("RUST_LOG")
-                .unwrap_or_else(|_| "theatre_be=debug,tower_http=debug".into()),
+                .unwrap_or_else(|_| "theatre_be=info".into()),
         ))
         .with(tracing_subscriber::fmt::layer())
         .init();
@@ -92,7 +103,7 @@ async fn main() {
 
     let app_state = Arc::new(AppState {
         rooms: RwLock::new(rooms),
-        movies: "/Users/shish2k/Movies".to_string(),
+        movies: args.movies,
     });
     let app: _ = Router::new()
         .route("/room", get(handle_room))
