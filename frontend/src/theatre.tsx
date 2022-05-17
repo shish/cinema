@@ -1,8 +1,8 @@
 /// <reference path='./theatre.d.ts'/>
 import h from "hyperapp-jsx-pragma";
 import { app } from "hyperapp";
-import { WebSocketListen, Http, Interval } from "hyperapp-fx";
-import { MsgScreen } from "./screens/base";
+import { WebSocketListen, Http } from "hyperapp-fx";
+import { Header } from "./screens/base";
 import { Login } from "./screens/login";
 import { RoomRender } from "./screens/room";
 import { v4 as uuidv4 } from "uuid";
@@ -24,11 +24,14 @@ let state: State = {
     loading: null,
     room: null,
     movies: [],
+    rooms: {},
     ws_errors: 0,
     error: null,
     settings: {
-        sound: !DEV,
+        sound: false,
     },
+    fullscreen: document.fullscreenElement != null,
+    manual_entry: false,
 };
 
 try {
@@ -49,24 +52,23 @@ function view(state: State) {
     let screen = null;
     if (state.error !== null) {
         screen = (
-            <MsgScreen
-                settings={state.settings}
-                header={"Error"}
-                footer={
+            <main class="message">
+                <Header header={"Error"} />
+                <article>{state.error}</article>
+                <footer>
                     <input type="button" value="Leave" onclick={ResetErrorAction} />
-                }
-            >
-                {state.error}
-            </MsgScreen>
+                </footer>
+            </main>
         );
     } else if (state.loading !== null) {
         screen = (
-            <MsgScreen settings={state.settings} header={"Loading"}>
-                {state.loading}
-            </MsgScreen>
+            <main class="message">
+                <Header header={"Loading"} />
+                <article>{state.loading}</article>
+            </main>
         );
     } else if (state.room !== null) {
-        screen = <RoomRender state={state} />;
+        screen = <RoomRender state={state} admin={state.room.admins.includes(state.conn.user)} />;
     } else {
         screen = <Login state={state} />;
     }
@@ -121,9 +123,15 @@ function getOpenWebSocketListener(state: State): WebSocketListen {
                     };
                 }
                 let new_state = { ...state, loading: null, room: resp };
-                let log = document.getElementById("chat_log");
-                if(log) log.scroll(0, 9999);
-                setTimeout(() => sync_movie_state(new_state), 10);
+                // After we have loaded the movie player HTML, make sure
+                // the timestamp is synced
+                requestAnimationFrame(() => sync_movie_state(new_state));
+                // After we have appended new messages to the chat log,
+                // make sure it's scrolled to the bottom
+                requestAnimationFrame(() => {
+                    let log = document.getElementById("chat_log");
+                    if (log) log.scroll(0, log.scrollHeight);    
+                })
                 return new_state;
             },
             error(state: State, error: Event): State {
@@ -143,22 +151,22 @@ export function sync_movie_state(state: State) {
     function setCurrentTimeIsh(movie: HTMLVideoElement, goal: number) {
         // if our time is nearly-correct, leave it as-is
         let diff = Math.abs(movie.currentTime - goal);
-        if(diff > 3) {
+        if (diff > 3) {
             console.log(`Time is ${movie.currentTime} and should be ${goal}`);
             movie.currentTime = goal;
         }
     }
 
     let movie = document.getElementById("movie") as HTMLVideoElement;
-    if(movie && state.room && state.room.state) {
-        if(state.room.state.paused != undefined) {
-            if(!movie.paused) movie.pause();
+    if (movie && state.room && state.room.state) {
+        if (state.room.state.paused != undefined) {
+            if (!movie.paused) movie.pause();
             setCurrentTimeIsh(movie, state.room.state.paused[1]);
         }
-        if(state.room.state.playing != undefined) {
+        if (state.room.state.playing != undefined) {
             //console.log(((new Date()).getTime() / 1000), state.room.state.playing, ((new Date()).getTime() / 1000) - state.room.state.playing);
             setCurrentTimeIsh(movie, ((new Date()).getTime() / 1000) - state.room.state.playing[1]);
-            if(movie.paused) movie.play();
+            if (movie.paused) movie.play();
         }
     }
 }
@@ -168,6 +176,15 @@ app({
         url: "/movies",
         action(state, movies) {
             return { ...state, movies };
+        },
+        error(state, error) {
+            console.log(error);
+            return state;
+        }
+    }), Http({
+        url: "/rooms",
+        action(state, rooms) {
+            return { ...state, rooms };
         },
         error(state, error) {
             console.log(error);

@@ -1,5 +1,5 @@
 import h from "hyperapp-jsx-pragma";
-import { Screen } from "./base";
+import { Header } from "./base";
 
 function LoginAction(state: State): State {
     let user = (document.getElementById("user") as HTMLFormElement).value;
@@ -18,8 +18,8 @@ function LoginAction(state: State): State {
     };
 }
 
-const About = () => (
-    <div>
+const Footer = () => (
+    <footer>
         <h2>
             <a href={"https://github.com/shish/theatre"}>Theatre</a>
             &nbsp;by&nbsp;
@@ -33,22 +33,33 @@ const About = () => (
             <a href={"https://paypal.me/shish2k"}>PayPal</a>
         </p>
         */}
-    </div>
+    </footer>
 );
 
+const MaybeManual = (state: State, event: Event): State => ({
+    ...state,
+    manual_entry: (document.getElementById("room") as HTMLInputElement).value == ""
+});
+
 export const Login = ({ state }: { state: State }) => (
-    <Screen
-        settings={state.settings}
-        header={"Join a Room"}
-        footer={<About />}
-    >
-        <input
-            type="text"
-            id="user"
-            placeholder="Enter Your Name"
-            value={state.conn.user}
-        />
-        <input type="text" id="room" placeholder="Enter Room Code" value={state.conn.room} />
-        <input type="button" value="Join" onclick={LoginAction} />
-    </Screen>
+    <main class="login">
+        <Header header={"Join a Room"} />
+        <article>
+            <input
+                type="text"
+                id="user"
+                placeholder="Enter Your Name"
+                value={state.conn.user}
+            />
+            {Object.entries(state.rooms).length > 0 && !state.manual_entry ?
+                <select id="room" onchange={MaybeManual}>
+                    {Object.entries(state.rooms).map((k) => <option value={k[0]}>{k[1]}</option>)}
+                    <option value="">Enter a code</option>
+                </select> :
+                <input type="text" id="room" placeholder="Enter Room Code" />
+            }
+            <input type="button" value="Join" onclick={LoginAction} />
+        </article>
+        <Footer />
+    </main>
 );

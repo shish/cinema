@@ -36,9 +36,13 @@ pub struct Viewer {
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "lowercase")]
 pub enum Command {
+    Stop(()),
     Pause(String, f64),
     Play(String, f64),
     Chat(String),
+    Admin(String),
+    Unadmin(String),
+    Title(String),
 }
 
 #[derive(PartialEq, Serialize, Deserialize)]
@@ -87,19 +91,12 @@ async fn main() {
 
     tracing_subscriber::registry()
         .with(tracing_subscriber::EnvFilter::new(
-            std::env::var("RUST_LOG")
-                .unwrap_or_else(|_| "theatre_be=info".into()),
+            std::env::var("RUST_LOG").unwrap_or_else(|_| "theatre_be=info".into()),
         ))
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    let mut rooms = HashMap::new();
-    let mut room = Room::default();
-    room.public = true;
-    room.title = "Theatre Tutorial".to_string();
-    let (tx, _rx) = broadcast::channel(100);
-    room.channel = Some(tx);
-    rooms.insert("tutorial".to_string(), Arc::new(RwLock::new(room)));
+    let rooms = HashMap::new();
 
     let app_state = Arc::new(AppState {
         rooms: RwLock::new(rooms),
@@ -280,22 +277,45 @@ async fn websocket(socket: WebSocket, login: LoginArgs, state: Arc<AppState>) {
 
 impl Room {
     pub fn command(&mut self, login: &crate::LoginArgs, cmd: &Command) {
-        match cmd {
-            Command::Pause(movie, pause_pos) => {
-                if *movie == "".to_string() {
-                    tracing::info!("[{}] Stopping", self.name);
-                    self.state = State::Stopped(());
-                } else {
-                    tracing::info!("[{}] Pausing {} at {}", self.name, movie, pause_pos);
-                    self.state = State::Paused(movie.clone(), *pause_pos);
-                }
+        let is_admin = self.admins.contains(&login.user);
+        match (is_admin, cmd) {
+            (_, Command::Chat(message)) => {
+                self.chat(&login.user, message);
             }
-            Command::Play(movie, start_ts) => {
+            (true, Command::Stop(())) => {
+                tracing::info!("[{}] Stopping", self.name);
+                self.state = State::Stopped(());
+            }
+            (true, Command::Pause(movie, pause_pos)) => {
+                tracing::info!("[{}] Pausing {} at {}", self.name, movie, pause_pos);
+                self.state = State::Paused(movie.clone(), *pause_pos);
+            }
+            (true, Command::Play(movie, start_ts)) => {
                 tracing::info!("[{}] Playing {} at {}", self.name, movie, start_ts);
                 self.state = State::Playing(movie.clone(), *start_ts);
             }
-            Command::Chat(message) => {
-                self.chat(&login.user, message);
+            (true, Command::Admin(user)) => {
+                tracing::info!("[{}] Making {} an admin", self.name, user);
+                self.admins.push(user.clone());
+            }
+            (true, Command::Unadmin(user)) => {
+                if &login.user != user {
+                    tracing::info!("[{}] Dethroning {}", self.name, user);
+                    self.admins.retain(|x| x != user);
+                }
+            }
+            (true, Command::Title(title)) => {
+                tracing::info!("[{}] Renaming room {}", self.name, title);
+                self.title = title.clone();
+            }
+            (false, _) => {
+                tracing::warn!(
+                    "[{}] {} is not an admin (admins={:?}) and tried to run {:?}",
+                    self.name,
+                    login.user,
+                    self.admins,
+                    cmd
+                );
             }
         }
     }

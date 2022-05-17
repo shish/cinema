@@ -34,16 +34,23 @@ type Settings = {
     sound: boolean,
 }
 
+interface Dictionary<T> {
+    [Key: string]: T;
+}
+
 type State = {
     conn: {
         user: string,
         room: string,
         sess: string,
-    }
+    },
     movies: Array<string>,
+    rooms: Dictionary<string>,
     error: string,
     room: Room,
     ws_errors: number,
     loading: string,
     settings: Settings,
+    fullscreen: boolean,
+    manual_entry: boolean,
 }
