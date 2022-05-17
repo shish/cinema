@@ -1,0 +1,4 @@
+frontend/dist
+frontend/node_modules
+frontend/.parcel-cache
+backend/target

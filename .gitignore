@@ -1,0 +1,7 @@
+node_modules
+.parcel-cache
+.cache
+.idea
+dist
+.DS_Store
+target
