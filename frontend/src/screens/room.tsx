@@ -1,7 +1,7 @@
 import h from "hyperapp-jsx-pragma";
 import { WebSocketSend } from "hyperapp-fx";
 import { Header } from "./base";
-import { socket_name, sync_movie_state } from "../theatre";
+import { socket_name, sync_movie_state } from "../cinema";
 
 function WebSocketCommand(state: State, command: object) {
     return WebSocketSend({

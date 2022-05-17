@@ -1,4 +1,4 @@
-/// <reference path='./theatre.d.ts'/>
+/// <reference path='./cinema.d.ts'/>
 import h from "hyperapp-jsx-pragma";
 import { app } from "hyperapp";
 import { WebSocketListen, Http } from "hyperapp-fx";

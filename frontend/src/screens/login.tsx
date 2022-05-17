@@ -21,7 +21,7 @@ function LoginAction(state: State): State {
 const Footer = () => (
     <footer>
         <h2>
-            <a href={"https://github.com/shish/theatre"}>Theatre</a>
+            <a href={"https://github.com/shish/cinema"}>Cinema</a>
             &nbsp;by&nbsp;
             <a href={"mailto:s@shish.io"}>Shish</a>
         </h2>

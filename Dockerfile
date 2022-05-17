@@ -10,7 +10,7 @@ RUN npm run build
 FROM rust:1.60 AS build-backend
 COPY backend/Cargo.toml backend/Cargo.lock /app/
 WORKDIR /app
-RUN mkdir src && echo "fn main() {println!(\"stub\")}" > /app/src/main.rs && cargo build --release && rm -rf src target/release/deps/theatre*
+RUN mkdir src && echo "fn main() {println!(\"stub\")}" > /app/src/main.rs && cargo build --release && rm -rf src target/release/deps/cinema*
 COPY backend/src /app/src
 RUN cargo build --release
 
@@ -19,9 +19,9 @@ FROM debian:stable-slim
 EXPOSE 8000
 HEALTHCHECK --interval=1m --timeout=3s CMD curl --fail http://127.0.0.1:8000/ || exit 1
 RUN apt update && apt install -y curl && rm -rf /var/lib/apt/lists/*
-COPY --from=build-backend /app/target/release/theatre_be /app/backend/
+COPY --from=build-backend /app/target/release/cinema_be /app/backend/
 COPY --from=build-frontend /app/dist /app/frontend/dist/
 
 WORKDIR /app/backend
 ENV RUST_LOG=info
-CMD ["/app/backend/theatre_be"]
+CMD ["/app/backend/cinema_be"]

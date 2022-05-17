@@ -1,4 +1,4 @@
-# Theatre
+# Cinema
 
 A thing to watch videos at the same time as other people
 
@@ -17,7 +17,7 @@ the backend if you want to have a web server to view it.
 
 ```
 cd backend
-RUST_LOG=theatre_be=debug cargo run
+cargo run -- -m /path/to/some/mp4/videos/
 ```
 
 Traffic served on http://localhost:8000/

@@ -1,5 +1,5 @@
 {
-  "name": "theatre",
+  "name": "cinema",
   "version": "0.0.0",
   "description": "shared video watching",
   "scripts": {
@@ -7,13 +7,13 @@
     "watch": "parcel watch --public-url . src/index.html --no-hmr",
     "serve": "parcel serve --port 1236 src/index.html"
   },
-  "repository": "https://github.com/shish/theatre/",
+  "repository": "https://github.com/shish/cinema/",
   "author": "Shish <webmaster@shishnet.org>",
   "license": "GPL-3.0-only",
   "bugs": {
-    "url": "https://github.com/shish/theatre/issues"
+    "url": "https://github.com/shish/cinema/issues"
   },
-  "homepage": "https://github.com/shish/theatre#readme",
+  "homepage": "https://github.com/shish/cinema#readme",
   "dependencies": {
     "hyperapp": "^2.0.22",
     "hyperapp-fx": "^2.0.0-beta.2",
