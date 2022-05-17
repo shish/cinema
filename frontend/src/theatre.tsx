@@ -125,13 +125,13 @@ function getOpenWebSocketListener(state: State): WebSocketListen {
                 let new_state = { ...state, loading: null, room: resp };
                 // After we have loaded the movie player HTML, make sure
                 // the timestamp is synced
-                requestAnimationFrame(() => sync_movie_state(new_state));
+                setTimeout(() => sync_movie_state(new_state), 10);
                 // After we have appended new messages to the chat log,
                 // make sure it's scrolled to the bottom
-                requestAnimationFrame(() => {
+                setTimeout(() => {
                     let log = document.getElementById("chat_log");
-                    if (log) log.scroll(0, log.scrollHeight);    
-                })
+                    if (log) log.scroll(0, log.scrollHeight);
+                }, 10);
                 return new_state;
             },
             error(state: State, error: Event): State {
