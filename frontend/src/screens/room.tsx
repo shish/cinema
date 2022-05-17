@@ -120,7 +120,7 @@ const Chat = ({ log }) => (
             </li>))}
         </ul>
         <form class="chat_input" onsubmit={ChatAction}>
-            <input id="chat_input" autocomplete={"off"}></input>
+            <input id="chat_input" autocomplete={"off"} enterkeyhint={"send"} placeholder="Type to chat"></input>
             <button>Send</button>
         </form>
     </div>
