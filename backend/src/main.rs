@@ -144,6 +144,7 @@ async fn handle_movies(Extension(state): Extension<Arc<AppState>>) -> impl IntoR
             movie_list.push(movie);
         }
     }
+    movie_list.sort();
     (StatusCode::OK, Json(movie_list))
 }
 
