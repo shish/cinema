@@ -76,6 +76,7 @@ function view(state: State) {
                     <i class="fas" />
                 </header>
                 <article>{state.loading}</article>
+                <footer />
             </main>
         );
     } else if (state.help) {
