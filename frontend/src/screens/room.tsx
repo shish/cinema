@@ -2,6 +2,7 @@ import h from "hyperapp-jsx-pragma";
 import { WebSocketSend } from "hyperapp-fx";
 import { Header } from "./base";
 import { socket_name, sync_movie_state } from "../cinema";
+import { Http } from "hyperapp-fx";
 
 function WebSocketCommand(state: State, command: object) {
     return WebSocketSend({
@@ -73,16 +74,36 @@ const LoadAction = function (state: State) {
         WebSocketCommand(state, command)
     ];
 };
+const RefreshMovies = (state: State) => [
+    state,
+    Http({
+        url: "/movies",
+        action(state, movies) {
+            return { ...state, movies };
+        },
+        error(state, error) {
+            console.log(error);
+            return state;
+        }
+    })
+];
+const NullSubmit = function(state: State, event: Event): State {
+    event.preventDefault();
+    return state;
+}
 const MovieList = ({ movies, state, admin }) => (
-    <select id="movie_list" class="movie_list" onchange={LoadAction} readonly={!admin}>
-        <option value="">Select Movie</option>
-        {movies.map((p) => (
-            <option selected={
-                (state.playing && state.playing[0] == p) ||
-                (state.paused && state.paused[0] == p)
-            }>{p}</option>
-        ))}
-    </select>
+    <form class="movie_list" onsubmit={NullSubmit}>
+        <select id="movie_list" onchange={LoadAction} readonly={!admin}>
+            <option value="">Select Movie</option>
+            {movies.map((p) => (
+                <option selected={
+                    (state.playing && state.playing[0] == p) ||
+                    (state.paused && state.paused[0] == p)
+                }>{p}</option>
+            ))}
+        </select>
+        <button onclick={RefreshMovies}>&nbsp;<i class="fas fa-sync"></i>&nbsp;</button>
+    </form>
 );
 
 /**********************************************************************
@@ -149,7 +170,6 @@ const Chat = ({ log }: { log: Array<ChatMessage> }) => (
         </ul>
         <form class="chat_input" onsubmit={ChatAction}>
             <input id="chat_input" autocomplete={"off"} enterkeyhint={"send"} placeholder="Type to chat"></input>
-            <button>Send</button>
         </form>
     </div>
 );
