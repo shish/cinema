@@ -1,6 +1,5 @@
 import h from "hyperapp-jsx-pragma";
 import { WebSocketSend } from "hyperapp-fx";
-import { Header } from "./base";
 import { socket_name, sync_movie_state } from "../cinema";
 import { Http } from "hyperapp-fx";
 
@@ -38,16 +37,16 @@ const SyncAction = function (state: State, event: Event) {
 }
 function iOS() {
     return [
-      'iPad Simulator',
-      'iPhone Simulator',
-      'iPod Simulator',
-      'iPad',
-      'iPhone',
-      'iPod'
+        'iPad Simulator',
+        'iPhone Simulator',
+        'iPod Simulator',
+        'iPad',
+        'iPhone',
+        'iPod'
     ].includes(navigator.platform)
-    // iPad on iOS 13 detection
-    || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
-  }
+        // iPad on iOS 13 detection
+        || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
+}
 const MainVideo = ({ state, admin }: { state: RoomState, admin: boolean }) => (
     (state.playing || state.paused) ?
         <video
@@ -87,7 +86,7 @@ const RefreshMovies = (state: State) => [
         }
     })
 ];
-const NullSubmit = function(state: State, event: Event): State {
+const NullSubmit = function (state: State, event: Event): State {
     event.preventDefault();
     return state;
 }
@@ -148,14 +147,14 @@ const ChatAction = function (state: State, event: SubmitEvent) {
 };
 function absolute_timestamp(ts: number): string {
     function convertUTCDateToLocalDate(date) {
-        var newDate = new Date(date.getTime()+date.getTimezoneOffset()*60*1000);
-    
+        var newDate = new Date(date.getTime() + date.getTimezoneOffset() * 60 * 1000);
+
         var offset = date.getTimezoneOffset() / 60;
         var hours = date.getHours();
-    
+
         newDate.setHours(hours - offset);
-    
-        return newDate;   
+
+        return newDate;
     }
     return convertUTCDateToLocalDate(new Date(ts * 1e3)).toISOString().slice(-13, -8);
 }
@@ -177,12 +176,12 @@ const Chat = ({ log }: { log: Array<ChatMessage> }) => (
 /**********************************************************************
  * Header
  */
- const TitleAction = function (state: State, event: SubmitEvent) {
-     let new_title = (document.getElementById("title") as HTMLFormElement).value;
+const TitleAction = function (state: State, event: SubmitEvent) {
+    let new_title = (document.getElementById("title") as HTMLFormElement).value;
     return [
         // Optimistically change the title locally to avoid flickering back and
         // forth. If the title change fails, the next update will refresh it.
-        { ...state, room: {...state.room, title: new_title} } as State,
+        { ...state, room: { ...state.room, title: new_title } } as State,
         WebSocketCommand(state, {
             title: new_title,
         })
@@ -201,37 +200,37 @@ function ToggleSound(state: State): State {
 }
 function GoFullscreen(state: State): State {
     requestAnimationFrame(() => document.documentElement.requestFullscreen());
-    return {...state, fullscreen: !state.fullscreen};
+    return { ...state, fullscreen: !state.fullscreen };
 }
 function ExitFullscreen(state: State): State {
     if (document.exitFullscreen) {
         requestAnimationFrame(() => document.exitFullscreen());
     }
-    return {...state, fullscreen: !state.fullscreen};
+    return { ...state, fullscreen: !state.fullscreen };
 }
 
 /**********************************************************************
  * Layout
  */
- export const RoomRender = ({ state, admin }: { state: State, admin: boolean }) => (
+export const RoomRender = ({ state, admin }: { state: State, admin: boolean }) => (
     <main class={admin ? "room admin" : "room user"}>
-        <Header
-            header={<span>
+        <header>
+            {state.settings.sound ? (
+                <i class="fas fa-bell" onclick={ToggleSound} />
+            ) : (
+                <i class="fas fa-bell-slash" onclick={ToggleSound} />
+            )}
+            <h1>
                 {state.room.name}:{" "}
                 {admin ?
                     <input id="title" value={state.room.title} onchange={TitleAction} /> :
                     state.room.title
                 }
-            </span>}
-            left={state.settings.sound ? (
-                <i class="fas fa-bell" onclick={ToggleSound} />
-            ) : (
-                <i class="fas fa-bell-slash" onclick={ToggleSound} />
-            )}
-            right={state.fullscreen ?
+            </h1>
+            {state.fullscreen ?
                 <i class="fas fa-compress-arrows-alt" onclick={ExitFullscreen} /> :
                 <i class="fas fa-expand-arrows-alt" onclick={GoFullscreen} />}
-        />
+        </header>
         <MainVideo
             state={state.room.state}
             admin={admin}

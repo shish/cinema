@@ -1,15 +1,15 @@
 import h from "hyperapp-jsx-pragma";
-import { Header } from "./base";
 
 
-const HideHelp = (state: State): State => ({...state, help: false});
+const HideHelp = (state: State): State => ({ ...state, help: false });
 
 export const Help = () => (
     <main class="login">
-        <Header
-            header={"About"}
-            right={<i class="fas fa-times-circle" onclick={HideHelp} />}
-        />
+        <header>
+            <i class="fas" />
+            <h1>About</h1>
+            <i class="fas fa-times-circle" onclick={HideHelp} />
+        </header>
         <article>
             <p>
                 <a href={"https://github.com/shish/cinema"}>Cinema</a>

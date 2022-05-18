@@ -2,7 +2,6 @@
 import h from "hyperapp-jsx-pragma";
 import { app } from "hyperapp";
 import { WebSocketListen, Http } from "hyperapp-fx";
-import { Header } from "./screens/base";
 import { Help } from "./screens/help";
 import { Login } from "./screens/login";
 import { RoomRender } from "./screens/room";
@@ -51,11 +50,17 @@ const ResetErrorAction = (state: State) => ({
 });
 
 function view(state: State) {
+    (window as any).state = state;
+
     let screen = null;
     if (state.error !== null) {
         screen = (
-            <main class="message">
-                <Header header={"Error"} />
+            <main class="login">
+                <header>
+                    <i class="fas" />
+                    <h1>Error</h1>
+                    <i class="fas" />
+                </header>
                 <article>{state.error}</article>
                 <footer>
                     <input type="button" value="Leave" onclick={ResetErrorAction} />
@@ -64,8 +69,12 @@ function view(state: State) {
         );
     } else if (state.loading !== null) {
         screen = (
-            <main class="message">
-                <Header header={"Loading"} />
+            <main class="login">
+                <header>
+                    <i class="fas" />
+                    <h1>Loading</h1>
+                    <i class="fas" />
+                </header>
                 <article>{state.loading}</article>
             </main>
         );

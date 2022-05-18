@@ -1,5 +1,4 @@
 import h from "hyperapp-jsx-pragma";
-import { Header } from "./base";
 
 function LoginAction(state: State): State {
     let user = (document.getElementById("user") as HTMLFormElement).value;
@@ -23,14 +22,15 @@ const MaybeManual = (state: State, event: Event): State => ({
     manual_entry: (document.getElementById("room") as HTMLInputElement).value == ""
 });
 
-const ShowHelp = (state: State): State => ({...state, help: true});
+const ShowHelp = (state: State): State => ({ ...state, help: true });
 
 export const Login = ({ state }: { state: State }) => (
     <main class="login">
-        <Header
-            header={"Join a Room"}
-            right={<i class="fas fa-info-circle" onclick={ShowHelp} />}
-        />
+        <header>
+            <i class="fas" />
+            <h1>Join a Room</h1>
+            <i class="fas fa-info-circle" onclick={ShowHelp} />
+        </header>
         <article>
             <input
                 type="text"
