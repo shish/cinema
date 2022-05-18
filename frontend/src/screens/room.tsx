@@ -178,10 +178,13 @@ const Chat = ({ log }: { log: Array<ChatMessage> }) => (
  * Layout
  */
  const TitleAction = function (state: State, event: SubmitEvent) {
+     let new_title = (document.getElementById("title") as HTMLFormElement).value;
     return [
-        { ...state } as State,
+        // Optimistically change the title locally to avoid flickering back and
+        // forth. If the title change fails, the next update will refresh it.
+        { ...state, room: {...state.room, title: new_title} } as State,
         WebSocketCommand(state, {
-            title: (document.getElementById("title") as HTMLFormElement).value,
+            title: new_title,
         })
     ];
 };
