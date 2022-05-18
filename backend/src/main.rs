@@ -10,7 +10,8 @@ use axum::{
 use clap::Parser;
 use futures::stream::StreamExt;
 use futures::SinkExt;
-use serde::{Deserialize};
+use glob::glob;
+use serde::Deserialize;
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::{io, net::SocketAddr};
@@ -86,20 +87,18 @@ async fn main() {
 }
 
 async fn handle_movies(Extension(state): Extension<Arc<AppState>>) -> impl IntoResponse {
-    let mut movie_list: Vec<String> = Vec::new();
-    //for movie in tokio::fs::read_dir("../movies/").await.unwrap() {
-    for entry in std::fs::read_dir(&state.movies).unwrap() {
-        let movie = entry
-            .unwrap()
-            .path()
-            .file_name()
-            .unwrap()
-            .to_string_lossy()
-            .to_string();
-        if movie.ends_with(".mp4") {
-            movie_list.push(movie);
-        }
-    }
+    let globs = glob(&format!("{}/**/*.mp4", state.movies)).expect("Failed to read glob pattern");
+    let mut movie_list: Vec<String> = globs
+        .map(|entry| {
+            entry
+                .unwrap()
+                .strip_prefix(&state.movies)
+                .unwrap()
+                .to_str()
+                .unwrap()
+                .to_string()
+        })
+        .collect();
     movie_list.sort();
     (StatusCode::OK, Json(movie_list))
 }
@@ -199,12 +198,11 @@ async fn websocket(socket: WebSocket, login: LoginArgs, state: Arc<AppState>) {
                 let room = locked_room.read().await;
                 if room.viewers.is_empty() {
                     tracing::info!("[{}] Room is still empty, cleaning it up", room.name);
-                    state.rooms.write().await.remove(&room.name);    
-                }
-                else {
+                    state.rooms.write().await.remove(&room.name);
+                } else {
                     tracing::info!("[{}] Room got a user, cancelling that cleanup", room.name);
                 }
-            });    
+            });
         }
     }
 }
