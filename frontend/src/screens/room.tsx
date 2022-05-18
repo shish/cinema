@@ -125,12 +125,26 @@ const ChatAction = function (state: State, event: SubmitEvent) {
         })
     ];
 };
-const Chat = ({ log }) => (
+function absolute_timestamp(ts: number): string {
+    function convertUTCDateToLocalDate(date) {
+        var newDate = new Date(date.getTime()+date.getTimezoneOffset()*60*1000);
+    
+        var offset = date.getTimezoneOffset() / 60;
+        var hours = date.getHours();
+    
+        newDate.setHours(hours - offset);
+    
+        return newDate;   
+    }
+    return convertUTCDateToLocalDate(new Date(ts * 1e3)).toISOString().slice(-13, -8);
+}
+const Chat = ({ log }: { log: Array<ChatMessage> }) => (
     <div class="chat">
         <ul class="chat_log" id="chat_log">
-            {log.map((p) => (<li class={p[0] == "system" ? "system" : "user"}>
-                <span class="user">{p[0]}</span>
-                <span class="message">{p[1]}</span>
+            {log.map((p) => (<li class={p.user == "system" ? "system" : "user"}>
+                <span class="absolute_timestamp">{absolute_timestamp(p.absolute_timestamp)}</span>
+                <span class="user">{p.user}</span>
+                <span class="message">{p.message}</span>
             </li>))}
         </ul>
         <form class="chat_input" onsubmit={ChatAction}>

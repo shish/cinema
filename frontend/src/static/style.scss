@@ -181,6 +181,14 @@ MAIN.room {
 
       LI {
         display: block;
+
+        .absolute_timestamp {
+          color: #666;
+        }
+
+        .absolute_timestamp::after {
+          content: " ";
+        }
       }
 
       LI.system {
@@ -207,6 +215,7 @@ MAIN.room {
     .chat_input {
       flex: 0 0 auto;
       display: flex;
+
       INPUT {
         flex: 1 1 auto;
         font-size: 1.5rem;
@@ -215,10 +224,11 @@ MAIN.room {
       BUTTON {
         flex: 0 0 auto;
         font-size: 1.5rem;
+
         @media (orientation: portrait) {
           display: none;
         }
-        }
+      }
     }
   }
 

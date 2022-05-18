@@ -9,7 +9,8 @@ type Viewer = {
     name: string,
 }
 
-type Message = {
+type ChatMessage = {
+    absolute_timestamp: number,
     user: string,
     message: string,
 }
@@ -26,7 +27,7 @@ type Room = {
 	state: RoomState,
     admins: Array<string>,
     viewers: Array<Viewer>,
-	chat: Array<Message>,
+	chat: Array<ChatMessage>,
     movie: string | null,
 }
 

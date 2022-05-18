@@ -10,14 +10,15 @@ use axum::{
 use clap::Parser;
 use futures::stream::StreamExt;
 use futures::SinkExt;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize};
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::{io, net::SocketAddr};
-use tokio::sync::broadcast;
 use tokio::sync::RwLock;
 use tower_http::{services::ServeDir, trace::TraceLayer};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+
+mod room;
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct LoginArgs {
@@ -26,57 +27,12 @@ pub struct LoginArgs {
     sess: String,
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct Viewer {
-    pub name: String,
-    #[serde(skip)]
-    pub sess: String,
-}
-
-#[derive(Deserialize, Debug)]
-#[serde(rename_all = "lowercase")]
-pub enum Command {
-    Stop(()),
-    Pause(String, f64),
-    Play(String, f64),
-    Chat(String),
-    Admin(String),
-    Unadmin(String),
-    Title(String),
-}
-
-#[derive(PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "lowercase")]
-pub enum State {
-    Stopped(()),
-    Paused(String, f64),
-    Playing(String, f64),
-}
-
-impl Default for State {
-    fn default() -> Self {
-        State::Stopped(())
-    }
-}
-
-#[derive(Serialize, Deserialize, Default)]
-pub struct Room {
-    pub public: bool,
-    pub title: String,
-    pub name: String,
-    pub state: State,
-    pub admins: Vec<String>,
-    pub viewers: Vec<Viewer>,
-    pub chat: Vec<(String, String)>,
-    #[serde(skip)]
-    pub channel: Option<broadcast::Sender<String>>,
-}
-
 struct AppState {
-    rooms: RwLock<HashMap<String, Arc<RwLock<Room>>>>,
+    rooms: RwLock<HashMap<String, Arc<RwLock<room::Room>>>>,
     movies: String,
 }
 
+// A website for watching movies together (backend)
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]
 pub struct Args {
@@ -170,26 +126,12 @@ async fn handle_room(
 }
 
 async fn websocket(socket: WebSocket, login: LoginArgs, state: Arc<AppState>) {
-    // By splitting we can send and receive at the same time.
-    let (mut sender, mut receiver) = socket.split();
-
     // Find our room, creating it if it doesn't exist
     let locked_room = {
         let mut rooms_lookup = state.rooms.write().await;
         if rooms_lookup.get(&login.room).is_none() {
-            tracing::info!("[{}] Creating room", login.room);
-            let mut new_room = Room::default();
-            new_room.public = true;
-            new_room.name = login.room.clone();
-            new_room.title = format!("{}'s Room", login.user);
-            new_room.state = State::Paused(
-                "Professor.Marston.And.The.Wonder.Women.mp4".to_string(),
-                20.0,
-            );
-            new_room.admins = vec![login.user.clone()];
-            let (tx, _rx) = broadcast::channel(100);
-            new_room.channel = Some(tx);
-            rooms_lookup.insert(new_room.name.clone(), Arc::new(RwLock::new(new_room)));
+            let new_room = room::Room::new(login.room.clone(), login.user.clone());
+            rooms_lookup.insert(login.room.clone(), Arc::new(RwLock::new(new_room)));
         }
         rooms_lookup.get(&login.room).unwrap().clone()
     };
@@ -197,25 +139,17 @@ async fn websocket(socket: WebSocket, login: LoginArgs, state: Arc<AppState>) {
     // Subscribe to the room state, so that we see the first sync that we generate
     let mut rx = {
         let room = locked_room.read().await;
-        match &room.channel {
-            Some(channel) => channel.subscribe(),
-            None => panic!("Room has no channel, this should never happen"),
-        }
+        room.channel.subscribe()
     };
 
     // Save the sender in our list of connected users.
     {
         let mut room = locked_room.write().await;
-        tracing::info!("[{}] Adding {} ({})", room.name, login.user, login.sess);
-        room.chat(&"system".to_string(), &format!("{} connected", login.user));
-        room.viewers.push(Viewer {
-            name: login.user.clone(),
-            sess: login.sess.clone(),
-        });
-        room.sync().await;
+        room.add_viewer(&login);
     }
 
     // This task will receive broadcast messages and send text message to our client.
+    let (mut sender, mut receiver) = socket.split();
     let mut send_task = tokio::spawn(async move {
         while let Ok(msg) = rx.recv().await {
             // In any websocket error, break loop.
@@ -234,7 +168,6 @@ async fn websocket(socket: WebSocket, login: LoginArgs, state: Arc<AppState>) {
                 let cmd = serde_json::from_str(&msg).unwrap();
                 let mut room = locked_room_2.write().await;
                 room.command(&login_2, &cmd);
-                room.sync().await;
             }
         }
     });
@@ -248,93 +181,30 @@ async fn websocket(socket: WebSocket, login: LoginArgs, state: Arc<AppState>) {
     // After we finish reading from the websocket (ie, it's closed), clean up
     {
         let mut room = locked_room.write().await;
-        tracing::info!("[{}] Removing {} ({})", room.name, login.user, login.sess);
-        if let Some(pos) = room.viewers.iter().position(|x| *x.sess == login.sess) {
-            room.viewers.remove(pos);
-        }
+        room.remove_viewer(&login);
     }
 
-    // Let everybody know about the user disconnecting.
-    {
-        let mut room = locked_room.write().await;
-        room.chat(
-            &"system".to_string(),
-            &format!("{} disconnected", login.user),
-        );
-        room.sync().await;
-    }
-
-    // If room is empty, delete room
+    // If room is empty, mark the room for deletion, if it's still empty after
+    // 5 minutes, delete it. This means that an admin can have some internet
+    // flakiness and the room will still be waiting for them.
+    // BUG: this checks for emptiness at two specific moments in time it won't
+    // catch any activity that happens in between those two moments.
     {
         let room = locked_room.read().await;
         if room.viewers.is_empty() {
-            // FIXME: delay by ~5 minutes so if admin is in the middle of setup
-            // and disconnects, it doesn't need to start from scratch
-            tracing::info!("[{}] Room is empty, cleaning it up", room.name);
-            state.rooms.write().await.remove(&room.name);
-        }
-    }
-}
-
-impl Room {
-    pub fn command(&mut self, login: &crate::LoginArgs, cmd: &Command) {
-        let is_admin = self.admins.contains(&login.user);
-        match (is_admin, cmd) {
-            (_, Command::Chat(message)) => {
-                self.chat(&login.user, message);
-            }
-            (true, Command::Stop(())) => {
-                tracing::info!("[{}] Stopping", self.name);
-                self.state = State::Stopped(());
-            }
-            (true, Command::Pause(movie, pause_pos)) => {
-                tracing::info!("[{}] Pausing {} at {}", self.name, movie, pause_pos);
-                self.state = State::Paused(movie.clone(), *pause_pos);
-            }
-            (true, Command::Play(movie, start_ts)) => {
-                tracing::info!("[{}] Playing {} at {}", self.name, movie, start_ts);
-                self.state = State::Playing(movie.clone(), *start_ts);
-            }
-            (true, Command::Admin(user)) => {
-                tracing::info!("[{}] Making {} an admin", self.name, user);
-                self.admins.push(user.clone());
-            }
-            (true, Command::Unadmin(user)) => {
-                if &login.user != user {
-                    tracing::info!("[{}] Dethroning {}", self.name, user);
-                    self.admins.retain(|x| x != user);
+            tracing::info!("[{}] Room is empty, starting a timer", room.name);
+            drop(room);
+            tokio::spawn(async move {
+                tokio::time::sleep(tokio::time::Duration::from_secs(5 * 60)).await;
+                let room = locked_room.read().await;
+                if room.viewers.is_empty() {
+                    tracing::info!("[{}] Room is still empty, cleaning it up", room.name);
+                    state.rooms.write().await.remove(&room.name);    
                 }
-            }
-            (true, Command::Title(title)) => {
-                tracing::info!("[{}] Renaming room {}", self.name, title);
-                self.title = title.clone();
-            }
-            (false, _) => {
-                tracing::warn!(
-                    "[{}] {} is not an admin (admins={:?}) and tried to run {:?}",
-                    self.name,
-                    login.user,
-                    self.admins,
-                    cmd
-                );
-            }
-        }
-    }
-
-    pub fn chat(&mut self, user: &String, message: &String) {
-        tracing::info!("[{}] <{}> {}", self.name, user, message);
-        self.chat.push((user.clone(), message.clone()));
-    }
-
-    pub async fn sync(&mut self) {
-        // Something happened. Serialize the current room state and
-        // broadcast it to everybody in the room.
-        if let Some(channel) = &self.channel {
-            tracing::debug!("[{}] Sync to {} viewers", self.name, self.viewers.len());
-            let json = serde_json::to_string(self).unwrap();
-            if channel.receiver_count() > 0 {
-                channel.send(json).unwrap();
-            }
+                else {
+                    tracing::info!("[{}] Room got a user, cancelling that cleanup", room.name);
+                }
+            });    
         }
     }
 }
