@@ -54,4 +54,5 @@ type State = {
     settings: Settings,
     fullscreen: boolean,
     manual_entry: boolean,
+    help: boolean,
 }

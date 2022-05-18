@@ -20,7 +20,11 @@ MAIN {
   top: 0;
   left: 0;
   right: 0;
-  bottom: 0;
+
+  // use "height" instead of "bottom" so that we can override
+  // with height=visualViewport.height when the virtual keyboard
+  // causes the viewport height to change
+  height: 100%;
 }
 
 /**********************************************************************

@@ -53,13 +53,13 @@ const MainVideo = ({ state, admin }: { state: RoomState, admin: boolean }) => (
         <video
             id="movie"
             src={"/movies/" + (state.playing || state.paused)[0]}
-            controls={admin || iOS()}
+            muted={iOS()} // iOS only allows auto-play if muted
+            controls={admin || iOS()} // iOS needs the user to manually un-mute
             onplay={admin && PlayAction}
             onpause={admin && PauseAction}
             onseeked={admin && PauseAction}
-            onloadedmetadata={SyncAction}
+            onloadeddata={SyncAction}
             playsinline={true}
-            muted={iOS()}
         ></video> : <div class="blackout" />
 );
 
@@ -175,7 +175,7 @@ const Chat = ({ log }: { log: Array<ChatMessage> }) => (
 );
 
 /**********************************************************************
- * Layout
+ * Header
  */
  const TitleAction = function (state: State, event: SubmitEvent) {
      let new_title = (document.getElementById("title") as HTMLFormElement).value;
@@ -209,7 +209,11 @@ function ExitFullscreen(state: State): State {
     }
     return {...state, fullscreen: !state.fullscreen};
 }
-export const RoomRender = ({ state, admin }: { state: State, admin: boolean }) => (
+
+/**********************************************************************
+ * Layout
+ */
+ export const RoomRender = ({ state, admin }: { state: State, admin: boolean }) => (
     <main class={admin ? "room admin" : "room user"}>
         <Header
             header={<span>

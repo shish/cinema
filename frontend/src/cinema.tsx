@@ -3,6 +3,7 @@ import h from "hyperapp-jsx-pragma";
 import { app } from "hyperapp";
 import { WebSocketListen, Http } from "hyperapp-fx";
 import { Header } from "./screens/base";
+import { Help } from "./screens/help";
 import { Login } from "./screens/login";
 import { RoomRender } from "./screens/room";
 import { v4 as uuidv4 } from "uuid";
@@ -32,6 +33,7 @@ let state: State = {
     },
     fullscreen: document.fullscreenElement != null,
     manual_entry: false,
+    help: false,
 };
 
 try {
@@ -67,6 +69,8 @@ function view(state: State) {
                 <article>{state.loading}</article>
             </main>
         );
+    } else if (state.help) {
+        screen = <Help />;
     } else if (state.room !== null) {
         screen = <RoomRender state={state} admin={state.room.admins.includes(state.conn.user)} />;
     } else {
@@ -170,6 +174,15 @@ export function sync_movie_state(state: State) {
         }
     }
 }
+
+function viewportHandler() {
+    var main = document.getElementsByTagName("MAIN")[0] as HTMLElement;
+    if (main) {
+        main.style.top = window.visualViewport.offsetTop + "px";
+        main.style.height = window.visualViewport.height + "px";
+    }
+}
+window.visualViewport.addEventListener('resize', viewportHandler);
 
 app({
     init: [state, Http({

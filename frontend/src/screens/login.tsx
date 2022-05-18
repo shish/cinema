@@ -18,32 +18,19 @@ function LoginAction(state: State): State {
     };
 }
 
-const Footer = () => (
-    <footer>
-        <h2>
-            <a href={"https://github.com/shish/cinema"}>Cinema</a>
-            &nbsp;by&nbsp;
-            <a href={"mailto:s@shish.io"}>Shish</a>
-        </h2>
-        {/*
-        <p className={"donate"}>
-            If you like this app and find it fun,
-            <br />
-            feel free to donate via{" "}
-            <a href={"https://paypal.me/shish2k"}>PayPal</a>
-        </p>
-        */}
-    </footer>
-);
-
 const MaybeManual = (state: State, event: Event): State => ({
     ...state,
     manual_entry: (document.getElementById("room") as HTMLInputElement).value == ""
 });
 
+const ShowHelp = (state: State): State => ({...state, help: true});
+
 export const Login = ({ state }: { state: State }) => (
     <main class="login">
-        <Header header={"Join a Room"} />
+        <Header
+            header={"Join a Room"}
+            right={<i class="fas fa-info-circle" onclick={ShowHelp} />}
+        />
         <article>
             <input
                 type="text"
@@ -60,6 +47,7 @@ export const Login = ({ state }: { state: State }) => (
             }
             <input type="button" value="Join" onclick={LoginAction} />
         </article>
-        <Footer />
+        {/* just have a footer so that flow layout works */}
+        <footer />
     </main>
 );
