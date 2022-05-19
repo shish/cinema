@@ -105,8 +105,11 @@ async fn handle_movies(Extension(state): Extension<Arc<AppState>>) -> impl IntoR
 
 async fn handle_rooms(Extension(state): Extension<Arc<AppState>>) -> impl IntoResponse {
     let mut rooms = HashMap::new();
-    for (name, room) in state.rooms.read().await.iter() {
-        rooms.insert(name.clone(), room.read().await.title.clone());
+    for (name, locked_room) in state.rooms.read().await.iter() {
+        let room = locked_room.read().await;
+        if room.public {
+            rooms.insert(name.clone(), room.title.clone());
+        }
     }
     (StatusCode::OK, Json(rooms))
 }

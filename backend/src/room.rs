@@ -19,6 +19,8 @@ pub enum Command {
     Admin(String),
     Unadmin(String),
     Title(String),
+    Lock(()),
+    Unlock(()),
 }
 
 #[derive(PartialEq, Serialize, Deserialize)]
@@ -102,6 +104,14 @@ impl Room {
             (true, Command::Title(title)) => {
                 tracing::info!("[{}] Renaming room {}", self.name, title);
                 self.title = title.clone();
+            }
+            (true, Command::Lock(_)) => {
+                tracing::info!("[{}] Locking room", self.name);
+                self.public = false;
+            }
+            (true, Command::Unlock(_)) => {
+                tracing::info!("[{}] Unlocking room", self.name);
+                self.public = true;
             }
             (false, _) => {
                 tracing::warn!(

@@ -208,44 +208,47 @@ function ExitFullscreen(state: State): State {
     }
     return { ...state, fullscreen: !state.fullscreen };
 }
+const LockAction = (state: State) => [
+    { ...state } as State,
+    WebSocketCommand(state, { lock: null })
+];
+const UnlockAction = (state: State) => [
+    { ...state } as State,
+    WebSocketCommand(state, { unlock: null })
+];
+export const Header = ({ state, admin }: { state: State, admin: boolean }) => (
+    <header>
+        {state.settings.sound ? (
+            <i class="fas fa-bell" onclick={ToggleSound} />
+        ) : (
+            <i class="fas fa-bell-slash" onclick={ToggleSound} />
+        )}
+        <h1>
+            {state.room.public ?
+                <i class="fas fa-unlock" onclick={LockAction} /> :
+                <i class="fas fa-lock" onclick={UnlockAction} />
+            }{" "}
+            {state.room.name}:{" "}
+            {admin ?
+                <input id="title" value={state.room.title} onchange={TitleAction} /> :
+                state.room.title
+            }
+        </h1>
+        {state.fullscreen ?
+            <i class="fas fa-compress-arrows-alt" onclick={ExitFullscreen} /> :
+            <i class="fas fa-expand-arrows-alt" onclick={GoFullscreen} />}
+    </header>
+);
 
 /**********************************************************************
  * Layout
  */
 export const RoomRender = ({ state, admin }: { state: State, admin: boolean }) => (
     <main class={admin ? "room admin" : "room user"}>
-        <header>
-            {state.settings.sound ? (
-                <i class="fas fa-bell" onclick={ToggleSound} />
-            ) : (
-                <i class="fas fa-bell-slash" onclick={ToggleSound} />
-            )}
-            <h1>
-                {state.room.name}:{" "}
-                {admin ?
-                    <input id="title" value={state.room.title} onchange={TitleAction} /> :
-                    state.room.title
-                }
-            </h1>
-            {state.fullscreen ?
-                <i class="fas fa-compress-arrows-alt" onclick={ExitFullscreen} /> :
-                <i class="fas fa-expand-arrows-alt" onclick={GoFullscreen} />}
-        </header>
-        <MainVideo
-            state={state.room.state}
-            admin={admin}
-        />
-        <Chat
-            log={state.room.chat}
-        />
-        <ViewerList
-            viewers={state.room.viewers}
-            admins={state.room.admins}
-        />
-        <MovieList
-            movies={state.movies}
-            state={state.room.state}
-            admin={admin}
-        />
+        <Header state={state} admin={admin} />
+        <MainVideo state={state.room.state} admin={admin} />
+        <Chat log={state.room.chat} />
+        <ViewerList viewers={state.room.viewers} admins={state.room.admins} />
+        <MovieList movies={state.movies} state={state.room.state} admin={admin} />
     </main>
 );
