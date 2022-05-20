@@ -224,9 +224,9 @@ export const Header = ({ state, admin }: { state: State, admin: boolean }) => (
             <i class="fas fa-bell-slash" onclick={ToggleSound} />
         )}
         <h1>
-            {state.room.public ?
+            {admin && (state.room.public ?
                 <i class="fas fa-unlock" onclick={LockAction} /> :
-                <i class="fas fa-lock" onclick={UnlockAction} />
+                <i class="fas fa-lock" onclick={UnlockAction} />)
             }{" "}
             {state.room.name}:{" "}
             {admin ?
