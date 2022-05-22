@@ -56,4 +56,5 @@ type State = {
     fullscreen: boolean,
     manual_entry: boolean,
     help: boolean,
+    can_play: boolean,
 }

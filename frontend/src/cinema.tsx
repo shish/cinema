@@ -31,6 +31,7 @@ let state: State = {
     fullscreen: document.fullscreenElement != null,
     manual_entry: false,
     help: false,
+    can_play: false,
 };
 
 try {

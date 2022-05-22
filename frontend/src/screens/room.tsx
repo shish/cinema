@@ -56,6 +56,10 @@ const MovieList = ({ movies, state }) => (
 /**********************************************************************
  * Video
  */
+ const SetCanPlayAndSyncMovieState = function (state: State, event: Event) {
+    sync_movie_state(state);
+    return {...state, can_play: true};
+}
 const SyncMovieState = function (state: State, event: Event) {
     sync_movie_state(state);
     return state;
@@ -72,13 +76,13 @@ function iOS() {
         // iPad on iOS 13 detection
         || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
 }
-const MainVideo = ({ state }: { state: RoomState }) => (
+const MainVideo = ({ state, can_play }: { state: RoomState, can_play: boolean }) => (
     (state.playing || state.paused) ?
         <video
             id="movie"
             src={"/movies/" + (state.playing || state.paused)[0]}
-            controls={iOS()} // iOS needs the user to press "play" for themselves
-            onplay={SyncMovieState}
+            controls={iOS() && !can_play} // iOS needs the user to press "play" for themselves
+            onplay={SetCanPlayAndSyncMovieState}
             onpause={SyncMovieState}
             onloadeddata={SyncMovieState}
             playsinline={true}
@@ -266,7 +270,7 @@ export const RoomRender = ({ state, admin }: { state: State, admin: boolean }) =
     <main class={admin ? "room admin" : "room user"}>
         <Header state={state} admin={admin} />
         <MovieList movies={state.movies} state={state.room.state} />
-        <MainVideo state={state.room.state} />
+        <MainVideo state={state.room.state} can_play={state.can_play} />
         <Controls state={state} enabled={!!(state.room.state.paused || state.room.state.playing)} />
         <Chat log={state.room.chat} />
         <ViewerList viewers={state.room.viewers} admins={state.room.admins} />
