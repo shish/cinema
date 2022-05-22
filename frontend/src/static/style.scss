@@ -101,20 +101,22 @@ MAIN.login {
 
 MAIN.room.admin {
   grid-template-columns: 1fr 20em;
-  grid-template-rows: 4rem 2rem 1fr 3rem;
+  grid-template-rows: 4rem 2rem 1fr 2rem 3rem;
   grid-template-areas:
-    "header  header"
-    "movies  chat"
-    "video   chat"
-    "viewers chat";
+    "header   header"
+    "movies   chat"
+    "video    chat"
+    "controls chat"
+    "viewers  chat";
 
   @media (orientation: portrait) {
     grid-template-columns: 1fr;
-    grid-template-rows: 4rem 2rem min-content 1fr 3rem;
+    grid-template-rows: 4rem 2rem min-content 2rem 1fr 3rem;
     grid-template-areas:
       "header"
       "movies"
       "video"
+      "controls"
       "chat"
       "viewers";
 
@@ -150,6 +152,10 @@ MAIN.room.user {
   }
 
   .movie_list {
+    display: none;
+  }
+
+  .controls {
     display: none;
   }
 }
@@ -257,6 +263,19 @@ MAIN.room {
     display: flex;
 
     SELECT {
+      flex: 1 1 auto;
+    }
+
+    BUTTON {
+      flex: 0 0 auto;
+    }
+  }
+
+  .controls {
+    grid-area: controls;
+    display: flex;
+
+    INPUT {
       flex: 1 1 auto;
     }
 

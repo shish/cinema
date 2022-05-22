@@ -11,61 +11,9 @@ function WebSocketCommand(state: State, command: object) {
 }
 
 /**********************************************************************
- * Video
- */
-const PauseAction = (state: State) => [
-    { ...state } as State,
-    WebSocketCommand(state, {
-        pause: [
-            (document.getElementById("movie_list") as HTMLFormElement).value,
-            (document.getElementById("movie") as HTMLVideoElement).currentTime,
-        ]
-    })
-];
-const PlayAction = (state: State) => [
-    { ...state } as State,
-    WebSocketCommand(state, {
-        play: [
-            (document.getElementById("movie_list") as HTMLFormElement).value,
-            ((new Date()).getTime() / 1000) - (document.getElementById("movie") as HTMLVideoElement).currentTime
-        ],
-    })
-];
-const SyncAction = function (state: State, event: Event) {
-    sync_movie_state(state);
-    return state;
-}
-function iOS() {
-    return [
-        'iPad Simulator',
-        'iPhone Simulator',
-        'iPod Simulator',
-        'iPad',
-        'iPhone',
-        'iPod'
-    ].includes(navigator.platform)
-        // iPad on iOS 13 detection
-        || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
-}
-const MainVideo = ({ state, admin }: { state: RoomState, admin: boolean }) => (
-    (state.playing || state.paused) ?
-        <video
-            id="movie"
-            src={"/movies/" + (state.playing || state.paused)[0]}
-            muted={iOS()} // iOS only allows auto-play if muted
-            controls={admin || iOS()} // iOS needs the user to manually un-mute
-            onplay={admin && PlayAction}
-            onpause={admin && PauseAction}
-            onseeked={admin && PauseAction}
-            onloadeddata={SyncAction}
-            playsinline={true}
-        ></video> : <div class="blackout" />
-);
-
-/**********************************************************************
  * Movie List
  */
-const LoadAction = function (state: State) {
+ const LoadAction = function (state: State) {
     let movie = (document.getElementById("movie_list") as HTMLFormElement).value;
     let command = movie ? { pause: [movie, 0] } : { stop: null };
     return [
@@ -90,9 +38,9 @@ const NullSubmit = function (state: State, event: Event): State {
     event.preventDefault();
     return state;
 }
-const MovieList = ({ movies, state, admin }) => (
+const MovieList = ({ movies, state }) => (
     <form class="movie_list" onsubmit={NullSubmit}>
-        <select id="movie_list" onchange={LoadAction} readonly={!admin}>
+        <select id="movie_list" onchange={LoadAction}>
             <option value="">Select Movie</option>
             {movies.map((p) => (
                 <option selected={
@@ -102,6 +50,77 @@ const MovieList = ({ movies, state, admin }) => (
             ))}
         </select>
         <button onclick={RefreshMovies}>&nbsp;<i class="fas fa-sync"></i>&nbsp;</button>
+    </form>
+);
+
+/**********************************************************************
+ * Video
+ */
+const SyncMovieState = function (state: State, event: Event) {
+    sync_movie_state(state);
+    return state;
+}
+function iOS() {
+    return [
+        'iPad Simulator',
+        'iPhone Simulator',
+        'iPod Simulator',
+        'iPad',
+        'iPhone',
+        'iPod'
+    ].includes(navigator.platform)
+        // iPad on iOS 13 detection
+        || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
+}
+const MainVideo = ({ state }: { state: RoomState }) => (
+    (state.playing || state.paused) ?
+        <video
+            id="movie"
+            src={"/movies/" + (state.playing || state.paused)[0]}
+            controls={iOS()} // iOS needs the user to press "play" for themselves
+            onplay={SyncMovieState}
+            onpause={SyncMovieState}
+            onloadeddata={SyncMovieState}
+            playsinline={true}
+        ></video> : <div class="blackout" />
+);
+
+/**********************************************************************
+ * Controls
+ */
+ const PauseAction = (state: State) => [
+    { ...state } as State,
+    WebSocketCommand(state, {
+        pause: [
+            (document.getElementById("movie_list") as HTMLFormElement).value,
+            (document.getElementById("movie") as HTMLVideoElement).currentTime,
+        ]
+    })
+];
+const PlayAction = (state: State) => [
+    { ...state } as State,
+    WebSocketCommand(state, {
+        play: [
+            (document.getElementById("movie_list") as HTMLFormElement).value,
+            ((new Date()).getTime() / 1000) - (document.getElementById("movie") as HTMLVideoElement).currentTime
+        ],
+    })
+];
+const SeekAction = (state: State) => [
+    { ...state } as State,
+    WebSocketCommand(state, {
+        pause: [
+            (document.getElementById("movie_list") as HTMLFormElement).value,
+            (document.getElementById("movie") as HTMLVideoElement).duration *
+            ((document.getElementById("seekbar") as HTMLFormElement).valueAsNumber / 100)
+        ],
+    })
+];
+ const Controls = ({ state, enabled }: {state: State, enabled: boolean}) => (
+    <form class="controls" onsubmit={function(s, e) {e.preventDefault(); return s;}}>
+        <button onclick={PlayAction} disabled={!enabled}>&nbsp;<i class="fas fa-play"></i>&nbsp;</button>
+        <button onclick={PauseAction} disabled={!enabled}>&nbsp;<i class="fas fa-pause"></i>&nbsp;</button>
+        <input id="seekbar" type="range" onchange={SeekAction} disabled={!enabled} />
     </form>
 );
 
@@ -246,9 +265,10 @@ export const Header = ({ state, admin }: { state: State, admin: boolean }) => (
 export const RoomRender = ({ state, admin }: { state: State, admin: boolean }) => (
     <main class={admin ? "room admin" : "room user"}>
         <Header state={state} admin={admin} />
-        <MainVideo state={state.room.state} admin={admin} />
+        <MovieList movies={state.movies} state={state.room.state} />
+        <MainVideo state={state.room.state} />
+        <Controls state={state} enabled={!!(state.room.state.paused || state.room.state.playing)} />
         <Chat log={state.room.chat} />
         <ViewerList viewers={state.room.viewers} admins={state.room.admins} />
-        <MovieList movies={state.movies} state={state.room.state} admin={admin} />
     </main>
 );
