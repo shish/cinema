@@ -13,6 +13,13 @@
 BODY {
   margin: 0;
   padding: 0;
+  font-family: arial, sans-serif;
+  background-color: #222;
+  color: #DDD;
+
+  A {
+    color: #BBF;
+  }
 }
 
 MAIN {
@@ -25,76 +32,85 @@ MAIN {
   // with height=visualViewport.height when the virtual keyboard
   // causes the viewport height to change
   height: 100%;
-}
 
-/**********************************************************************
- * Common colours
- */
+  display: grid;
+  gap: 1px 1px;
+  background-color: #999;
 
-MAIN {
-  background: #222;
-}
+  HEADER {
+    grid-area: header;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    background: #444;
 
-BODY {
-  font-family: arial, sans-serif;
-  background-color: #222;
-  color: #DDD;
+    >I {
+      flex: 0 0 auto;
+      width: 4rem;
+      font-size: 2rem;
+    }
 
-  A {
-    color: #BBF;
+    H1 {
+      flex: 1 1 auto;
+      font-size: 1.5rem;
+    }
+
+    INPUT {
+      font-size: 1em;
+      padding: 0.2rem 0.5rem;
+      border-radius: 0.5rem;
+      max-width: 50%;
+    }
   }
-}
-
-HEADER {
-  text-align: center;
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid #666;
-  background: #444;
-
-  >I {
-    flex: 0 0 auto;
-    width: 4rem;
-    font-size: 2rem;
-  }
-
-  H1 {
-    flex: 1 1 auto;
-    font-size: 1.5rem;
-  }
-
-  INPUT {
-    font-size: 1em;
-    padding: 0.2rem 0.5rem;
-    border-radius: 0.5rem;
-    max-width: 50%;
-  }
-}
-
-FOOTER {
-  border-top: 1px solid #666;
-  text-align: center;
-  padding: 0 1rem;
-  background: #444;
 }
 
 /**********************************************************************
  * Page-specific layouts
  */
 
-MAIN.room.admin {
-  grid-template-columns: 1fr 1fr 20em;
-  grid-template-rows: 4em 2em 1fr 1fr 3em;
+MAIN.login {
+  grid-template-columns: 1fr;
+  grid-template-rows: min-content 1fr;
   grid-template-areas:
-    "header header header"
-    "movies movies chat"
-    "video video chat"
-    "video video chat"
-    "viewers viewers chat";
+    "header"
+    "content";
+  text-align: center;
+
+  ARTICLE {
+    grid-area: content;
+    overflow: scroll;
+    padding: 1rem;
+    background: #222;
+
+    FORM {
+      max-width: 30em;
+      margin: auto;
+    }
+
+    INPUT[type="text"],
+    INPUT[type="button"],
+    SELECT {
+      font-size: 2rem;
+      padding: 0.5rem;
+      width: 100%;
+      border-radius: 0.5rem;
+      margin: .5rem auto;
+    }
+  }
+}
+
+MAIN.room.admin {
+  grid-template-columns: 1fr 20em;
+  grid-template-rows: 4rem 2rem 1fr 3rem;
+  grid-template-areas:
+    "header  header"
+    "movies  chat"
+    "video   chat"
+    "viewers chat";
 
   @media (orientation: portrait) {
     grid-template-columns: 1fr;
-    grid-template-rows: 4em 2em min-content 1fr 3em;
+    grid-template-rows: 4rem 2rem min-content 1fr 3rem;
     grid-template-areas:
       "header"
       "movies"
@@ -104,27 +120,21 @@ MAIN.room.admin {
 
     VIDEO {
       height: auto;
-      border-bottom: 1px solid #666;
-    }
-
-    .chat {
-      border-left: 0;
     }
   }
 }
 
 MAIN.room.user {
-  grid-template-columns: 1fr 1fr 20em;
-  grid-template-rows: 4em 1fr 1fr 3em;
+  grid-template-columns: 1fr 20rem;
+  grid-template-rows: 4rem 1fr 3rem;
   grid-template-areas:
-    "header header header"
-    "video video chat"
-    "video video chat"
-    "viewers viewers chat";
+    "header  header"
+    "video   chat"
+    "viewers chat";
 
   @media (orientation: portrait) {
     grid-template-columns: 1fr;
-    grid-template-rows: 4em min-content 1fr;
+    grid-template-rows: 4rem min-content 1fr;
     grid-template-areas:
       "header"
       "video"
@@ -132,11 +142,6 @@ MAIN.room.user {
 
     VIDEO {
       height: auto;
-      border-bottom: 1px solid #666;
-    }
-
-    .chat {
-      border-left: 0;
     }
 
     .viewers {
@@ -150,13 +155,6 @@ MAIN.room.user {
 }
 
 MAIN.room {
-  display: grid;
-  gap: 0px 0px;
-
-  HEADER {
-    grid-area: header;
-  }
-
   VIDEO {
     grid-area: video;
     background: #111;
@@ -171,10 +169,10 @@ MAIN.room {
   }
 
   .chat {
+    background: #222;
     grid-area: chat;
     display: flex;
     flex-direction: column;
-    border-left: 1px solid #666;
 
     .chat_log {
       flex: 1 1 auto;
@@ -257,55 +255,13 @@ MAIN.room {
   .movie_list {
     grid-area: movies;
     display: flex;
+
     SELECT {
       flex: 1 1 auto;
     }
+
     BUTTON {
       flex: 0 0 auto;
     }
-  }
-}
-
-MAIN.login {
-  text-align: center;
-  display: flex;
-  flex-flow: column;
-  justify-content: space-between;
-
-  HEADER {
-    flex: 0 0 auto;
-  }
-
-  ARTICLE {
-    flex: 0 1 auto;
-    overflow: scroll;
-    padding: 1rem;
-
-    .inputBlock {
-      border: 2px solid #8C8;
-      border-radius: 0.5rem;
-      margin: 1rem auto;
-      display: block;
-      background: white;
-
-      P {
-        margin: 0px;
-        padding: 0.5rem;
-      }
-    }
-
-    INPUT[type="text"],
-    INPUT[type="button"],
-    SELECT {
-      font-size: 2rem;
-      padding: 0.5rem;
-      width: 100%;
-      border-radius: 0.5rem;
-      margin: 1rem auto;
-    }
-  }
-
-  FOOTER {
-    flex: 0 0 auto;
   }
 }

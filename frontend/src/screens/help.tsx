@@ -23,7 +23,5 @@ export const Help = () => (
                 <a href={"https://paypal.me/shish2k"}>PayPal</a>
             </p>
         </article>
-        {/* just have a footer so that flow layout works */}
-        <footer />
     </main>
 );

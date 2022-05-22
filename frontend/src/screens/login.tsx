@@ -1,6 +1,8 @@
 import h from "hyperapp-jsx-pragma";
 
-function LoginAction(state: State): State {
+function LoginAction(state: State, event: Event): State {
+    event.preventDefault();
+
     let user = (document.getElementById("user") as HTMLFormElement).value;
     let room = (document.getElementById("room") as HTMLFormElement).value;
 
@@ -32,22 +34,22 @@ export const Login = ({ state }: { state: State }) => (
             <i class="fas fa-info-circle" onclick={ShowHelp} />
         </header>
         <article>
-            <input
-                type="text"
-                id="user"
-                placeholder="Enter Your Name"
-                value={state.conn.user}
-            />
-            {Object.entries(state.rooms).length > 0 && !state.manual_entry ?
-                <select id="room" onchange={MaybeManual}>
-                    {Object.entries(state.rooms).map((k) => <option value={k[0]}>{k[1]}</option>)}
-                    <option value="">Enter a code</option>
-                </select> :
-                <input type="text" id="room" placeholder="Enter Room Code" />
-            }
-            <input type="button" value="Join" onclick={LoginAction} />
+            <form onsubmit={LoginAction}>
+                <input
+                    type="text"
+                    id="user"
+                    placeholder="Enter Your Name"
+                    value={state.conn.user}
+                />
+                {Object.entries(state.rooms).length > 0 && !state.manual_entry ?
+                    <select id="room" onchange={MaybeManual}>
+                        {Object.entries(state.rooms).map((k) => <option value={k[0]}>{k[1]}</option>)}
+                        <option value="">Enter a code</option>
+                    </select> :
+                    <input type="text" id="room" placeholder="Enter Room Code" />
+                }
+                <input type="button" value="Join" onclick={LoginAction} />
+            </form>
         </article>
-        {/* just have a footer so that flow layout works */}
-        <footer />
     </main>
 );
