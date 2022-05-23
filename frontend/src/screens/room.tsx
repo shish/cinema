@@ -138,8 +138,9 @@ function ts2hms(ts: number): string {
 }
 const Controls = ({ state, enabled }: { state: State, enabled: boolean }) => (
     <form class="controls" onsubmit={function (s, e) { e.preventDefault(); return s; }}>
-        <button onclick={PlayAction} disabled={!enabled}>&nbsp;<i class="fas fa-play"></i>&nbsp;</button>
-        <button onclick={PauseAction} disabled={!enabled}>&nbsp;<i class="fas fa-pause"></i>&nbsp;</button>
+        {state.room.state.playing ?
+            <button onclick={PauseAction} disabled={!enabled}>&nbsp;<i class="fas fa-pause"></i>&nbsp;</button> :
+            <button onclick={PlayAction} disabled={!enabled}>&nbsp;<i class="fas fa-play"></i>&nbsp;</button>}
         <input id="seekbar" type="range" onchange={SeekAction} disabled={!enabled} min={0} max={state.duration} value={state.currentTime} />
         <span>{ts2hms(state.currentTime)} / {ts2hms(state.duration)}</span>
     </form>
