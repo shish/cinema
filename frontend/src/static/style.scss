@@ -43,6 +43,7 @@ MAIN {
     display: flex;
     align-items: center;
     background: #444;
+    overflow-x: scroll;
 
     >I {
       flex: 0 0 auto;
