@@ -1,5 +1,6 @@
 /// <reference path='./cinema.d.ts'/>
 import h from "hyperapp-jsx-pragma";
+
 import { app } from "hyperapp";
 import { WebSocketListen, Http } from "hyperapp-fx";
 import { Root } from "./screens/root";
@@ -32,6 +33,8 @@ let state: State = {
     manual_entry: false,
     help: false,
     can_play: false,
+    currentTime: 0,
+    duration: 0,
 };
 
 try {

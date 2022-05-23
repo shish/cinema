@@ -13,7 +13,7 @@ function WebSocketCommand(state: State, command: object) {
 /**********************************************************************
  * Movie List
  */
- const LoadAction = function (state: State) {
+const LoadAction = function (state: State) {
     let movie = (document.getElementById("movie_list") as HTMLFormElement).value;
     let command = movie ? { pause: [movie, 0] } : { stop: null };
     return [
@@ -56,13 +56,20 @@ const MovieList = ({ movies, state }) => (
 /**********************************************************************
  * Video
  */
- const SetCanPlayAndSyncMovieState = function (state: State, event: Event) {
+const SetCanPlayAndSyncMovieState = function (state: State, event: Event) {
     sync_movie_state(state);
-    return {...state, can_play: true};
+    return { ...state, can_play: true };
 }
 const SyncMovieState = function (state: State, event: Event) {
     sync_movie_state(state);
-    return state;
+    return UpdateDuration(state);
+}
+const UpdateDuration = function (state: State) {
+    return {
+        ...state,
+        currentTime: (document.getElementById("movie") as HTMLVideoElement).currentTime,
+        duration: (document.getElementById("movie") as HTMLVideoElement).duration || 0,
+    };
 }
 function iOS() {
     return [
@@ -81,18 +88,25 @@ const MainVideo = ({ state, can_play }: { state: RoomState, can_play: boolean })
         <video
             id="movie"
             src={"/movies/" + (state.playing || state.paused)[0]}
-            controls={iOS() && !can_play} // iOS needs the user to press "play" for themselves
+            // iOS needs the user to press "play" for themselves. Once we've
+            // detected that the movie can start playing, then they don't
+            // need controls any more, so hide them to avoid desyncs.
+            controls={iOS() && !can_play}
             onplay={SetCanPlayAndSyncMovieState}
-            onpause={SyncMovieState}
-            onloadeddata={SyncMovieState}
             playsinline={true}
+            // Once a new joiner has loaded enough data to be able to seek,
+            // then make sure we've seeked to the right place.
+            onloadeddata={SyncMovieState}
+            // Keep the progress bar in the controls section in-sync with
+            // the playing movie.
+            ontimeupdate={UpdateDuration}
         ></video> : <div class="blackout" />
 );
 
 /**********************************************************************
  * Controls
  */
- const PauseAction = (state: State) => [
+const PauseAction = (state: State) => [
     { ...state } as State,
     WebSocketCommand(state, {
         pause: [
@@ -115,16 +129,19 @@ const SeekAction = (state: State) => [
     WebSocketCommand(state, {
         pause: [
             (document.getElementById("movie_list") as HTMLFormElement).value,
-            (document.getElementById("movie") as HTMLVideoElement).duration *
-            ((document.getElementById("seekbar") as HTMLFormElement).valueAsNumber / 100)
+            (document.getElementById("seekbar") as HTMLFormElement).valueAsNumber
         ],
     })
 ];
- const Controls = ({ state, enabled }: {state: State, enabled: boolean}) => (
-    <form class="controls" onsubmit={function(s, e) {e.preventDefault(); return s;}}>
+function ts2hms(ts: number): string {
+    return new Date(ts * 1000).toISOString().substring(11, 19);
+}
+const Controls = ({ state, enabled }: { state: State, enabled: boolean }) => (
+    <form class="controls" onsubmit={function (s, e) { e.preventDefault(); return s; }}>
         <button onclick={PlayAction} disabled={!enabled}>&nbsp;<i class="fas fa-play"></i>&nbsp;</button>
         <button onclick={PauseAction} disabled={!enabled}>&nbsp;<i class="fas fa-pause"></i>&nbsp;</button>
-        <input id="seekbar" type="range" onchange={SeekAction} disabled={!enabled} />
+        <input id="seekbar" type="range" onchange={SeekAction} disabled={!enabled} min={0} max={state.duration} value={state.currentTime} />
+        <span>{ts2hms(state.currentTime)} / {ts2hms(state.duration)}</span>
     </form>
 );
 

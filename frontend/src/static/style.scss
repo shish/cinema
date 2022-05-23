@@ -282,5 +282,10 @@ MAIN.room {
     BUTTON {
       flex: 0 0 auto;
     }
+    SPAN {
+      flex: 0 0 auto;
+      align-self: center;
+      padding: 0 .5rem;
+    }
   }
 }

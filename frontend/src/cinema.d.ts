@@ -57,4 +57,6 @@ type State = {
     manual_entry: boolean,
     help: boolean,
     can_play: boolean,
+    currentTime: number,
+    duration: number,
 }
