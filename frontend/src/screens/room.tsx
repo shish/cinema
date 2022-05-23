@@ -149,18 +149,14 @@ const Controls = ({ state, enabled }: { state: State, enabled: boolean }) => (
 /**********************************************************************
  * Viewers
  */
-const AdminAction = (user: string) => function (state: State) {
-    return [
-        { ...state } as State,
-        WebSocketCommand(state, { admin: user })
-    ];
-};
-const UnadminAction = (user: string) => function (state: State) {
-    return [
-        { ...state } as State,
-        WebSocketCommand(state, { unadmin: user })
-    ];
-};
+const AdminAction = (user: string) => (state: State) => [
+    { ...state } as State,
+    WebSocketCommand(state, { admin: user })
+];
+const UnadminAction = (user: string) => (state: State) => [
+    { ...state } as State,
+    WebSocketCommand(state, { unadmin: user })
+];
 const ViewerList = ({ viewers, admins }) => (
     <ul class="viewers">
         {viewers.map((p) => (
