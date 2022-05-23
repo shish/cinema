@@ -19,6 +19,18 @@ function LoginAction(state: State, event: Event): State {
     };
 }
 
+function UpdateUser(state: State): State {
+    let user = (document.getElementById("user") as HTMLFormElement).value;
+    sessionStorage.setItem("user", user);
+    return {
+        ...state,
+        conn: {
+            ...state.conn,
+            user: user,
+        },
+    };
+}
+
 const MaybeManual = (state: State, event: Event): State => ({
     ...state,
     manual_entry: (document.getElementById("room") as HTMLInputElement).value == ""
@@ -39,6 +51,7 @@ export const Login = ({ state }: { state: State }) => (
                     type="text"
                     id="user"
                     placeholder="Enter Your Name"
+                    onchange={UpdateUser}
                     value={state.conn.user}
                 />
                 {Object.entries(state.rooms).length > 0 && !state.manual_entry ?
@@ -46,7 +59,7 @@ export const Login = ({ state }: { state: State }) => (
                         {Object.entries(state.rooms).map((k) => <option value={k[0]}>{k[1]}</option>)}
                         <option value="">Enter a code</option>
                     </select> :
-                    <input type="text" id="room" placeholder="Enter Room Code" />
+                    <input type="text" id="room" maxlength="4" placeholder="Enter Room Code" />
                 }
                 <input type="button" value="Join" onclick={LoginAction} />
             </form>
