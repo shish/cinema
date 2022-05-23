@@ -26,9 +26,6 @@ let state: State = {
     rooms: {},
     ws_errors: 0,
     error: null,
-    settings: {
-        sound: false,
-    },
     fullscreen: document.fullscreenElement != null,
     manual_entry: false,
     help: false,
@@ -36,15 +33,6 @@ let state: State = {
     currentTime: 0,
     duration: 0,
 };
-
-try {
-    state.settings = {
-        ...state.settings,
-        ...JSON.parse(localStorage.getItem("settings") || "{}"),
-    };
-} catch (err) {
-    console.log("Error loading state:", err);
-}
 
 let mySubs = {};
 

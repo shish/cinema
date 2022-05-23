@@ -224,17 +224,6 @@ const TitleAction = function (state: State, event: SubmitEvent) {
         })
     ];
 };
-function ToggleSound(state: State): State {
-    let new_state = {
-        ...state,
-        settings: {
-            ...state.settings,
-            sound: !state.settings.sound,
-        },
-    };
-    localStorage.setItem("settings", JSON.stringify(new_state.settings));
-    return new_state;
-}
 function GoFullscreen(state: State): State {
     requestAnimationFrame(() => document.documentElement.requestFullscreen());
     return { ...state, fullscreen: !state.fullscreen };
@@ -255,16 +244,13 @@ const UnlockAction = (state: State) => [
 ];
 export const Header = ({ state, admin }: { state: State, admin: boolean }) => (
     <header>
-        {state.settings.sound ? (
-            <i class="fas fa-bell" onclick={ToggleSound} />
-        ) : (
-            <i class="fas fa-bell-slash" onclick={ToggleSound} />
-        )}
-        <h1>
-            {admin && (state.room.public ?
+        {admin ? (
+            state.room.public ?
                 <i class="fas fa-unlock" onclick={LockAction} /> :
-                <i class="fas fa-lock" onclick={UnlockAction} />)
-            }{" "}
+                <i class="fas fa-lock" onclick={UnlockAction} />) :
+            <i class="fas" />
+        }
+        <h1>
             {state.room.name}:{" "}
             {admin ?
                 <input id="title" value={state.room.title} onchange={TitleAction} /> :

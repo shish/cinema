@@ -32,10 +32,6 @@ type Room = {
     public: boolean,
 }
 
-type Settings = {
-    sound: boolean,
-}
-
 interface Dictionary<T> {
     [Key: string]: T;
 }
@@ -52,7 +48,6 @@ type State = {
     room: Room,
     ws_errors: number,
     loading: string,
-    settings: Settings,
     fullscreen: boolean,
     manual_entry: boolean,
     help: boolean,
