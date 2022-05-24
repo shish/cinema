@@ -8,6 +8,8 @@ function LoginAction(state: State, event: Event): State {
 
     sessionStorage.setItem("user", user);
 
+    if(!user || !room) return state;
+
     return {
         ...state,
         conn: {
