@@ -251,7 +251,7 @@ export const Header = ({ state, admin }: { state: State, admin: boolean }) => (
             <i class="fas" />
         }
         <h1>
-            {state.room.name}:{" "}
+            {(admin || !state.room.public) ? (state.room.name + ": ") : ""}
             {admin ?
                 <input id="title" value={state.room.title} onchange={TitleAction} /> :
                 state.room.title
