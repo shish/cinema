@@ -54,4 +54,13 @@ type State = {
     can_play: boolean,
     currentTime: number,
     duration: number,
+    show_settings: boolean,
+    show_chat: boolean,
+    title_edit: string,
 }
+
+declare type Action = import('hyperapp').Action<State>;
+declare type Effect = import('hyperapp').Effect<State>;
+declare type Dispatchable = import('hyperapp').Dispatchable<State>;
+declare type Subscription = import('hyperapp').Subscription<State>;
+declare type VNode = import('hyperapp').VNode<State>;

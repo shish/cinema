@@ -32,6 +32,9 @@ let state: State = {
     can_play: false,
     currentTime: 0,
     duration: 0,
+    show_settings: false,
+    show_chat: true,
+    title_edit: "",
 };
 
 let mySubs = {};
@@ -140,25 +143,29 @@ function viewportHandler() {
 window.visualViewport.addEventListener('resize', viewportHandler);
 
 app({
-    init: [state, Http({
-        url: "/movies",
-        action(state, movies) {
-            return { ...state, movies };
-        },
-        error(state, error) {
-            console.log(error);
-            return state;
-        }
-    }), Http({
-        url: "/rooms",
-        action(state, rooms) {
-            return { ...state, rooms };
-        },
-        error(state, error) {
-            console.log(error);
-            return state;
-        }
-    })],
+    init: [
+        state,
+        Http({
+            url: "/movies",
+            action(state, movies) {
+                return { ...state, movies };
+            },
+            error(state, error) {
+                console.log(error);
+                return state;
+            }
+        }),
+        Http({
+            url: "/rooms",
+            action(state, rooms) {
+                return { ...state, rooms };
+            },
+            error(state, error) {
+                console.log(error);
+                return state;
+            }
+        }),
+    ],
     view: (state) => <Root state={state} />,
     subscriptions: (state: State) => [
         state.conn.room && getOpenWebSocketListener(state),

@@ -2,8 +2,10 @@ import h from "hyperapp-jsx-pragma";
 import { WebSocketSend } from "hyperapp-fx";
 import { socket_name, sync_movie_state } from "../cinema";
 import { Http } from "hyperapp-fx";
+import { SettingsMenu } from "./settings";
 
-function WebSocketCommand(state: State, command: object) {
+
+export function WebSocketCommand(state: State, command: object) {
     return WebSocketSend({
         url: socket_name(state),
         data: JSON.stringify(command),
@@ -213,53 +215,17 @@ const Chat = ({ log }: { log: Array<ChatMessage> }) => (
 /**********************************************************************
  * Header
  */
-const TitleAction = function (state: State, event: SubmitEvent) {
-    let new_title = (document.getElementById("title") as HTMLFormElement).value;
-    return [
-        // Optimistically change the title locally to avoid flickering back and
-        // forth. If the title change fails, the next update will refresh it.
-        { ...state, room: { ...state.room, title: new_title } } as State,
-        WebSocketCommand(state, {
-            title: new_title,
-        })
-    ];
-};
-function GoFullscreen(state: State): State {
-    requestAnimationFrame(() => document.documentElement.requestFullscreen());
-    return { ...state, fullscreen: !state.fullscreen };
-}
-function ExitFullscreen(state: State): State {
-    if (document.exitFullscreen) {
-        requestAnimationFrame(() => document.exitFullscreen());
-    }
-    return { ...state, fullscreen: !state.fullscreen };
-}
-const LockAction = (state: State) => [
-    { ...state } as State,
-    WebSocketCommand(state, { lock: null })
-];
-const UnlockAction = (state: State) => [
-    { ...state } as State,
-    WebSocketCommand(state, { unlock: null })
-];
+const ShowSettings = (state: State) => ({
+    ...state,
+    show_settings: true,
+    title_edit: state.room.title,
+});
+
 export const Header = ({ state, admin }: { state: State, admin: boolean }) => (
     <header>
-        {admin ? (
-            state.room.public ?
-                <i class="fas fa-unlock" onclick={LockAction} /> :
-                <i class="fas fa-lock" onclick={UnlockAction} />) :
-            <i class="fas" />
-        }
-        <h1>
-            {(admin || !state.room.public) ? (state.room.name + ": ") : ""}
-            {admin ?
-                <input id="title" value={state.room.title} onchange={TitleAction} /> :
-                state.room.title
-            }
-        </h1>
-        {state.fullscreen ?
-            <i class="fas fa-compress-arrows-alt" onclick={ExitFullscreen} /> :
-            <i class="fas fa-expand-arrows-alt" onclick={GoFullscreen} />}
+        <i class="fas" />
+        <h1>{state.room.title}</h1>
+        <i class="fas fa-cogs" onclick={ShowSettings} />
     </header>
 );
 
@@ -267,12 +233,19 @@ export const Header = ({ state, admin }: { state: State, admin: boolean }) => (
  * Layout
  */
 export const RoomRender = ({ state, admin }: { state: State, admin: boolean }) => (
-    <main class={admin ? "room admin" : "room user"}>
+    <main class={{
+        room: true,
+        admin: admin,
+        user: !admin,
+        chat: state.show_chat,
+        nochat: !state.show_chat,
+    }}>
         <Header state={state} admin={admin} />
         <MovieList movies={state.movies} state={state.room.state} />
         <MainVideo state={state.room.state} can_play={state.can_play} />
         <Controls state={state} enabled={!!(state.room.state.paused || state.room.state.playing)} />
         <Chat log={state.room.chat} />
         <ViewerList viewers={state.room.viewers} admins={state.room.admins} />
+        {state.show_settings && <SettingsMenu state={state} admin={admin} />}
     </main>
 );
