@@ -57,6 +57,7 @@ type State = {
     show_settings: boolean,
     show_chat: boolean,
     title_edit: string,
+    show_system: boolean,
 }
 
 declare type Action = import('hyperapp').Action<State>;

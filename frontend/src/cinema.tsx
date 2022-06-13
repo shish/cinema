@@ -35,6 +35,7 @@ let state: State = {
     show_settings: false,
     show_chat: true,
     title_edit: "",
+    show_system: true,
 };
 
 let mySubs = {};

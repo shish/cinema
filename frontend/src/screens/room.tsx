@@ -197,14 +197,19 @@ function absolute_timestamp(ts: number): string {
     }
     return convertUTCDateToLocalDate(new Date(ts * 1e3)).toISOString().slice(-13, -8);
 }
-const Chat = ({ log }: { log: Array<ChatMessage> }) => (
+const Chat = ({ log, show_system }: { log: Array<ChatMessage>, show_system: boolean }) => (
     <div class="chat">
         <ul class="chat_log" id="chat_log">
-            {log.map((p) => (<li class={p.user == "system" ? "system" : "user"}>
-                <span class="absolute_timestamp">{absolute_timestamp(p.absolute_timestamp)}</span>
-                <span class="user">{p.user}</span>
-                <span class="message">{p.message}</span>
-            </li>))}
+            {log
+                .filter(p => (show_system || p.user != "system"))
+                .map((p) => (
+                    <li class={p.user == "system" ? "system" : "user"}>
+                        <span class="absolute_timestamp">{absolute_timestamp(p.absolute_timestamp)}</span>
+                        <span class="user">{p.user}</span>
+                        <span class="message">{p.message}</span>
+                    </li>
+                ))
+            }
         </ul>
         <form class="chat_input" onsubmit={ChatAction}>
             <input id="chat_input" autocomplete={"off"} enterkeyhint={"send"} placeholder="Type to chat"></input>
@@ -244,7 +249,7 @@ export const RoomRender = ({ state, admin }: { state: State, admin: boolean }) =
         <MovieList movies={state.movies} state={state.room.state} />
         <MainVideo state={state.room.state} can_play={state.can_play} />
         <Controls state={state} enabled={!!(state.room.state.paused || state.room.state.playing)} />
-        <Chat log={state.room.chat} />
+        <Chat log={state.room.chat} show_system={state.show_system} />
         <ViewerList viewers={state.room.viewers} admins={state.room.admins} />
         {state.show_settings && <SettingsMenu state={state} admin={admin} />}
     </main>

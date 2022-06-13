@@ -79,7 +79,7 @@ export const SettingsMenu = ({ state, admin }: { state: State, admin: boolean })
                     </tbody>}
                     <tbody>
                         <tr><th colspan="2">Viewer</th></tr>
-                        <tr>
+                        {!admin && <tr>
                             <td>Show Chat</td>
                             <td>
                                 <input
@@ -96,7 +96,7 @@ export const SettingsMenu = ({ state, admin }: { state: State, admin: boolean })
                                     }}
                                 />
                             </td>
-                        </tr>
+                        </tr>}
                         {document.body.requestFullscreen && (
                             <tr>
                                 <td>Fullscreen</td>
@@ -122,6 +122,24 @@ export const SettingsMenu = ({ state, admin }: { state: State, admin: boolean })
                                 </td>
                             </tr>
                         )}
+                        <tr>
+                            <td>Show System<br/>Messages</td>
+                            <td>
+                                <input
+                                    checked={state.show_system}
+                                    type={"checkbox"}
+                                    onchange={function (
+                                        state: State,
+                                        event: FormInputEvent,
+                                    ): State {
+                                        return {
+                                            ...state,
+                                            show_system: !state.show_system,
+                                        };
+                                    }}
+                                />
+                            </td>
+                        </tr>
                         <tr>
                             <td colspan={2}>
                                 <button>Close</button>
