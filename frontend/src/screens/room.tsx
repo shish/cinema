@@ -197,6 +197,20 @@ function absolute_timestamp(ts: number): string {
     }
     return convertUTCDateToLocalDate(new Date(ts * 1e3)).toISOString().slice(-13, -8);
 }
+function name2color(name: string): string {
+    var hash = name.split(/[^a-zA-Z0-9]/)[0].toLowerCase().split('').reduce((prevHash, currVal) => (((prevHash << 5) - prevHash) + currVal.charCodeAt(0))|0, 0);
+    var b1 = 0x77 + (hash & 0xFF) / 2;
+    var b2 = 0x77 + ((hash >> 8) & 0xFF) / 2;
+    var b3 = 0x77 + ((hash >> 16) & 0xFF) / 2;
+    return `rgb(${b1}, ${b2}, ${b3})`;
+}
+function addAts(message: string) {
+    return message.split(/(@[a-zA-Z0-9]+)/).map(
+        x => x.startsWith("@") ?
+            <span style={{color: name2color(x.substring(1))}}>{x}</span> :
+            x
+    );
+}
 const Chat = ({ log, show_system }: { log: Array<ChatMessage>, show_system: boolean }) => (
     <div class="chat">
         <ul class="chat_log" id="chat_log">
@@ -205,8 +219,8 @@ const Chat = ({ log, show_system }: { log: Array<ChatMessage>, show_system: bool
                 .map((p) => (
                     <li class={p.user == "system" ? "system" : "user"}>
                         <span class="absolute_timestamp">{absolute_timestamp(p.absolute_timestamp)}</span>
-                        <span class="user">{p.user}</span>
-                        <span class="message">{p.message}</span>
+                        <span class="user" style={{color: name2color(p.user)}}>{p.user}</span>
+                        <span class="message">{addAts(p.message)}</span>
                     </li>
                 ))
             }
