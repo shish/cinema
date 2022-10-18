@@ -153,7 +153,8 @@ async fn websocket(socket: WebSocket, login: LoginArgs, state: Arc<AppState>) {
     // This task will receive broadcast messages and send text message to our client.
     let (mut sender, mut receiver) = socket.split();
     let mut send_task = tokio::spawn(async move {
-        while let Ok(msg) = rx.recv().await {
+        while let Ok(state) = rx.recv().await {
+            let msg = serde_json::to_string(&state).unwrap();
             // In any websocket error, break loop.
             if sender.send(Message::Text(msg)).await.is_err() {
                 break;

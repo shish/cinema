@@ -2,7 +2,7 @@ use tokio::sync::broadcast;
 use serde::{Deserialize, Serialize};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Viewer {
     pub name: String,
     #[serde(skip)]
@@ -22,7 +22,7 @@ pub enum Command {
     Public(bool),
 }
 
-#[derive(PartialEq, Serialize, Deserialize)]
+#[derive(PartialEq, Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "lowercase")]
 pub enum State {
     Stopped(()),
@@ -36,14 +36,14 @@ impl Default for State {
     }
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone, Debug)]
 pub struct ChatMessage {
     pub absolute_timestamp: f64,
     pub user: String,
     pub message: String,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone, Debug)]
 pub struct Room {
     pub public: bool,
     pub name: String,
@@ -53,7 +53,7 @@ pub struct Room {
     pub viewers: Vec<Viewer>,
     pub chat: Vec<ChatMessage>,
     #[serde(skip)]
-    pub channel: broadcast::Sender<String>,
+    pub channel: broadcast::Sender<Room>,
 }
 
 impl Room {
@@ -159,9 +159,8 @@ impl Room {
         // Something happened. Serialize the current room state and
         // broadcast it to everybody in the room.
         tracing::debug!("[{}] Sync to {} viewers", self.name, self.viewers.len());
-        let json = serde_json::to_string(self).unwrap();
         if self.channel.receiver_count() > 0 {
-            self.channel.send(json).unwrap();
+            self.channel.send(self.clone()).unwrap();
         }
     }
 }
