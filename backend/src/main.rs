@@ -14,6 +14,7 @@ use glob::glob;
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::sync::Arc;
+use std::time::{Duration, SystemTime};
 use std::{io, net::SocketAddr};
 use tokio::sync::RwLock;
 use tower_http::{services::ServeDir, trace::TraceLayer};
@@ -158,8 +159,9 @@ async fn websocket(socket: WebSocket, login: LoginArgs, state: Arc<AppState>) {
             let msg = if let Some(last_state) = maybe_last_state {
                 serde_json::to_string(&json_patch::diff(
                     &serde_json::to_value(&last_state).unwrap(),
-                    &serde_json::to_value(&state).unwrap()
-                )).unwrap()
+                    &serde_json::to_value(&state).unwrap(),
+                ))
+                .unwrap()
             } else {
                 serde_json::to_string(&state).unwrap()
             };
@@ -204,16 +206,18 @@ async fn websocket(socket: WebSocket, login: LoginArgs, state: Arc<AppState>) {
     {
         let room = locked_room.read().await;
         if room.viewers.is_empty() {
-            tracing::info!("[{}] Room is empty, starting a timer", room.name);
             drop(room);
             tokio::spawn(async move {
-                tokio::time::sleep(tokio::time::Duration::from_secs(5 * 60)).await;
+                let room_timeout = Duration::from_secs(5 * 60);
+                tokio::time::sleep(room_timeout).await;
                 let room = locked_room.read().await;
-                if room.viewers.is_empty() {
-                    tracing::info!("[{}] Room is still empty, cleaning it up", room.name);
+                if SystemTime::now()
+                    .duration_since(room.last_activity)
+                    .unwrap()
+                    >= room_timeout
+                {
+                    tracing::info!("[{}] Cleaning up empty room", room.name);
                     state.rooms.write().await.remove(&room.name);
-                } else {
-                    tracing::info!("[{}] Room got a user, cancelling that cleanup", room.name);
                 }
             });
         }

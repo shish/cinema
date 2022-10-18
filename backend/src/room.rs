@@ -1,6 +1,6 @@
-use tokio::sync::broadcast;
 use serde::{Deserialize, Serialize};
 use std::time::{SystemTime, UNIX_EPOCH};
+use tokio::sync::broadcast;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Viewer {
@@ -54,6 +54,8 @@ pub struct Room {
     pub chat: Vec<ChatMessage>,
     #[serde(skip)]
     pub channel: broadcast::Sender<Room>,
+    #[serde(skip)]
+    pub last_activity: SystemTime,
 }
 
 impl Room {
@@ -69,6 +71,7 @@ impl Room {
             viewers: vec![],
             chat: vec![],
             channel: tx,
+            last_activity: SystemTime::now(),
         }
     }
 
@@ -151,7 +154,7 @@ impl Room {
         self.chat.push(ChatMessage {
             absolute_timestamp: since_the_epoch.as_secs_f64(),
             user: user.clone(),
-            message: message.clone()
+            message: message.clone(),
         });
     }
 
@@ -162,5 +165,6 @@ impl Room {
         if self.channel.receiver_count() > 0 {
             self.channel.send(self.clone()).unwrap();
         }
+        self.last_activity = SystemTime::now();
     }
 }
