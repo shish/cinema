@@ -40,15 +40,12 @@ const NullSubmit = function (state: State, event: Event): State {
     event.preventDefault();
     return state;
 }
-const MovieList = ({ movies, state }) => (
+const MovieList = ({ movies, video_state }: {movies: any, video_state: VideoState}) => (
     <form class="movie_list" onsubmit={NullSubmit}>
         <select id="movie_list" onchange={LoadAction}>
             <option value="">Select Movie</option>
             {movies.map((p) => (
-                <option selected={
-                    (state.playing && state.playing[0] == p) ||
-                    (state.paused && state.paused[0] == p)
-                }>{p}</option>
+                <option selected={video_state.video?.[0] == p}>{p}</option>
             ))}
         </select>
         <button onclick={RefreshMovies}>&nbsp;<i class="fas fa-sync"></i>&nbsp;</button>
@@ -85,11 +82,11 @@ function iOS() {
         // iPad on iOS 13 detection
         || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
 }
-const MainVideo = ({ state, can_play }: { state: RoomState, can_play: boolean }) => (
-    (state.playing || state.paused) ?
+const MainVideo = ({ video_state, can_play }: { video_state: VideoState, can_play: boolean }) => (
+    (video_state.video) ?
         <video
             id="movie"
-            src={"/movies/" + (state.playing || state.paused)[0]}
+            src={"/movies/" + video_state.video[0]}
             // iOS needs the user to press "play" for themselves. Once we've
             // detected that the movie can start playing, then they don't
             // need controls any more, so hide them to avoid desyncs.
@@ -140,7 +137,7 @@ function ts2hms(ts: number): string {
 }
 const Controls = ({ state, enabled }: { state: State, enabled: boolean }) => (
     <form class="controls" onsubmit={function (s, e) { e.preventDefault(); return s; }}>
-        {state.room.state.playing ?
+        {state.room.video_state.video?.[1].playing ?
             <button onclick={PauseAction} disabled={!enabled}>&nbsp;<i class="fas fa-pause"></i>&nbsp;</button> :
             <button onclick={PlayAction} disabled={!enabled}>&nbsp;<i class="fas fa-play"></i>&nbsp;</button>}
         <input id="seekbar" type="range" onchange={SeekAction} disabled={!enabled} min={0} max={state.duration} value={state.currentTime} />
@@ -260,9 +257,9 @@ export const RoomRender = ({ state, admin }: { state: State, admin: boolean }) =
         nochat: !state.show_chat,
     }}>
         <Header state={state} admin={admin} />
-        <MovieList movies={state.movies} state={state.room.state} />
-        <MainVideo state={state.room.state} can_play={state.can_play} />
-        <Controls state={state} enabled={!!(state.room.state.paused || state.room.state.playing)} />
+        <MovieList movies={state.movies} video_state={state.room.video_state} />
+        <MainVideo video_state={state.room.video_state} can_play={state.can_play} />
+        <Controls state={state} enabled={!!(state.room.video_state.video)} />
         <Chat log={state.room.chat} show_system={state.show_system} />
         <ViewerList viewers={state.room.viewers} admins={state.room.admins} />
         {state.show_settings && <SettingsMenu state={state} admin={admin} />}

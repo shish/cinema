@@ -24,15 +24,20 @@ pub enum Command {
 
 #[derive(PartialEq, Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "lowercase")]
-pub enum State {
-    Stopped(()),
-    Paused(String, f64),
-    Playing(String, f64),
+pub enum PlayingState {
+    Paused(f64),
+    Playing(f64),
+}
+#[derive(PartialEq, Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "lowercase")]
+pub enum VideoState {
+    NoVideo(()),
+    Video(String, PlayingState),
 }
 
-impl Default for State {
+impl Default for VideoState {
     fn default() -> Self {
-        State::Stopped(())
+        VideoState::NoVideo(())
     }
 }
 
@@ -48,7 +53,7 @@ pub struct Room {
     pub public: bool,
     pub name: String,
     pub title: String,
-    pub state: State,
+    pub video_state: VideoState,
     pub admins: Vec<String>,
     pub viewers: Vec<Viewer>,
     pub chat: Vec<ChatMessage>,
@@ -66,7 +71,7 @@ impl Room {
             public: true,
             name: name,
             title: format!("{}'s Room", user),
-            state: State::Stopped(()),
+            video_state: VideoState::NoVideo(()),
             admins: vec![user],
             viewers: vec![],
             chat: vec![],
@@ -83,15 +88,15 @@ impl Room {
             }
             (true, Command::Stop(())) => {
                 tracing::info!("[{}] Stopping", self.name);
-                self.state = State::Stopped(());
+                self.video_state = VideoState::NoVideo(());
             }
             (true, Command::Pause(movie, pause_pos)) => {
                 tracing::info!("[{}] Pausing {} at {}", self.name, movie, pause_pos);
-                self.state = State::Paused(movie.clone(), *pause_pos);
+                self.video_state = VideoState::Video(movie.clone(), PlayingState::Paused(*pause_pos));
             }
             (true, Command::Play(movie, start_ts)) => {
                 tracing::info!("[{}] Playing {} at {}", self.name, movie, start_ts);
-                self.state = State::Playing(movie.clone(), *start_ts);
+                self.video_state = VideoState::Video(movie.clone(), PlayingState::Playing(*start_ts));
             }
             (true, Command::Admin(user)) => {
                 tracing::info!("[{}] Making {} an admin", self.name, user);

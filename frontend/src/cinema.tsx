@@ -113,14 +113,13 @@ export function sync_movie_state(state: State) {
     }
 
     let movie = document.getElementById("movie") as HTMLVideoElement;
-    if (movie && state.room && state.room.state) {
-        if (state.room.state.paused != undefined) {
+    if (movie && state.room?.video_state?.video) {
+        if (state.room?.video_state?.video?.[1].paused != undefined) {
             if (!movie.paused) movie.pause();
-            setCurrentTimeIsh(movie, state.room.state.paused[1]);
+            setCurrentTimeIsh(movie, state.room?.video_state?.video?.[1].paused);
         }
-        if (state.room.state.playing != undefined) {
-            //console.log(((new Date()).getTime() / 1000), state.room.state.playing, ((new Date()).getTime() / 1000) - state.room.state.playing);
-            setCurrentTimeIsh(movie, ((new Date()).getTime() / 1000) - state.room.state.playing[1]);
+        if (state.room?.video_state?.video?.[1].playing != undefined) {
+            setCurrentTimeIsh(movie, ((new Date()).getTime() / 1000) - state.room?.video_state?.video?.[1].playing);
             if (movie.paused) movie.play();
         }
     }

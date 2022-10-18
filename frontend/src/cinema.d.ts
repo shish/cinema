@@ -15,16 +15,20 @@ type ChatMessage = {
     message: string,
 }
 
-type RoomState = {
-    stopped?: null,
-    paused?: [string, number],
-    playing?: [string, number],
+type PlayingState = {
+    paused?: number,
+    playing?: number,
+}
+
+type VideoState = {
+    novideo?: null,
+    video?: [string, PlayingState],
 }
 
 type Room = {
     name: string,
     title: string,
-	state: RoomState,
+	video_state: VideoState,
     admins: Array<string>,
     viewers: Array<Viewer>,
 	chat: Array<ChatMessage>,
