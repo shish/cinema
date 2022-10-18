@@ -39,15 +39,15 @@ interface Dictionary<T> {
 type State = {
     conn: {
         user: string,
-        room: string,
+        room: string | null,
         sess: string,
     },
     movies: Array<string>,
     rooms: Dictionary<string>,
-    error: string,
+    error: string | null,
     room: Room,
     ws_errors: number,
-    loading: string,
+    loading: string | null,
     fullscreen: boolean,
     manual_entry: boolean,
     help: boolean,

@@ -5,14 +5,12 @@ import { app } from "hyperapp";
 import { WebSocketListen, Http } from "hyperapp-fx";
 import { Root } from "./screens/root";
 import { v4 as uuidv4 } from "uuid";
+import * as jsonpatch from "jsonpatch";
 
 const DEV = false;
 
-let sess = sessionStorage.getItem("sess");
-if (!sess) {
-    sess = uuidv4();
-    sessionStorage.setItem("sess", sess);
-}
+let sess = sessionStorage.getItem("sess") ?? uuidv4();
+sessionStorage.setItem("sess", sess);
 
 let state: State = {
     conn: {
@@ -63,7 +61,7 @@ function getOpenWebSocketListener(state: State): WebSocketListen {
         mySubs[url] = WebSocketListen({
             url: url,
             open(state: State): State {
-                return { ...state, loading: "Syncing..." };
+                return { ...state, loading: "Syncing...", room: null };
             },
             close(state: State): State {
                 delete mySubs[url];
@@ -74,17 +72,11 @@ function getOpenWebSocketListener(state: State): WebSocketListen {
                 };
             },
             action(state: State, msg: MessageEvent): State {
-                // TODO: separate room-state updates and chat-broadcast updates
                 let resp = JSON.parse(msg.data);
-
-                if (resp.error) {
-                    return {
-                        ...state,
-                        loading: null,
-                        error: resp.error,
-                        conn: { ...state.conn, room: null },
-                    };
+                if (state.room) {
+                    resp = jsonpatch.apply_patch(state.room, resp);
                 }
+
                 let new_state = { ...state, loading: null, room: resp };
                 // After we have loaded the movie player HTML, make sure
                 // the timestamp is synced
@@ -136,12 +128,12 @@ export function sync_movie_state(state: State) {
 
 function viewportHandler() {
     var main = document.getElementsByTagName("MAIN")[0] as HTMLElement;
-    if (main) {
+    if (main && window.visualViewport) {
         main.style.top = window.visualViewport.offsetTop + "px";
         main.style.height = window.visualViewport.height + "px";
     }
 }
-window.visualViewport.addEventListener('resize', viewportHandler);
+window.visualViewport?.addEventListener('resize', viewportHandler);
 
 app({
     init: [

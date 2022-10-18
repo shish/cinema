@@ -15,3 +15,4 @@ serde_json = "1.0"
 futures = "0.3"
 clap = { version = "3.1.18", features = ["derive"] }
 glob = "0.3"
+json-patch = "*"

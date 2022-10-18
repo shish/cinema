@@ -153,8 +153,17 @@ async fn websocket(socket: WebSocket, login: LoginArgs, state: Arc<AppState>) {
     // This task will receive broadcast messages and send text message to our client.
     let (mut sender, mut receiver) = socket.split();
     let mut send_task = tokio::spawn(async move {
+        let mut maybe_last_state = None;
         while let Ok(state) = rx.recv().await {
-            let msg = serde_json::to_string(&state).unwrap();
+            let msg = if let Some(last_state) = maybe_last_state {
+                serde_json::to_string(&json_patch::diff(
+                    &serde_json::to_value(&last_state).unwrap(),
+                    &serde_json::to_value(&state).unwrap()
+                )).unwrap()
+            } else {
+                serde_json::to_string(&state).unwrap()
+            };
+            maybe_last_state = Some(state);
             // In any websocket error, break loop.
             if sender.send(Message::Text(msg)).await.is_err() {
                 break;
