@@ -10,7 +10,6 @@ use axum::{
 use clap::Parser;
 use futures::stream::StreamExt;
 use futures::SinkExt;
-use glob::glob;
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -88,20 +87,20 @@ async fn main() {
 }
 
 async fn handle_movies(Extension(state): Extension<Arc<AppState>>) -> impl IntoResponse {
-    let globs = glob(&format!("{}/**/*.mp4", state.movies)).expect("Failed to read glob pattern");
-    let mut movie_list: Vec<String> = globs
-        .map(|entry| {
-            entry
-                .unwrap()
-                .strip_prefix(&state.movies)
-                .unwrap()
-                .to_str()
-                .unwrap()
-                .to_string()
-        })
-        .collect();
-    movie_list.sort();
-    (StatusCode::OK, Json(movie_list))
+    fn _list_movies(prefix: &String) -> anyhow::Result<Vec<String>> {
+        globwalk::GlobWalkerBuilder::from_patterns(prefix, &["*.{mp4,webm,mpd}", "!*stream?.mp4"])
+            .build()?
+            .map(|entry| {
+                Ok(entry?
+                    .into_path()
+                    .strip_prefix(&prefix)?
+                    .to_str()
+                    .unwrap()
+                    .to_string())
+            })
+            .collect()
+    }
+    (StatusCode::OK, Json(_list_movies(&state.movies).unwrap()))
 }
 
 async fn handle_rooms(Extension(state): Extension<Arc<AppState>>) -> impl IntoResponse {

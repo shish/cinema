@@ -92,11 +92,13 @@ impl Room {
             }
             (true, Command::Pause(movie, pause_pos)) => {
                 tracing::info!("[{}] Pausing {} at {}", self.name, movie, pause_pos);
-                self.video_state = VideoState::Video(movie.clone(), PlayingState::Paused(*pause_pos));
+                self.video_state =
+                    VideoState::Video(movie.clone(), PlayingState::Paused(*pause_pos));
             }
             (true, Command::Play(movie, start_ts)) => {
                 tracing::info!("[{}] Playing {} at {}", self.name, movie, start_ts);
-                self.video_state = VideoState::Video(movie.clone(), PlayingState::Playing(*start_ts));
+                self.video_state =
+                    VideoState::Video(movie.clone(), PlayingState::Playing(*start_ts));
             }
             (true, Command::Admin(user)) => {
                 tracing::info!("[{}] Making {} an admin", self.name, user);
