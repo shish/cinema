@@ -3,7 +3,48 @@ import { WebSocketSend } from "hyperapp-fx";
 import { socket_name, sync_movie_state } from "../cinema";
 import { Http } from "hyperapp-fx";
 import { SettingsMenu } from "./settings";
+import dashjs from "dashjs";
 
+class DASHVideoElement extends HTMLVideoElement {
+    dashPlayer: dashjs.MediaPlayerClass|null = null;
+
+    get src() {
+        return this.getAttribute('src') || "";
+    }
+  
+    set src(val) {
+        if (val !== this.src) {
+            this.setAttribute('src', val);
+        }
+        this.updatePlayer();
+    }
+
+    updatePlayer() {
+        let val = this.getAttribute("src") || "";
+        if(!this.dashPlayer) {
+            return;
+        }
+        // console.log("Set video to ", val);
+        if(val.startsWith("blob:")) {
+            // leave this alone
+        }
+        else if(val.endsWith(".mpd")) {
+            this.dashPlayer.attachView(this);
+            this.dashPlayer.attachSource(val);
+        }
+        else {
+            this.dashPlayer.reset();
+        }
+    }
+  
+    connectedCallback() {
+        this.dashPlayer = dashjs.MediaPlayer().create();
+        this.dashPlayer.initialize();
+        this.updatePlayer();
+    }
+}
+  
+window.customElements.define('dash-video', DASHVideoElement, {extends: "video"});
 
 export function WebSocketCommand(state: State, command: object) {
     return WebSocketSend({
@@ -99,6 +140,7 @@ const MainVideo = ({ video_state, can_play }: { video_state: VideoState, can_pla
             // Keep the progress bar in the controls section in-sync with
             // the playing movie.
             ontimeupdate={UpdateDuration}
+            is="dash-video"
         ></video> : <div class="blackout" />
 );
 
