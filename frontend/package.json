@@ -15,6 +15,7 @@
   },
   "homepage": "https://github.com/shish/cinema#readme",
   "dependencies": {
+    "@ungap/custom-elements": "^1.1.1",
     "dashjs": "^4.5.0",
     "hyperapp": "^2.0.22",
     "hyperapp-fx": "^2.0.0-beta.2",

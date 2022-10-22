@@ -3,6 +3,8 @@ import { WebSocketSend } from "hyperapp-fx";
 import { socket_name, sync_movie_state } from "../cinema";
 import { Http } from "hyperapp-fx";
 import { SettingsMenu } from "./settings";
+
+import '@ungap/custom-elements';
 import dashjs from "dashjs";
 
 class DASHVideoElement extends HTMLVideoElement {
