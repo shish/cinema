@@ -2,7 +2,7 @@
 import h from "hyperapp-jsx-pragma";
 
 import { app } from "hyperapp";
-import { WebSocketListen, Http } from "hyperapp-fx";
+import { WebSocketListen, Http, Interval } from "hyperapp-fx";
 import { Root } from "./screens/root";
 import { v4 as uuidv4 } from "uuid";
 import * as jsonpatch from "jsonpatch";
@@ -27,13 +27,13 @@ let state: State = {
     fullscreen: document.fullscreenElement != null,
     manual_entry: false,
     help: false,
-    can_play: false,
     currentTime: 0,
     duration: 0,
     show_settings: false,
     show_chat: true,
     title_edit: "",
     show_system: true,
+    video_hint: null,
 };
 
 let mySubs = {};
@@ -78,9 +78,6 @@ function getOpenWebSocketListener(state: State): WebSocketListen {
                 }
 
                 let new_state = { ...state, loading: null, room: resp };
-                // After we have loaded the movie player HTML, make sure
-                // the timestamp is synced
-                setTimeout(() => sync_movie_state(new_state), 10);
                 // After we have appended new messages to the chat log,
                 // make sure it's scrolled to the bottom
                 setTimeout(() => {
@@ -102,13 +99,31 @@ function getOpenWebSocketListener(state: State): WebSocketListen {
     return mySubs[url];
 }
 
-export function sync_movie_state(state: State) {
+function SyncMovieState(state: State): State {
     function setCurrentTimeIsh(movie: HTMLVideoElement, goal: number) {
         // if our time is nearly-correct, leave it as-is
         let diff = Math.abs(movie.currentTime - goal);
         if (diff > 3) {
             console.log(`Time is ${movie.currentTime} and should be ${goal}`);
             movie.currentTime = goal;
+        }
+    }
+
+    function tryToPlay(movie: HTMLVideoElement) {
+        var promise = movie.play();
+        if (promise !== undefined) {
+            promise.then(_ => {
+                // everything is awesome
+            }).catch(error => {
+                movie.muted = true;
+                movie.controls = true;
+                movie.play().then(_ => {
+                    // next sync will detect that we're muted and tell the user to unmute
+                }).catch(error => {
+                    movie.muted = false;
+                    // next sync will detect that we failed to play and tell the user to play
+                })
+            });
         }
     }
 
@@ -119,10 +134,48 @@ export function sync_movie_state(state: State) {
             setCurrentTimeIsh(movie, state.room?.video_state?.video?.[1].paused);
         }
         if (state.room?.video_state?.video?.[1].playing != undefined) {
-            setCurrentTimeIsh(movie, ((new Date()).getTime() / 1000) - state.room?.video_state?.video?.[1].playing);
-            if (movie.paused) movie.play();
+            let goal_time = ((new Date()).getTime() / 1000) - state.room?.video_state?.video?.[1].playing;
+            if(goal_time < 0 || goal_time > (movie.duration || 9999)) {
+                // if we haven't yet started, or we have already finished, then pause at the start
+                if (!movie.paused) movie.pause();
+                setCurrentTimeIsh(movie, 0);
+            }
+            else {
+                setCurrentTimeIsh(movie, goal_time);
+
+                // if we're supposed to be playing, but we're paused, attempt to
+                // trigger auto-play
+                if (movie.paused) tryToPlay(movie);
+
+                // if everything is ok, remove any warning
+                if(movie.paused == false && movie.muted == false && state.video_hint != "") {
+                    movie.controls = false;
+                    state = {
+                        ...state,
+                        video_hint: null,
+                    };
+                }
+                // if we only managed to mute-play, warn about that
+                if(movie.paused == false && movie.muted == true) {
+                    movie.controls = true;
+                    state = {
+                        ...state,
+                        video_hint: "Auto-play failed, you will need to tap the video and then un-mute it manually",
+                    };
+                }
+                // if we didn't manage to play at all, warn about that
+                if(movie.paused == true) {
+                    movie.controls = true;
+                    state = {
+                        ...state,
+                        video_hint: "Auto-play failed, you will need to tap the video and then push the play button manually",
+                    };
+                }
+            }
         }
     }
+
+    return state;
 }
 
 function viewportHandler() {
@@ -161,6 +214,10 @@ app({
     view: (state) => <Root state={state} />,
     subscriptions: (state: State) => [
         state.conn.room && getOpenWebSocketListener(state),
+        state.conn.room && Interval({
+            every: 1000,
+            action: SyncMovieState
+        })
     ],
     node: document.body,
 });

@@ -1,6 +1,6 @@
 import h from "hyperapp-jsx-pragma";
 import { WebSocketSend } from "hyperapp-fx";
-import { socket_name, sync_movie_state } from "../cinema";
+import { socket_name } from "../cinema";
 import { Http } from "hyperapp-fx";
 import { SettingsMenu } from "./settings";
 
@@ -98,14 +98,6 @@ const MovieList = ({ movies, video_state }: {movies: any, video_state: VideoStat
 /**********************************************************************
  * Video
  */
-const SetCanPlayAndSyncMovieState = function (state: State, event: Event) {
-    sync_movie_state(state);
-    return { ...state, can_play: true };
-}
-const SyncMovieState = function (state: State, event: Event) {
-    sync_movie_state(state);
-    return UpdateDuration(state);
-}
 const UpdateDuration = function (state: State) {
     return {
         ...state,
@@ -113,32 +105,12 @@ const UpdateDuration = function (state: State) {
         duration: (document.getElementById("movie") as HTMLVideoElement).duration || 0,
     };
 }
-function iOS() {
-    return [
-        'iPad Simulator',
-        'iPhone Simulator',
-        'iPod Simulator',
-        'iPad',
-        'iPhone',
-        'iPod'
-    ].includes(navigator.platform)
-        // iPad on iOS 13 detection
-        || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
-}
-const MainVideo = ({ video_state, can_play }: { video_state: VideoState, can_play: boolean }) => (
+const MainVideo = ({ video_state }: { video_state: VideoState }) => (
     (video_state.video) ?
         <video
             id="movie"
             src={"/movies/" + video_state.video[0]}
-            // iOS needs the user to press "play" for themselves. Once we've
-            // detected that the movie can start playing, then they don't
-            // need controls any more, so hide them to avoid desyncs.
-            controls={iOS() && !can_play}
-            onplay={SetCanPlayAndSyncMovieState}
             playsinline={true}
-            // Once a new joiner has loaded enough data to be able to seek,
-            // then make sure we've seeked to the right place.
-            onloadeddata={SyncMovieState}
             // Keep the progress bar in the controls section in-sync with
             // the playing movie.
             ontimeupdate={UpdateDuration}
@@ -252,7 +224,7 @@ function addAts(message: string) {
             x
     );
 }
-const Chat = ({ log, show_system }: { log: Array<ChatMessage>, show_system: boolean }) => (
+const Chat = ({ log, show_system, video_hint }: { log: Array<ChatMessage>, show_system: boolean, video_hint: string|null }) => (
     <div class="chat">
         <ul class="chat_log" id="chat_log">
             {log
@@ -266,6 +238,7 @@ const Chat = ({ log, show_system }: { log: Array<ChatMessage>, show_system: bool
                 ))
             }
         </ul>
+        {video_hint && <div class="video_hint">{video_hint}</div>}
         <form class="chat_input" onsubmit={ChatAction}>
             <input id="chat_input" autocomplete={"off"} enterkeyhint={"send"} placeholder="Type to chat"></input>
         </form>
@@ -302,9 +275,9 @@ export const RoomRender = ({ state, admin }: { state: State, admin: boolean }) =
     }}>
         <Header state={state} admin={admin} />
         <MovieList movies={state.movies} video_state={state.room.video_state} />
-        <MainVideo video_state={state.room.video_state} can_play={state.can_play} />
+        <MainVideo video_state={state.room.video_state} />
         <Controls state={state} enabled={!!(state.room.video_state.video)} />
-        <Chat log={state.room.chat} show_system={state.show_system} />
+        <Chat log={state.room.chat} show_system={state.show_system} video_hint={state.video_hint} />
         <ViewerList viewers={state.room.viewers} admins={state.room.admins} />
         {state.show_settings && <SettingsMenu state={state} admin={admin} />}
     </main>

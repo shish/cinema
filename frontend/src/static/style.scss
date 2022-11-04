@@ -239,6 +239,12 @@ MAIN.room {
     background: #111;
   }
 
+  .video_hint {
+    color: black;
+    background: #D44;
+    padding: 0.2em;
+  }
+
   .chat {
     background: #222;
     grid-area: chat;

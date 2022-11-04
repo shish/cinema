@@ -55,13 +55,13 @@ type State = {
     fullscreen: boolean,
     manual_entry: boolean,
     help: boolean,
-    can_play: boolean,
     currentTime: number,
     duration: number,
     show_settings: boolean,
     show_chat: boolean,
     title_edit: string,
     show_system: boolean,
+    video_hint: string | null,
 }
 
 declare type Action = import('hyperapp').Action<State>;
