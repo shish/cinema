@@ -20,6 +20,12 @@ cd backend
 cargo run -- -m /path/to/some/mp4/videos/
 ```
 
+Or to run with logging and auto-restart whenever the code changes:
+
+```
+RUST_LOG=cinema_be=info cargo watch -s 'cargo run -- -m /Users/shish2k/Movies/Cinema/'
+```
+
 Traffic served on http://localhost:8000/
 
 ## Protocol

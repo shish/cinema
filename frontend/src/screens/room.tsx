@@ -4,49 +4,35 @@ import { socket_name } from "../cinema";
 import { Http } from "hyperapp-fx";
 import { SettingsMenu } from "./settings";
 
-import '@ungap/custom-elements';
-import dashjs from "dashjs";
+import Hls from "hls.js";
 
-class DASHVideoElement extends HTMLVideoElement {
-    dashPlayer: dashjs.MediaPlayerClass|null = null;
+class HLSVideoElement extends HTMLVideoElement {
+    hls: Hls | null = null;
+
+    constructor() {
+        super();
+    }
 
     get src() {
         return this.getAttribute('src') || "";
     }
-  
+
     set src(val) {
         if (val !== this.src) {
             this.setAttribute('src', val);
         }
-        this.updatePlayer();
     }
 
-    updatePlayer() {
-        let val = this.getAttribute("src") || "";
-        if(!this.dashPlayer) {
-            return;
-        }
-        // console.log("Set video to ", val);
-        if(val.startsWith("blob:")) {
-            // leave this alone
-        }
-        else if(val.endsWith(".mpd")) {
-            this.dashPlayer.attachView(this);
-            this.dashPlayer.attachSource(val);
-        }
-        else {
-            this.dashPlayer.reset();
-        }
-    }
-  
     connectedCallback() {
-        this.dashPlayer = dashjs.MediaPlayer().create();
-        this.dashPlayer.initialize();
-        this.updatePlayer();
+        if (Hls.isSupported()) {
+            this.hls = new Hls({});
+            this.hls.loadSource(this.src);
+            this.hls.attachMedia(this);
+        }
     }
 }
-  
-window.customElements.define('dash-video', DASHVideoElement, {extends: "video"});
+
+window.customElements.define('hls-video', HLSVideoElement, { extends: "video" });
 
 export function WebSocketCommand(state: State, command: object) {
     return WebSocketSend({
@@ -83,7 +69,7 @@ const NullSubmit = function (state: State, event: Event): State {
     event.preventDefault();
     return state;
 }
-const MovieList = ({ movies, video_state }: {movies: any, video_state: VideoState}) => (
+const MovieList = ({ movies, video_state }: { movies: any, video_state: VideoState }) => (
     <form class="movie_list" onsubmit={NullSubmit}>
         <select id="movie_list" onchange={LoadAction}>
             <option value="">Select Movie</option>
@@ -114,7 +100,7 @@ const MainVideo = ({ video_state }: { video_state: VideoState }) => (
             // Keep the progress bar in the controls section in-sync with
             // the playing movie.
             ontimeupdate={UpdateDuration}
-            is="dash-video"
+            is="hls-video"
         ></video> : <div class="blackout" />
 );
 
@@ -211,7 +197,7 @@ function absolute_timestamp(ts: number): string {
     return convertUTCDateToLocalDate(new Date(ts * 1e3)).toISOString().slice(-13, -8);
 }
 function name2color(name: string): string {
-    var hash = name.split(/[^a-zA-Z0-9]/)[0].toLowerCase().split('').reduce((prevHash, currVal) => (((prevHash << 5) - prevHash) + currVal.charCodeAt(0))|0, 0);
+    var hash = name.split(/[^a-zA-Z0-9]/)[0].toLowerCase().split('').reduce((prevHash, currVal) => (((prevHash << 5) - prevHash) + currVal.charCodeAt(0)) | 0, 0);
     var b1 = 0x77 + (hash & 0xFF) / 2;
     var b2 = 0x77 + ((hash >> 8) & 0xFF) / 2;
     var b3 = 0x77 + ((hash >> 16) & 0xFF) / 2;
@@ -220,11 +206,11 @@ function name2color(name: string): string {
 function addAts(message: string) {
     return message.split(/(@[a-zA-Z0-9]+)/).map(
         x => x.startsWith("@") ?
-            <span style={{color: name2color(x.substring(1))}}>{x}</span> :
+            <span style={{ color: name2color(x.substring(1)) }}>{x}</span> :
             x
     );
 }
-const Chat = ({ log, show_system, video_hint }: { log: Array<ChatMessage>, show_system: boolean, video_hint: string|null }) => (
+const Chat = ({ log, show_system, video_hint }: { log: Array<ChatMessage>, show_system: boolean, video_hint: string | null }) => (
     <div class="chat">
         <ul class="chat_log" id="chat_log">
             {log
@@ -232,7 +218,7 @@ const Chat = ({ log, show_system, video_hint }: { log: Array<ChatMessage>, show_
                 .map((p) => (
                     <li class={p.user == "system" ? "system" : "user"}>
                         <span class="absolute_timestamp">{absolute_timestamp(p.absolute_timestamp)}</span>
-                        <span class="user" style={{color: name2color(p.user)}}>{p.user}</span>
+                        <span class="user" style={{ color: name2color(p.user) }}>{p.user}</span>
                         <span class="message">{addAts(p.message)}</span>
                     </li>
                 ))
