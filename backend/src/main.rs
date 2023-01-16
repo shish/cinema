@@ -88,7 +88,7 @@ async fn main() {
 
 async fn handle_movies(Extension(state): Extension<Arc<AppState>>) -> impl IntoResponse {
     fn _list_movies(prefix: &String) -> anyhow::Result<Vec<String>> {
-        globwalk::GlobWalkerBuilder::from_patterns(prefix, &["original.m3u8", "!*stream?.mp4"])
+        globwalk::GlobWalkerBuilder::from_patterns(prefix, &["*.m3u8", "!index.m3u8"])
             .build()?
             .map(|entry| {
                 Ok(entry?
