@@ -101,7 +101,9 @@ const MainVideo = ({ video_state }: { video_state: VideoState }) => (
             // the playing movie.
             ontimeupdate={UpdateDuration}
             is="hls-video"
-        ></video> : <div class="blackout" />
+        >
+            <track src={"/movies/" + video_state.video[0].replace(".m3u8", ".vtt")} default />
+        </video> : <div class="blackout" />
 );
 
 /**********************************************************************
