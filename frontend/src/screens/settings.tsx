@@ -123,6 +123,24 @@ export const SettingsMenu = ({ state, admin }: { state: State, admin: boolean })
                             </tr>
                         )}
                         <tr>
+                            <td>Show Subtitles</td>
+                            <td>
+                                <input
+                                    checked={state.show_subs}
+                                    type={"checkbox"}
+                                    onchange={function (
+                                        state: State,
+                                        event: FormInputEvent,
+                                    ): State {
+                                        return {
+                                            ...state,
+                                            show_subs: !state.show_subs,
+                                        };
+                                    }}
+                                />
+                            </td>
+                        </tr>
+                        <tr>
                             <td>Show System<br/>Messages</td>
                             <td>
                                 <input

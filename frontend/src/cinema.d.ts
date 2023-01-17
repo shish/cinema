@@ -62,6 +62,7 @@ type State = {
     title_edit: string,
     show_system: boolean,
     video_hint: string | null,
+    show_subs: boolean,
 }
 
 declare type Action = import('hyperapp').Action<State>;

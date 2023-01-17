@@ -34,6 +34,7 @@ let state: State = {
     title_edit: "",
     show_system: true,
     video_hint: null,
+    show_subs: true,
 };
 
 let mySubs = {};
@@ -100,6 +101,13 @@ function getOpenWebSocketListener(state: State): WebSocketListen {
 }
 
 function SyncMovieState(state: State): State {
+    let movie = document.getElementById("movie") as HTMLVideoElement;
+    let video_state = state.room?.video_state?.video;
+    if(!movie || !video_state) {
+        // we need both an HTML video element, and a video to be playing in it
+        return state;
+    }
+
     function setCurrentTimeIsh(movie: HTMLVideoElement, goal: number) {
         // if our time is nearly-correct, leave it as-is
         let diff = Math.abs(movie.currentTime - goal);
@@ -127,50 +135,51 @@ function SyncMovieState(state: State): State {
         }
     }
 
-    let movie = document.getElementById("movie") as HTMLVideoElement;
-    if (movie && state.room?.video_state?.video) {
-        if (state.room?.video_state?.video?.[1].paused != undefined) {
+    if(movie.textTracks.length > 0) {
+        movie.textTracks[0].mode = state.show_subs ? "showing" : "hidden";
+    }
+
+    if (video_state[1].paused != undefined) {
+        if (!movie.paused) movie.pause();
+        setCurrentTimeIsh(movie, video_state[1].paused);
+    }
+    if (video_state[1].playing != undefined) {
+        let goal_time = ((new Date()).getTime() / 1000) - video_state[1].playing;
+        if(goal_time < 0 || goal_time > (movie.duration || 9999)) {
+            // if we haven't yet started, or we have already finished, then pause at the start
             if (!movie.paused) movie.pause();
-            setCurrentTimeIsh(movie, state.room?.video_state?.video?.[1].paused);
+            setCurrentTimeIsh(movie, 0);
         }
-        if (state.room?.video_state?.video?.[1].playing != undefined) {
-            let goal_time = ((new Date()).getTime() / 1000) - state.room?.video_state?.video?.[1].playing;
-            if(goal_time < 0 || goal_time > (movie.duration || 9999)) {
-                // if we haven't yet started, or we have already finished, then pause at the start
-                if (!movie.paused) movie.pause();
-                setCurrentTimeIsh(movie, 0);
+        else {
+            setCurrentTimeIsh(movie, goal_time);
+
+            // if we're supposed to be playing, but we're paused, attempt to
+            // trigger auto-play
+            if (movie.paused) tryToPlay(movie);
+
+            // if everything is ok, remove any warning
+            if(movie.paused == false && movie.muted == false && state.video_hint != "") {
+                movie.controls = false;
+                state = {
+                    ...state,
+                    video_hint: null,
+                };
             }
-            else {
-                setCurrentTimeIsh(movie, goal_time);
-
-                // if we're supposed to be playing, but we're paused, attempt to
-                // trigger auto-play
-                if (movie.paused) tryToPlay(movie);
-
-                // if everything is ok, remove any warning
-                if(movie.paused == false && movie.muted == false && state.video_hint != "") {
-                    movie.controls = false;
-                    state = {
-                        ...state,
-                        video_hint: null,
-                    };
-                }
-                // if we only managed to mute-play, warn about that
-                if(movie.paused == false && movie.muted == true) {
-                    movie.controls = true;
-                    state = {
-                        ...state,
-                        video_hint: "Auto-play failed, you will need to tap the video and then un-mute it manually",
-                    };
-                }
-                // if we didn't manage to play at all, warn about that
-                if(movie.paused == true) {
-                    movie.controls = true;
-                    state = {
-                        ...state,
-                        video_hint: "Auto-play failed, you will need to tap the video and then push the play button manually",
-                    };
-                }
+            // if we only managed to mute-play, warn about that
+            if(movie.paused == false && movie.muted == true) {
+                movie.controls = true;
+                state = {
+                    ...state,
+                    video_hint: "Auto-play failed, you will need to tap the video and then un-mute it manually",
+                };
+            }
+            // if we didn't manage to play at all, warn about that
+            if(movie.paused == true) {
+                movie.controls = true;
+                state = {
+                    ...state,
+                    video_hint: "Auto-play failed, you will need to tap the video and then push the play button manually",
+                };
             }
         }
     }
