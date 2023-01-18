@@ -17,7 +17,7 @@ the backend if you want to have a web server to view it.
 
 ```
 cd backend
-cargo run -- -m /path/to/some/mp4/videos/
+cargo run -- -m /path/to/some/hls/videos/
 ```
 
 Or to run with logging and auto-restart whenever the code changes:
@@ -27,6 +27,29 @@ RUST_LOG=cinema_be=info cargo watch -s 'cargo run -- -m /Users/shish2k/Movies/Ci
 ```
 
 Traffic served on http://localhost:8000/
+
+## Media setup:
+
+Use `encode.sh` to convert `.mp4` to a variety of HLS streams with different
+quality settings that the client can then select from based on bandwidth.
+
+```
+$ ls
+blah.mp4
+blah.srt
+
+$ ~/Projects/cinema/encode.sh blah
+
+$ ls
+blah.mp4
+blah.srt
+blah.m3u8
+blah.vtt
+blah_0
+blah_1
+blah_2
+blah_3
+```
 
 ## Protocol
 
