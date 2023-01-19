@@ -19,6 +19,7 @@ let state: State = {
         sess: sess,
     },
     loading: null,
+    // @ts-expect-error
     room: null,
     movies: [],
     rooms: {},
@@ -62,7 +63,12 @@ function getOpenWebSocketListener(state: State): WebSocketListen {
         mySubs[url] = WebSocketListen({
             url: url,
             open(state: State): State {
-                return { ...state, loading: "Syncing...", room: null };
+                return {
+                    ...state,
+                    loading: "Syncing...",
+                    // @ts-expect-error
+                    room: null
+                };
             },
             close(state: State): State {
                 delete mySubs[url];
@@ -103,7 +109,7 @@ function getOpenWebSocketListener(state: State): WebSocketListen {
 function SyncMovieState(state: State): State {
     let movie = document.getElementById("movie") as HTMLVideoElement;
     let video_state = state.room?.video_state?.video;
-    if(!movie || !video_state) {
+    if (!movie || !video_state) {
         // we need both an HTML video element, and a video to be playing in it
         return state;
     }
@@ -135,7 +141,7 @@ function SyncMovieState(state: State): State {
         }
     }
 
-    if(movie.textTracks.length > 0) {
+    if (movie.textTracks.length > 0) {
         movie.textTracks[0].mode = state.show_subs ? "showing" : "hidden";
     }
 
@@ -145,7 +151,7 @@ function SyncMovieState(state: State): State {
     }
     if (video_state[1].playing != undefined) {
         let goal_time = ((new Date()).getTime() / 1000) - video_state[1].playing;
-        if(goal_time < 0 || goal_time > (movie.duration || 9999)) {
+        if (goal_time < 0 || goal_time > (movie.duration || 9999)) {
             // if we haven't yet started, or we have already finished, then pause at the start
             if (!movie.paused) movie.pause();
             setCurrentTimeIsh(movie, 0);
@@ -158,7 +164,7 @@ function SyncMovieState(state: State): State {
             if (movie.paused) tryToPlay(movie);
 
             // if everything is ok, remove any warning
-            if(movie.paused == false && movie.muted == false && state.video_hint != "") {
+            if (movie.paused == false && movie.muted == false && state.video_hint != "") {
                 movie.controls = false;
                 state = {
                     ...state,
@@ -166,7 +172,7 @@ function SyncMovieState(state: State): State {
                 };
             }
             // if we only managed to mute-play, warn about that
-            if(movie.paused == false && movie.muted == true) {
+            if (movie.paused == false && movie.muted == true) {
                 movie.controls = true;
                 state = {
                     ...state,
@@ -174,7 +180,7 @@ function SyncMovieState(state: State): State {
                 };
             }
             // if we didn't manage to play at all, warn about that
-            if(movie.paused == true) {
+            if (movie.paused == true) {
                 movie.controls = true;
                 state = {
                     ...state,
