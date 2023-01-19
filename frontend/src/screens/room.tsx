@@ -9,17 +9,18 @@ import Hls from "hls.js";
 class HLSVideoElement extends HTMLVideoElement {
     hls: Hls | null = null;
 
-    constructor() {
-        super();
-    }
-
     get src() {
         return this.getAttribute('src') || "";
     }
 
     set src(val) {
         if (val !== this.src) {
-            this.setAttribute('src', val);
+            if(this.hls && val.endsWith(".m3u8")) {
+                this.hls.loadSource(val);
+            }
+            else {
+                this.setAttribute('src', val);
+            }
         }
     }
 
