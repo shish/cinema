@@ -1,4 +1,5 @@
 import h from "hyperapp-jsx-pragma";
+import * as icons from "../static/icons";
 
 function LoginAction(state: State, event: Event): State {
     event.preventDefault();
@@ -43,9 +44,9 @@ const ShowHelp = (state: State): State => ({ ...state, help: true });
 export const Login = ({ state }: { state: State }) => (
     <main class="login">
         <header>
-            <i class="fas" />
+            <icons.CircleXmark style={{opacity: 0}} />
             <h1>Join a Room</h1>
-            <i class="fas fa-info-circle" onclick={ShowHelp} />
+            <icons.CircleInfo class="x2" onclick={ShowHelp} />
         </header>
         <article>
             <form onsubmit={LoginAction}>

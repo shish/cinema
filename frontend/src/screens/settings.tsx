@@ -78,7 +78,7 @@ export const SettingsMenu = ({ state, admin }: { state: State, admin: boolean })
                         </tr>
                     </tbody>}
                     <tbody>
-                        <tr><th colspan="2">Viewer</th></tr>
+                        {admin && <tr><th colspan="2">Viewer</th></tr>}
                         {!admin && <tr>
                             <td>Show Chat</td>
                             <td>

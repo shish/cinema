@@ -3,6 +3,7 @@ import { WebSocketSend } from "hyperapp-fx";
 import { socket_name } from "../cinema";
 import { Http } from "hyperapp-fx";
 import { SettingsMenu } from "./settings";
+import * as icons from "../static/icons";
 
 import Hls from "hls.js";
 
@@ -78,7 +79,7 @@ const MovieList = ({ movies, video_state }: { movies: any, video_state: VideoSta
                 <option selected={video_state.video?.[0] == p}>{p}</option>
             ))}
         </select>
-        <button onclick={RefreshMovies}>&nbsp;<i class="fas fa-sync"></i>&nbsp;</button>
+        <button onclick={RefreshMovies}>&nbsp;<icons.Rotate />&nbsp;</button>
     </form>
 );
 
@@ -143,8 +144,8 @@ function ts2hms(ts: number): string {
 const Controls = ({ state, enabled }: { state: State, enabled: boolean }) => (
     <form class="controls" onsubmit={function (s, e) { e.preventDefault(); return s; }}>
         {state.room.video_state.video?.[1].playing ?
-            <button onclick={PauseAction} disabled={!enabled}>&nbsp;<i class="fas fa-pause"></i>&nbsp;</button> :
-            <button onclick={PlayAction} disabled={!enabled}>&nbsp;<i class="fas fa-play"></i>&nbsp;</button>}
+            <button onclick={PauseAction} disabled={!enabled}>&nbsp;<icons.Pause />&nbsp;</button> :
+            <button onclick={PlayAction} disabled={!enabled}>&nbsp;<icons.Play />&nbsp;</button>}
         <input id="seekbar" type="range" onchange={SeekAction} disabled={!enabled} min={0} max={state.duration} value={state.currentTime} />
         <span>{ts2hms(state.currentTime)} / {ts2hms(state.duration)}</span>
     </form>
@@ -245,9 +246,9 @@ const ShowSettings = (state: State) => ({
 
 export const Header = ({ state, admin }: { state: State, admin: boolean }) => (
     <header>
-        <i class="fas" />
+        <icons.CircleXmark style={{opacity: 0}} />
         <h1>{state.room.title}</h1>
-        <i class="fas fa-cogs" onclick={ShowSettings} />
+        <icons.Gears class="x2" onclick={ShowSettings} />
     </header>
 );
 

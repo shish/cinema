@@ -1,6 +1,3 @@
-@import 'fontawesome';
-@import 'solid';
-
 
 /**********************************************************************
  * Common layout
@@ -8,6 +5,17 @@
 
 * {
   box-sizing: border-box;
+}
+
+/* svg wibbling */
+svg {
+  path {
+    fill: currentColor;
+  }
+}
+BUTTON svg, SPAN svg {
+  top: .125em;
+  position: relative;
 }
 
 BODY {
@@ -87,7 +95,7 @@ MAIN {
     background: #444;
     overflow-x: scroll;
 
-    >I {
+    svg {
       flex: 0 0 auto;
       width: 4rem;
       font-size: 2rem;
