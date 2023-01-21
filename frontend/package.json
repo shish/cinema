@@ -6,7 +6,8 @@
     "build": "parcel build --public-url . src/index.html",
     "watch": "parcel watch --public-url . src/index.html --no-hmr",
     "serve": "parcel serve --port 1236 src/index.html",
-    "analyze": "parcel build --public-url . src/index.html --reporter @parcel/reporter-bundle-analyzer"
+    "analyze": "parcel build --public-url . src/index.html --reporter @parcel/reporter-bundle-analyzer",
+    "format": "prettier --write 'src/**/*.ts{,x}' --tab-width 4 --trailing-comma all"
   },
   "repository": "https://github.com/shish/cinema/",
   "author": "Shish <webmaster@shishnet.org>",
@@ -24,10 +25,11 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "parcel": "^2.8.3",
     "@parcel/optimizer-data-url": "^2.8.3",
     "@parcel/reporter-bundle-analyzer": "^2.8.3",
     "@parcel/transformer-inline-string": "^2.8.3",
-    "@parcel/transformer-sass": "^2.8.3"
+    "@parcel/transformer-sass": "^2.8.3",
+    "parcel": "^2.8.3",
+    "prettier": "^2.8.3"
   }
 }

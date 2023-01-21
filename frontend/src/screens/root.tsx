@@ -4,7 +4,7 @@ import { Help } from "./help";
 import { Login } from "./login";
 import { RoomRender } from "./room";
 
-export const Root = ({state}: {state: State}) => {
+export const Root = ({ state }: { state: State }) => {
     (window as any).state = state;
 
     let screen = null;
@@ -33,7 +33,12 @@ export const Root = ({state}: {state: State}) => {
     } else if (state.help) {
         screen = <Help />;
     } else if (state.room !== null) {
-        screen = <RoomRender state={state} admin={state.room.admins.includes(state.conn.user)} />;
+        screen = (
+            <RoomRender
+                state={state}
+                admin={state.room.admins.includes(state.conn.user)}
+            />
+        );
     } else {
         screen = <Login state={state} />;
     }

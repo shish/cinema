@@ -9,7 +9,7 @@ function LoginAction(state: State, event: Event): State {
 
     sessionStorage.setItem("user", user);
 
-    if(!user || !room) return state;
+    if (!user || !room) return state;
 
     return {
         ...state,
@@ -36,7 +36,8 @@ function UpdateUser(state: State): State {
 
 const MaybeManual = (state: State, event: Event): State => ({
     ...state,
-    manual_entry: (document.getElementById("room") as HTMLInputElement).value == ""
+    manual_entry:
+        (document.getElementById("room") as HTMLInputElement).value == "",
 });
 
 const ShowHelp = (state: State): State => ({ ...state, help: true });
@@ -44,7 +45,7 @@ const ShowHelp = (state: State): State => ({ ...state, help: true });
 export const Login = ({ state }: { state: State }) => (
     <main class="login">
         <header>
-            <icons.CircleXmark style={{opacity: 0}} />
+            <icons.CircleXmark style={{ opacity: 0 }} />
             <h1>Join a Room</h1>
             <icons.CircleInfo class="x2" onclick={ShowHelp} />
         </header>
@@ -57,13 +58,22 @@ export const Login = ({ state }: { state: State }) => (
                     onchange={UpdateUser}
                     value={state.conn.user}
                 />
-                {Object.entries(state.rooms).length > 0 && !state.manual_entry ?
+                {Object.entries(state.rooms).length > 0 &&
+                !state.manual_entry ? (
                     <select id="room" onchange={MaybeManual}>
-                        {Object.entries(state.rooms).map((k) => <option value={k[0]}>{k[1]}</option>)}
+                        {Object.entries(state.rooms).map((k) => (
+                            <option value={k[0]}>{k[1]}</option>
+                        ))}
                         <option value="">Enter a code</option>
-                    </select> :
-                    <input type="text" id="room" maxlength="4" placeholder="Enter Room Code" />
-                }
+                    </select>
+                ) : (
+                    <input
+                        type="text"
+                        id="room"
+                        maxlength="4"
+                        placeholder="Enter Room Code"
+                    />
+                )}
                 <input type="button" value="Join" onclick={LoginAction} />
             </form>
         </article>

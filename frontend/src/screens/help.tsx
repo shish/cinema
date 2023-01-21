@@ -1,13 +1,12 @@
 import h from "hyperapp-jsx-pragma";
 import * as icons from "../static/icons";
 
-
 const HideHelp = (state: State): State => ({ ...state, help: false });
 
 export const Help = () => (
     <main class="login">
         <header>
-            <icons.CircleXmark style={{opacity: 0}} />
+            <icons.CircleXmark style={{ opacity: 0 }} />
             <h1>About</h1>
             <icons.CircleXmark class="x2" onclick={HideHelp} />
         </header>

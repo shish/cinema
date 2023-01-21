@@ -67,7 +67,7 @@ function getOpenWebSocketListener(state: State): WebSocketListen {
                     ...state,
                     loading: "Syncing...",
                     // @ts-expect-error
-                    room: null
+                    room: null,
                 };
             },
             close(state: State): State {
@@ -126,18 +126,23 @@ function SyncMovieState(state: State): State {
     function tryToPlay(movie: HTMLVideoElement) {
         var promise = movie.play();
         if (promise !== undefined) {
-            promise.then(_ => {
-                // everything is awesome
-            }).catch(error => {
-                movie.muted = true;
-                movie.controls = true;
-                movie.play().then(_ => {
-                    // next sync will detect that we're muted and tell the user to unmute
-                }).catch(error => {
-                    movie.muted = false;
-                    // next sync will detect that we failed to play and tell the user to play
+            promise
+                .then((_) => {
+                    // everything is awesome
                 })
-            });
+                .catch((error) => {
+                    movie.muted = true;
+                    movie.controls = true;
+                    movie
+                        .play()
+                        .then((_) => {
+                            // next sync will detect that we're muted and tell the user to unmute
+                        })
+                        .catch((error) => {
+                            movie.muted = false;
+                            // next sync will detect that we failed to play and tell the user to play
+                        });
+                });
         }
     }
 
@@ -150,13 +155,12 @@ function SyncMovieState(state: State): State {
         setCurrentTimeIsh(movie, video_state[1].paused);
     }
     if (video_state[1].playing != undefined) {
-        let goal_time = ((new Date()).getTime() / 1000) - video_state[1].playing;
+        let goal_time = new Date().getTime() / 1000 - video_state[1].playing;
         if (goal_time < 0 || goal_time > (movie.duration || 9999)) {
             // if we haven't yet started, or we have already finished, then pause at the start
             if (!movie.paused) movie.pause();
             setCurrentTimeIsh(movie, 0);
-        }
-        else {
+        } else {
             setCurrentTimeIsh(movie, goal_time);
 
             // if we're supposed to be playing, but we're paused, attempt to
@@ -164,7 +168,11 @@ function SyncMovieState(state: State): State {
             if (movie.paused) tryToPlay(movie);
 
             // if everything is ok, remove any warning
-            if (movie.paused == false && movie.muted == false && state.video_hint != "") {
+            if (
+                movie.paused == false &&
+                movie.muted == false &&
+                state.video_hint != ""
+            ) {
                 movie.controls = false;
                 state = {
                     ...state,
@@ -176,7 +184,8 @@ function SyncMovieState(state: State): State {
                 movie.controls = true;
                 state = {
                     ...state,
-                    video_hint: "Auto-play failed, you will need to tap the video and then un-mute it manually",
+                    video_hint:
+                        "Auto-play failed, you will need to tap the video and then un-mute it manually",
                 };
             }
             // if we didn't manage to play at all, warn about that
@@ -184,7 +193,8 @@ function SyncMovieState(state: State): State {
                 movie.controls = true;
                 state = {
                     ...state,
-                    video_hint: "Auto-play failed, you will need to tap the video and then push the play button manually",
+                    video_hint:
+                        "Auto-play failed, you will need to tap the video and then push the play button manually",
                 };
             }
         }
@@ -200,7 +210,7 @@ function viewportHandler() {
         main.style.height = window.visualViewport.height + "px";
     }
 }
-window.visualViewport?.addEventListener('resize', viewportHandler);
+window.visualViewport?.addEventListener("resize", viewportHandler);
 
 app({
     init: [
@@ -213,7 +223,7 @@ app({
             error(state, error) {
                 console.log(error);
                 return state;
-            }
+            },
         }),
         Http({
             url: "/rooms",
@@ -223,16 +233,17 @@ app({
             error(state, error) {
                 console.log(error);
                 return state;
-            }
+            },
         }),
     ],
     view: (state) => <Root state={state} />,
     subscriptions: (state: State) => [
         state.conn.room && getOpenWebSocketListener(state),
-        state.conn.room && Interval({
-            every: 1000,
-            action: SyncMovieState
-        })
+        state.conn.room &&
+            Interval({
+                every: 1000,
+                action: SyncMovieState,
+            }),
     ],
     node: document.body,
 });
