@@ -24,6 +24,8 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@parcel/optimizer-data-url": "^2.7.0",
+    "@parcel/transformer-inline-string": "^2.7.0",
     "@parcel/transformer-sass": "^2.7.0"
   }
 }
