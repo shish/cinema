@@ -8,7 +8,9 @@ import * as jsonpatch from "jsonpatch";
 
 const DEV = false;
 
-let sess = sessionStorage.getItem("sess") ?? (Math.random() + 1).toString(36).substring(2);;
+let sess =
+    sessionStorage.getItem("sess") ??
+    (Math.random() + 1).toString(36).substring(2);
 sessionStorage.setItem("sess", sess);
 
 let state: State = {
