@@ -1,12 +1,14 @@
-#!/bin/bash
-BASE=$1
+#!/usr/bin/env bash
+
+INPUT=$1
+BASE="${1%.*}"
 
 if [ -f $BASE.srt ] ; then
 	ffmpeg -i $BASE.srt $BASE.vtt
 fi
 
-if [ -f $BASE.mp4 ] ; then
-	ffmpeg -i $BASE.mp4 \
+if [ -f $INPUT ] ; then
+	ffmpeg -i $INPUT \
 		-filter_complex \
 		"[0:v]split=4[v1][v2][v3][v4]; \
 		[v1]copy[v1out]; [v2]scale=w=-2:h=720[v2out]; [v3]scale=w=-2:h=480[v3out]; [v4]scale=w=-2:h=360[v4out]" \

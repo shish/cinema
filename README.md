@@ -30,7 +30,7 @@ Traffic served on http://localhost:8000/
 
 ## Media setup:
 
-Use `encode.sh` to convert `.mp4` to a variety of HLS streams with different
+Use `encode.sh` to convert videos to a variety of HLS streams with different
 quality settings that the client can then select from based on bandwidth.
 
 ```
@@ -38,7 +38,7 @@ $ ls
 blah.mp4
 blah.srt
 
-$ ~/Projects/cinema/encode.sh blah
+$ ~/Projects/cinema/encode.sh blah.mp4
 
 $ ls
 blah.mp4
