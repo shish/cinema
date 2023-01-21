@@ -5,7 +5,8 @@
   "scripts": {
     "build": "parcel build --public-url . src/index.html",
     "watch": "parcel watch --public-url . src/index.html --no-hmr",
-    "serve": "parcel serve --port 1236 src/index.html"
+    "serve": "parcel serve --port 1236 src/index.html",
+    "analyze": "parcel build --public-url . src/index.html --reporter @parcel/reporter-bundle-analyzer"
   },
   "repository": "https://github.com/shish/cinema/",
   "author": "Shish <webmaster@shishnet.org>",
@@ -20,12 +21,13 @@
     "hyperapp-fx": "^2.0.0-beta.2",
     "hyperapp-jsx-pragma": "^1.3.0",
     "jsonpatch": "^3.1.0",
-    "parcel": "^2.7.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "@parcel/optimizer-data-url": "^2.7.0",
-    "@parcel/transformer-inline-string": "^2.7.0",
-    "@parcel/transformer-sass": "^2.7.0"
+    "parcel": "^2.8.3",
+    "@parcel/optimizer-data-url": "^2.8.3",
+    "@parcel/reporter-bundle-analyzer": "^2.8.3",
+    "@parcel/transformer-inline-string": "^2.8.3",
+    "@parcel/transformer-sass": "^2.8.3"
   }
 }

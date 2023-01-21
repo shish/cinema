@@ -1,4 +1,5 @@
 node_modules
+parcel-bundle-reports
 .parcel-cache
 .cache
 .idea
