@@ -4,12 +4,11 @@ import h from "hyperapp-jsx-pragma";
 import { app } from "hyperapp";
 import { WebSocketListen, Http, Interval } from "hyperapp-fx";
 import { Root } from "./screens/root";
-import { v4 as uuidv4 } from "uuid";
 import * as jsonpatch from "jsonpatch";
 
 const DEV = false;
 
-let sess = sessionStorage.getItem("sess") ?? uuidv4();
+let sess = sessionStorage.getItem("sess") ?? (Math.random() + 1).toString(36).substring(2);;
 sessionStorage.setItem("sess", sess);
 
 let state: State = {

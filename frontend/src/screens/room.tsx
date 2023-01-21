@@ -1,7 +1,7 @@
 import h from "hyperapp-jsx-pragma";
-import { WebSocketSend } from "hyperapp-fx";
+import { WebSocketSend, Http } from "hyperapp-fx";
+
 import { socket_name } from "../cinema";
-import { Http } from "hyperapp-fx";
 import { SettingsMenu } from "./settings";
 import * as icons from "../static/icons";
 
