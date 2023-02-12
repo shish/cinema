@@ -93,7 +93,6 @@ MAIN {
     display: flex;
     align-items: center;
     background: #444;
-    overflow-x: scroll;
 
     svg {
       flex: 0 0 auto;
@@ -129,7 +128,6 @@ MAIN.login {
 
   ARTICLE {
     grid-area: content;
-    overflow: scroll;
     padding: 1rem;
     background: #222;
 
@@ -151,7 +149,7 @@ MAIN.login {
 }
 
 MAIN.room.admin {
-  grid-template-columns: 1fr 20em;
+  grid-template-columns: 1fr minmax(5em, min(20em, 50%));
   grid-template-rows: 4rem 2rem 1fr 2rem 3rem;
   grid-template-areas:
     "header   header"
@@ -161,7 +159,7 @@ MAIN.room.admin {
     "viewers  chat";
 
   @media (orientation: portrait) {
-    grid-template-columns: 1fr;
+    grid-template-columns: 100%;
     grid-template-rows: 4rem 2rem min-content 2rem 1fr 3rem;
     grid-template-areas:
       "header"
@@ -178,7 +176,7 @@ MAIN.room.admin {
 }
 
 MAIN.room.user {
-  grid-template-columns: 1fr 20rem;
+  grid-template-columns: 1fr minmax(5em, min(20em, 50%));
   grid-template-rows: 4rem 1fr 3rem;
   grid-template-areas:
     "header  header"
@@ -186,7 +184,7 @@ MAIN.room.user {
     "viewers chat";
 
   @media (orientation: portrait) {
-    grid-template-columns: 1fr;
+    grid-template-columns: 100%;
     grid-template-rows: 4rem min-content 1fr;
     grid-template-areas:
       "header"
@@ -262,7 +260,8 @@ MAIN.room {
     .chat_log {
       flex: 1 1 auto;
       height: 2em;
-      overflow: scroll;
+      overflow-wrap: break-word;
+      overflow-y: scroll;
       text-align: left;
       margin: 0;
       padding: 1em;
@@ -343,6 +342,7 @@ MAIN.room {
 
     SELECT {
       flex: 1 1 auto;
+      width: 10px;
     }
 
     BUTTON {
@@ -356,6 +356,7 @@ MAIN.room {
 
     INPUT {
       flex: 1 1 auto;
+      min-width: 0px;
     }
 
     BUTTON {
