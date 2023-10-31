@@ -22,6 +22,7 @@ let state: State = {
     loading: null,
     // @ts-expect-error
     room: null,
+    folder: null,
     movies: [],
     rooms: {},
     ws_errors: 0,

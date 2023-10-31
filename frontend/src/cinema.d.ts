@@ -46,6 +46,7 @@ type State = {
         room: string | null;
         sess: string;
     };
+    folder: string | null;
     movies: Array<string>;
     rooms: Dictionary<string>;
     error: string | null;

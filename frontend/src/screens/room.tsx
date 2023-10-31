@@ -47,6 +47,13 @@ export function WebSocketCommand(state: State, command: object) {
 /**********************************************************************
  * Movie List
  */
+const SetFolder = function (state: State) {
+    let folder = (document.getElementById("movie_dirs") as HTMLFormElement)
+        .value;
+    return [
+        { ...state, folder: folder } as State,
+    ];
+};
 const LoadAction = function (state: State) {
     let movie = (document.getElementById("movie_list") as HTMLFormElement)
         .value;
@@ -71,16 +78,24 @@ const NullSubmit = function (state: State, event: Event): State {
     return state;
 };
 const MovieList = ({
+    folder,
     movies,
     video_state,
 }: {
-    movies: any;
+    folder: string | null,
+    movies: string[];
     video_state: VideoState;
 }) => (
     <form class="movie_list" onsubmit={NullSubmit}>
+        <select id="movie_dirs" onchange={SetFolder}>
+            <option value="">Folder</option>
+            {[...new Set(movies.map(p => p.split("/")[0]))].map((p) => (
+                <option selected={folder == p}>{p}</option>
+            ))}
+        </select>
         <select id="movie_list" onchange={LoadAction}>
             <option value="">Select Movie</option>
-            {movies.map((p) => (
+            {movies.filter(p => !folder || p.startsWith(folder + "/")).map((p) => (
                 <option selected={video_state.video?.[0] == p}>{p}</option>
             ))}
         </select>
@@ -355,7 +370,7 @@ export const RoomRender = ({
         }}
     >
         <Header state={state} admin={admin} />
-        <MovieList movies={state.movies} video_state={state.room.video_state} />
+        <MovieList folder={state.folder} movies={state.movies} video_state={state.room.video_state} />
         <MainVideo video_state={state.room.video_state} />
         <Controls state={state} enabled={!!state.room.video_state.video} />
         <Chat
