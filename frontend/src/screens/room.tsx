@@ -96,7 +96,7 @@ const MovieList = ({
         <select id="movie_list" onchange={LoadAction}>
             <option value="">Select Movie</option>
             {movies.filter(p => !folder || p.startsWith(folder + "/")).map((p) => (
-                <option selected={video_state.video?.[0] == p}>{p.replace(folder+"/", "")}</option>
+                <option selected={video_state.video?.[0] == p} value={p}>{p.replace(folder+"/", "")}</option>
             ))}
         </select>
         <button onclick={RefreshMovies}>
