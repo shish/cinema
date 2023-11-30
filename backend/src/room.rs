@@ -65,7 +65,7 @@ pub struct Room {
 
 impl Room {
     pub fn new(name: String, user: String) -> Self {
-        tracing::info!("[{}] Creating room", name);
+        tracing::info!("Creating room");
         let (tx, _rx) = broadcast::channel(100);
         Room {
             public: true,
@@ -87,42 +87,40 @@ impl Room {
                 self.chat(&login.user, message);
             }
             (true, Command::Stop(())) => {
-                tracing::info!("[{}] Stopping", self.name);
+                tracing::info!("Stopping");
                 self.video_state = VideoState::NoVideo(());
             }
             (true, Command::Pause(movie, pause_pos)) => {
-                tracing::info!("[{}] Pausing {} at {}", self.name, movie, pause_pos);
+                tracing::info!("Pausing {} at {}", movie, pause_pos);
                 self.video_state =
                     VideoState::Video(movie.clone(), PlayingState::Paused(*pause_pos));
             }
             (true, Command::Play(movie, start_ts)) => {
-                tracing::info!("[{}] Playing {} at {}", self.name, movie, start_ts);
+                tracing::info!("Playing {} at {}", movie, start_ts);
                 self.video_state =
                     VideoState::Video(movie.clone(), PlayingState::Playing(*start_ts));
             }
             (true, Command::Admin(user)) => {
-                tracing::info!("[{}] Making {} an admin", self.name, user);
+                tracing::info!("Making {} an admin", user);
                 self.admins.push(user.clone());
             }
             (true, Command::Unadmin(user)) => {
                 if &login.user != user {
-                    tracing::info!("[{}] Dethroning {}", self.name, user);
+                    tracing::info!("Dethroning {}", user);
                     self.admins.retain(|x| x != user);
                 }
             }
             (true, Command::Title(title)) => {
-                tracing::info!("[{}] Renaming room {}", self.name, title);
+                tracing::info!("Renaming room {}", title);
                 self.title = title.clone();
             }
             (true, Command::Public(public)) => {
-                tracing::info!("[{}] Setting public = {}", self.name, public);
+                tracing::info!("Setting public = {}", public);
                 self.public = *public;
             }
             (false, _) => {
                 tracing::warn!(
-                    "[{}] {} is not an admin (admins={:?}) and tried to run {:?}",
-                    self.name,
-                    login.user,
+                    "User is not an admin (admins={:?}) and tried to run {:?}",
                     self.admins,
                     cmd
                 );
@@ -132,7 +130,7 @@ impl Room {
     }
 
     pub fn add_viewer(&mut self, login: &crate::LoginArgs) {
-        tracing::info!("[{}] Adding {} ({})", self.name, login.user, login.sess);
+        tracing::info!("Adding user session ({})", login.sess);
         self.chat(&"system".to_string(), &format!("{} connected", login.user));
         self.viewers.push(Viewer {
             name: login.user.clone(),
@@ -142,7 +140,7 @@ impl Room {
     }
 
     pub fn remove_viewer(&mut self, login: &crate::LoginArgs) {
-        tracing::info!("[{}] Removing {} ({})", self.name, login.user, login.sess);
+        tracing::info!("Removing user session ({})", login.sess);
         if let Some(pos) = self.viewers.iter().position(|x| *x.sess == login.sess) {
             self.viewers.remove(pos);
         }
@@ -154,7 +152,7 @@ impl Room {
     }
 
     pub fn chat(&mut self, user: &String, message: &String) {
-        tracing::info!("[{}] <{}> {}", self.name, user, message);
+        tracing::info!("<{}> {}", user, message);
         let since_the_epoch = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .expect("Time went backwards");
@@ -168,7 +166,7 @@ impl Room {
     pub fn sync(&mut self) {
         // Something happened. Serialize the current room state and
         // broadcast it to everybody in the room.
-        tracing::debug!("[{}] Sync to {} viewers", self.name, self.viewers.len());
+        tracing::debug!("Sync to {} viewers", self.viewers.len());
         if self.channel.receiver_count() > 0 {
             self.channel.send(self.clone()).unwrap();
         }

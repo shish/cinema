@@ -11,6 +11,8 @@ use clap::Parser;
 use futures::stream::StreamExt;
 use futures::SinkExt;
 use serde::Deserialize;
+use tracing::Instrument;
+//use tracing_subscriber::fmt::format::FmtSpan;
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::{Duration, SystemTime};
@@ -45,14 +47,14 @@ pub struct Args {
 #[tokio::main]
 async fn main() {
     let args = Args::parse();
-
     tracing_subscriber::registry()
         .with(tracing_subscriber::EnvFilter::new(
             std::env::var("RUST_LOG").unwrap_or_else(|_| "cinema_be=info".into()),
         ))
-        .with(tracing_subscriber::fmt::layer())
+        .with(
+            tracing_subscriber::fmt::layer(), //.with_span_events(FmtSpan::ENTER | FmtSpan::CLOSE)
+        )
         .init();
-
     let rooms = HashMap::new();
 
     let app_state = Arc::new(AppState {
@@ -79,7 +81,7 @@ async fn main() {
         .layer(Extension(app_state));
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 8000));
-    tracing::debug!("listening on {}", addr);
+    tracing::info!("listening on {}", addr);
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
         .await
@@ -128,6 +130,16 @@ async fn handle_room(
 }
 
 async fn websocket(socket: WebSocket, login: LoginArgs, state: Arc<AppState>) {
+    let login_2 = login.clone();
+    _websocket(socket, login, state)
+        .instrument(tracing::info_span!(
+            "",
+            room = ?login_2.room,
+            user = ?login_2.user,
+        ))
+        .await;
+}
+async fn _websocket(socket: WebSocket, login: LoginArgs, state: Arc<AppState>) {
     // Find our room, creating it if it doesn't exist
     let locked_room = {
         let mut rooms_lookup = state.rooms.write().await;
@@ -152,38 +164,44 @@ async fn websocket(socket: WebSocket, login: LoginArgs, state: Arc<AppState>) {
 
     // This task will receive broadcast messages and send text message to our client.
     let (mut sender, mut receiver) = socket.split();
-    let mut send_task = tokio::spawn(async move {
-        let mut maybe_last_state = None;
-        while let Ok(state) = rx.recv().await {
-            let msg = if let Some(last_state) = maybe_last_state {
-                serde_json::to_string(&json_patch::diff(
-                    &serde_json::to_value(&last_state).unwrap(),
-                    &serde_json::to_value(&state).unwrap(),
-                ))
-                .unwrap()
-            } else {
-                serde_json::to_string(&state).unwrap()
-            };
-            maybe_last_state = Some(state);
-            // In any websocket error, break loop.
-            if sender.send(Message::Text(msg)).await.is_err() {
-                break;
+    let mut send_task = tokio::spawn(
+        async move {
+            let mut maybe_last_state = None;
+            while let Ok(state) = rx.recv().await {
+                let msg = if let Some(last_state) = maybe_last_state {
+                    serde_json::to_string(&json_patch::diff(
+                        &serde_json::to_value(&last_state).unwrap(),
+                        &serde_json::to_value(&state).unwrap(),
+                    ))
+                    .unwrap()
+                } else {
+                    serde_json::to_string(&state).unwrap()
+                };
+                maybe_last_state = Some(state);
+                // In any websocket error, break loop.
+                if sender.send(Message::Text(msg)).await.is_err() {
+                    break;
+                }
             }
         }
-    });
+        .instrument(tracing::info_span!("")),
+    );
 
     // This task will receive messages from client and send them to broadcast subscribers.
     let locked_room_2 = locked_room.clone();
     let login_2 = login.clone();
-    let mut recv_task = tokio::spawn(async move {
-        while let Some(Ok(msg)) = receiver.next().await {
-            if let Message::Text(msg) = msg {
-                let cmd = serde_json::from_str(&msg).unwrap();
-                let mut room = locked_room_2.write().await;
-                room.command(&login_2, &cmd);
+    let mut recv_task = tokio::spawn(
+        async move {
+            while let Some(Ok(msg)) = receiver.next().await {
+                if let Message::Text(msg) = msg {
+                    let cmd = serde_json::from_str(&msg).unwrap();
+                    let mut room = locked_room_2.write().await;
+                    room.command(&login_2, &cmd);
+                }
             }
         }
-    });
+        .instrument(tracing::info_span!("")),
+    );
 
     // If any one of the tasks exit, abort the other.
     tokio::select! {
@@ -206,19 +224,22 @@ async fn websocket(socket: WebSocket, login: LoginArgs, state: Arc<AppState>) {
         let room = locked_room.read().await;
         if room.viewers.is_empty() {
             drop(room);
-            tokio::spawn(async move {
-                let room_timeout = Duration::from_secs(5 * 60);
-                tokio::time::sleep(room_timeout).await;
-                let room = locked_room.read().await;
-                if SystemTime::now()
-                    .duration_since(room.last_activity)
-                    .unwrap()
-                    >= room_timeout
-                {
-                    tracing::info!("[{}] Cleaning up empty room", room.name);
-                    state.rooms.write().await.remove(&room.name);
+            tokio::spawn(
+                async move {
+                    let room_timeout = Duration::from_secs(5 * 60);
+                    tokio::time::sleep(room_timeout).await;
+                    let room = locked_room.read().await;
+                    if SystemTime::now()
+                        .duration_since(room.last_activity)
+                        .unwrap()
+                        >= room_timeout
+                    {
+                        tracing::info!("Cleaning up empty room");
+                        state.rooms.write().await.remove(&room.name);
+                    }
                 }
-            });
+                .instrument(tracing::info_span!("cleanup")),
+            );
         }
     }
 }
