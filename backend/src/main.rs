@@ -129,17 +129,8 @@ async fn handle_room(
     ws.on_upgrade(|socket| websocket(socket, login, state))
 }
 
+#[tracing::instrument(name="", skip(socket, login, state), fields(room=?login.room, user=?login.user))]
 async fn websocket(socket: WebSocket, login: LoginArgs, state: Arc<AppState>) {
-    let login_2 = login.clone();
-    _websocket(socket, login, state)
-        .instrument(tracing::info_span!(
-            "",
-            room = ?login_2.room,
-            user = ?login_2.user,
-        ))
-        .await;
-}
-async fn _websocket(socket: WebSocket, login: LoginArgs, state: Arc<AppState>) {
     // Find our room, creating it if it doesn't exist
     let locked_room = {
         let mut rooms_lookup = state.rooms.write().await;
