@@ -129,7 +129,7 @@ async fn handle_room(
     ws.on_upgrade(|socket| websocket(socket, login, state))
 }
 
-#[tracing::instrument(name="", skip(socket, login, state), fields(room=?login.room, user=?login.user))]
+#[tracing::instrument(name="", skip_all, fields(room=?login.room, user=?login.user))]
 async fn websocket(socket: WebSocket, login: LoginArgs, state: Arc<AppState>) {
     // Find our room, creating it if it doesn't exist
     let locked_room = {
