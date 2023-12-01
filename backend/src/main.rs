@@ -130,10 +130,16 @@ async fn handle_room(
 
 #[tracing::instrument(name="", skip_all, fields(room=?login.room, user=?login.user))]
 async fn websocket(socket: WebSocket, login: LoginArgs, state: Arc<AppState>) {
-    _websocket(socket, login, state).await.unwrap_or_else(|e| tracing::error!("Error: {}", e));
+    _websocket(socket, login, state)
+        .await
+        .unwrap_or_else(|e| tracing::error!("Error: {}", e));
 }
 
-async fn _websocket(socket: WebSocket, login: LoginArgs, state: Arc<AppState>) -> anyhow::Result<()> {
+async fn _websocket(
+    socket: WebSocket,
+    login: LoginArgs,
+    state: Arc<AppState>,
+) -> anyhow::Result<()> {
     // Find our room, creating it if it doesn't exist
     let locked_room = {
         let mut rooms_lookup = state.rooms.write().await;
@@ -181,10 +187,7 @@ async fn _websocket(socket: WebSocket, login: LoginArgs, state: Arc<AppState>) -
             let room_timeout = Duration::from_secs(5 * 60);
             tokio::time::sleep(room_timeout).await;
             let room = locked_room.read().await;
-            if SystemTime::now()
-                .duration_since(room.last_activity)?
-                >= room_timeout
-            {
+            if SystemTime::now().duration_since(room.last_activity)? >= room_timeout {
                 tracing::info!("Cleaning up empty room");
                 state.rooms.write().await.remove(&room.name);
             }
