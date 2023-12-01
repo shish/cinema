@@ -153,52 +153,52 @@ async fn websocket(socket: WebSocket, login: LoginArgs, state: Arc<AppState>) {
         room.add_viewer(&login);
     }
 
-    // This task will receive broadcast messages and send text message to our client.
     let (mut sender, mut receiver) = socket.split();
-    let mut send_task = tokio::spawn(
-        async move {
-            let mut maybe_last_state = None;
-            while let Ok(state) = rx.recv().await {
-                let msg = if let Some(last_state) = maybe_last_state {
-                    serde_json::to_string(&json_patch::diff(
-                        &serde_json::to_value(&last_state).unwrap(),
-                        &serde_json::to_value(&state).unwrap(),
-                    ))
-                    .unwrap()
-                } else {
-                    serde_json::to_string(&state).unwrap()
-                };
-                maybe_last_state = Some(state);
-                // In any websocket error, break loop.
-                if sender.send(Message::Text(msg)).await.is_err() {
+
+    let mut maybe_last_state = None;
+    loop {
+        tokio::select! {
+            // If nothing is happening, keep the connection alive.
+            _ = tokio::time::sleep(Duration::from_secs(30)) => {
+                sender.send(Message::Ping(vec![])).await.unwrap();
+            },
+            // Receive broadcast messages and send text message to our client.
+            state = receiver.next() => {
+                if let Some(Ok(msg)) = state {
+                    if let Message::Text(msg) = msg {
+                        let cmd = serde_json::from_str(&msg).unwrap();
+                        let mut room = locked_room.write().await;
+                        room.command(&login, &cmd);
+                    }
+                }
+                else {
                     break;
                 }
-            }
-        }
-        .instrument(tracing::info_span!("")),
-    );
-
-    // This task will receive messages from client and send them to broadcast subscribers.
-    let locked_room_2 = locked_room.clone();
-    let login_2 = login.clone();
-    let mut recv_task = tokio::spawn(
-        async move {
-            while let Some(Ok(msg)) = receiver.next().await {
-                if let Message::Text(msg) = msg {
-                    let cmd = serde_json::from_str(&msg).unwrap();
-                    let mut room = locked_room_2.write().await;
-                    room.command(&login_2, &cmd);
+            },
+            // Receive messages from client and send them to broadcast subscribers.
+            state = rx.recv() => {
+                if let Ok(state) = state {
+                    let msg = if let Some(last_state) = maybe_last_state {
+                        serde_json::to_string(&json_patch::diff(
+                            &serde_json::to_value(&last_state).unwrap(),
+                            &serde_json::to_value(&state).unwrap(),
+                        ))
+                        .unwrap()
+                    } else {
+                        serde_json::to_string(&state).unwrap()
+                    };
+                    maybe_last_state = Some(state);
+                    // In any websocket error, break loop.
+                    if sender.send(Message::Text(msg)).await.is_err() {
+                        break;
+                    }
                 }
-            }
+                else {
+                    break;
+                }
+            },
         }
-        .instrument(tracing::info_span!("")),
-    );
-
-    // If any one of the tasks exit, abort the other.
-    tokio::select! {
-        _ = (&mut send_task) => recv_task.abort(),
-        _ = (&mut recv_task) => send_task.abort(),
-    };
+    }
 
     // After we finish reading from the websocket (ie, it's closed), clean up
     {
