@@ -11,7 +11,6 @@ use clap::Parser;
 use futures::stream::StreamExt;
 use futures::SinkExt;
 use serde::Deserialize;
-use tracing::Instrument;
 //use tracing_subscriber::fmt::format::FmtSpan;
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -131,6 +130,10 @@ async fn handle_room(
 
 #[tracing::instrument(name="", skip_all, fields(room=?login.room, user=?login.user))]
 async fn websocket(socket: WebSocket, login: LoginArgs, state: Arc<AppState>) {
+    _websocket(socket, login, state).await.unwrap_or_else(|e| tracing::error!("Error: {}", e));
+}
+
+async fn _websocket(socket: WebSocket, login: LoginArgs, state: Arc<AppState>) -> anyhow::Result<()> {
     // Find our room, creating it if it doesn't exist
     let locked_room = {
         let mut rooms_lookup = state.rooms.write().await;
@@ -142,7 +145,7 @@ async fn websocket(socket: WebSocket, login: LoginArgs, state: Arc<AppState>) {
     };
 
     // Subscribe to the room state, so that we see the first sync that we generate
-    let mut rx = {
+    let rx = {
         let room = locked_room.read().await;
         room.channel.subscribe()
     };
@@ -150,87 +153,84 @@ async fn websocket(socket: WebSocket, login: LoginArgs, state: Arc<AppState>) {
     // Save the sender in our list of connected users.
     {
         let mut room = locked_room.write().await;
-        room.add_viewer(&login);
+        room.add_viewer(&login)?;
     }
 
-    let (mut sender, mut receiver) = socket.split();
-
-    let mut maybe_last_state = None;
-    loop {
-        tokio::select! {
-            // If nothing is happening, keep the connection alive.
-            _ = tokio::time::sleep(Duration::from_secs(30)) => {
-                sender.send(Message::Ping(vec![])).await.unwrap();
-            },
-            // Receive broadcast messages and send text message to our client.
-            state = receiver.next() => {
-                if let Some(Ok(msg)) = state {
-                    if let Message::Text(msg) = msg {
-                        let cmd = serde_json::from_str(&msg).unwrap();
-                        let mut room = locked_room.write().await;
-                        room.command(&login, &cmd);
-                    }
-                }
-                else {
-                    break;
-                }
-            },
-            // Receive messages from client and send them to broadcast subscribers.
-            state = rx.recv() => {
-                if let Ok(state) = state {
-                    let msg = if let Some(last_state) = maybe_last_state {
-                        serde_json::to_string(&json_patch::diff(
-                            &serde_json::to_value(&last_state).unwrap(),
-                            &serde_json::to_value(&state).unwrap(),
-                        ))
-                        .unwrap()
-                    } else {
-                        serde_json::to_string(&state).unwrap()
-                    };
-                    maybe_last_state = Some(state);
-                    // In any websocket error, break loop.
-                    if sender.send(Message::Text(msg)).await.is_err() {
-                        break;
-                    }
-                }
-                else {
-                    break;
-                }
-            },
+    // Catch any errors from the websocket loop and log them, but don't
+    // propagate them, because we still want to clean up the room.
+    match _websocket_loop(rx, socket, &locked_room, &login).await {
+        Ok(_) => {}
+        Err(e) => {
+            tracing::error!("Error: {}", e);
         }
     }
 
     // After we finish reading from the websocket (ie, it's closed), clean up
     {
         let mut room = locked_room.write().await;
-        room.remove_viewer(&login);
+        room.remove_viewer(&login)?;
     }
 
-    // If room is empty, mark the room for deletion, if it's still empty after
-    // 5 minutes, delete it. This means that an admin can have some internet
-    // flakiness and the room will still be waiting for them.
-    // BUG: this checks for emptiness at two specific moments in time it won't
-    // catch any activity that happens in between those two moments.
+    // If room is empty, mark the room for deletion, if there has been no
+    // activity after 5 minutes, delete it. This means that an admin can have
+    // some internet flakiness and the room will still be waiting for them.
     {
         let room = locked_room.read().await;
         if room.viewers.is_empty() {
             drop(room);
-            tokio::spawn(
-                async move {
-                    let room_timeout = Duration::from_secs(5 * 60);
-                    tokio::time::sleep(room_timeout).await;
-                    let room = locked_room.read().await;
-                    if SystemTime::now()
-                        .duration_since(room.last_activity)
-                        .unwrap()
-                        >= room_timeout
-                    {
-                        tracing::info!("Cleaning up empty room");
-                        state.rooms.write().await.remove(&room.name);
-                    }
+            let room_timeout = Duration::from_secs(5 * 60);
+            tokio::time::sleep(room_timeout).await;
+            let room = locked_room.read().await;
+            if SystemTime::now()
+                .duration_since(room.last_activity)?
+                >= room_timeout
+            {
+                tracing::info!("Cleaning up empty room");
+                state.rooms.write().await.remove(&room.name);
+            }
+        }
+    }
+
+    Ok(())
+}
+
+async fn _websocket_loop(
+    mut rx: tokio::sync::broadcast::Receiver<room::Room>,
+    socket: WebSocket,
+    locked_room: &Arc<RwLock<room::Room>>,
+    login: &LoginArgs,
+) -> anyhow::Result<()> {
+    let (mut sender, mut receiver) = socket.split();
+    let mut maybe_last_state = None;
+    loop {
+        tokio::select! {
+            // If nothing is happening, keep the connection alive.
+            _ = tokio::time::sleep(Duration::from_secs(30)) => {
+                sender.send(Message::Ping(vec![])).await?;
+            },
+            // Receive messages from client and send them to broadcast subscribers.
+            state = receiver.next() => {
+                let Some(msg) = state else { return Ok(()) };
+                if let Message::Text(msg) = msg? {
+                    let cmd = serde_json::from_str(&msg)?;
+                    let mut room = locked_room.write().await;
+                    room.command(&login, &cmd)?;
                 }
-                .instrument(tracing::info_span!("cleanup")),
-            );
+            },
+            // Receive broadcast room updates and send text message to our client.
+            state = rx.recv() => {
+                let state = state?;
+                let msg = if let Some(last_state) = maybe_last_state {
+                    serde_json::to_string(&json_patch::diff(
+                        &serde_json::to_value(&last_state)?,
+                        &serde_json::to_value(&state)?,
+                    ))?
+                } else {
+                    serde_json::to_string(&state)?
+                };
+                maybe_last_state = Some(state);
+                sender.send(Message::Text(msg)).await?;
+            },
         }
     }
 }

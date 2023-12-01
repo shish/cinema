@@ -80,7 +80,7 @@ impl Room {
         }
     }
 
-    pub fn command(&mut self, login: &crate::LoginArgs, cmd: &Command) {
+    pub fn command(&mut self, login: &crate::LoginArgs, cmd: &Command) -> anyhow::Result<()> {
         let is_admin = self.admins.contains(&login.user);
         match (is_admin, cmd) {
             (_, Command::Chat(message)) => {
@@ -126,20 +126,20 @@ impl Room {
                 );
             }
         }
-        self.sync();
+        self.sync()
     }
 
-    pub fn add_viewer(&mut self, login: &crate::LoginArgs) {
+    pub fn add_viewer(&mut self, login: &crate::LoginArgs) -> anyhow::Result<()> {
         tracing::info!("Adding user session ({})", login.sess);
         self.chat(&"system".to_string(), &format!("{} connected", login.user));
         self.viewers.push(Viewer {
             name: login.user.clone(),
             sess: login.sess.clone(),
         });
-        self.sync();
+        self.sync()
     }
 
-    pub fn remove_viewer(&mut self, login: &crate::LoginArgs) {
+    pub fn remove_viewer(&mut self, login: &crate::LoginArgs) -> anyhow::Result<()> {
         tracing::info!("Removing user session ({})", login.sess);
         if let Some(pos) = self.viewers.iter().position(|x| *x.sess == login.sess) {
             self.viewers.remove(pos);
@@ -148,7 +148,7 @@ impl Room {
             &"system".to_string(),
             &format!("{} disconnected", login.user),
         );
-        self.sync();
+        self.sync()
     }
 
     pub fn chat(&mut self, user: &String, message: &String) {
@@ -163,13 +163,14 @@ impl Room {
         });
     }
 
-    pub fn sync(&mut self) {
+    pub fn sync(&mut self) -> anyhow::Result<()> {
         // Something happened. Serialize the current room state and
         // broadcast it to everybody in the room.
         tracing::debug!("Sync to {} viewers", self.viewers.len());
         if self.channel.receiver_count() > 0 {
-            self.channel.send(self.clone()).unwrap();
+            self.channel.send(self.clone())?;
         }
         self.last_activity = SystemTime::now();
+        Ok(())
     }
 }
