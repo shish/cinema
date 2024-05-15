@@ -89,7 +89,7 @@ async fn main() {
 
 async fn handle_movies(Extension(state): Extension<Arc<AppState>>) -> impl IntoResponse {
     fn _list_movies(prefix: &String) -> anyhow::Result<Vec<String>> {
-        globwalk::GlobWalkerBuilder::from_patterns(prefix, &["*.m3u8", "!index.m3u8"])
+        let mut list = globwalk::GlobWalkerBuilder::from_patterns(prefix, &["*.m3u8", "!index.m3u8"])
             .build()?
             .map(|entry| {
                 Ok(entry?
@@ -99,7 +99,9 @@ async fn handle_movies(Extension(state): Extension<Arc<AppState>>) -> impl IntoR
                     .unwrap()
                     .to_string())
             })
-            .collect()
+            .collect::<anyhow::Result<Vec<String>>>()?;
+        list.sort();
+        Ok(list)
     }
     (StatusCode::OK, Json(_list_movies(&state.movies).unwrap()))
 }
