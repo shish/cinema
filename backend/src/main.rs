@@ -79,7 +79,7 @@ async fn main() {
         .layer(TraceLayer::new_for_http())
         .layer(Extension(app_state));
 
-    let addr = SocketAddr::from(([0, 0, 0, 0], 8000));
+    let addr = SocketAddr::from(([0, 0, 0, 0], 8074));
     tracing::info!("listening on {}", addr);
     axum::Server::bind(&addr)
         .serve(app.into_make_service())

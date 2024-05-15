@@ -16,8 +16,8 @@ RUN cargo build --release
 
 # copy to /app/backend and /app/frontend
 FROM debian:stable-slim
-EXPOSE 8000
-#HEALTHCHECK --interval=1m --timeout=3s CMD curl --fail http://127.0.0.1:8000/ || exit 1
+EXPOSE 8074
+#HEALTHCHECK --interval=1m --timeout=3s CMD curl --fail http://127.0.0.1:8074/ || exit 1
 #RUN apt update && apt install -y curl && rm -rf /var/lib/apt/lists/*
 COPY --from=build-backend /app/target/release/cinema_be /app/backend/
 COPY --from=build-frontend /app/dist /app/frontend/dist/

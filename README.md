@@ -26,7 +26,7 @@ Or to run with logging and auto-restart whenever the code changes:
 RUST_LOG=cinema_be=info cargo watch -s 'cargo run -- -m /Users/shish2k/Movies/Cinema/'
 ```
 
-Traffic served on http://localhost:8000/
+Traffic served on http://localhost:8074/
 
 ## Media setup:
 
