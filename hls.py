@@ -35,7 +35,7 @@ for fn_in in sys.argv[1:]:
         for n, (px, bw, abw) in enumerate(fmts, start=0):
             cmd.extend([
                 "-map", f"[v{n+1}out]",
-                f"-c:v:{n}", "libx264", "-x264-params", "nal-hrd=cbr:force-cfr=1",
+                f"-c:v:{n}", "libx264", "-profile:v", "high", "-pix_fmt", "yuv420p", "-x264-params", "nal-hrd=cbr:force-cfr=1",
                 f"-b:v:{n}", bw, f"-maxrate:v:{n}", bw, f"-minrate:v:{n}", bw, f"-bufsize:v:{n}", bw, "-preset", "slow", "-g", "48", "-sc_threshold", "0", "-keyint_min", "48"
             ])
 
