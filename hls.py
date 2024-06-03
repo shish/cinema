@@ -11,9 +11,9 @@ for fn_in in sys.argv[1:]:
     fn_vtt = f"{fn_base}.vtt"
 
     fmts = [
-        (720, "3M", "96k"),
-        (480, "2M", "48k"),
-        (360, "1M", "48k"),
+        (720, "3M", "256k"),
+        (480, "2M", "192k"),
+        (360, "1M", "128k"),
     ]
 
     if os.path.exists(fn_in):
