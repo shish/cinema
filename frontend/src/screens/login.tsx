@@ -1,81 +1,97 @@
-import h from "hyperapp-jsx-pragma";
-import * as icons from "../static/icons";
+import { useSessionStorage } from '@uidotdev/usehooks';
+import { useEffect, useState } from 'react';
 
-function LoginAction(state: State, event: Event): State {
-    event.preventDefault();
+import { InfoMenu } from '../components/info';
 
-    let user = (document.getElementById("user") as HTMLFormElement).value;
-    let room = (document.getElementById("room") as HTMLFormElement).value;
+import CircleInfo from '../static/icons/circle-info.svg?react';
+import CircleXmark from '../static/icons/circle-xmark.svg?react';
 
-    sessionStorage.setItem("user", user);
+export function Login({
+    setConnData,
+}: {
+    setConnData: (connData: ConnData) => void;
+}) {
+    const [showInfo, setShowInfo] = useState(false);
+    const [manualEntry, setManualEntry] = useState(false);
+    const [rooms, setRooms] = useState<{ [name: string]: string }>({});
+    const [sess, setSess] = useSessionStorage<string>('sess2', '');
+    const [user, setUser] = useSessionStorage<string>('user2', '');
+    const [room, setRoom] = useState<string>('');
 
-    if (!user || !room) return state;
+    useEffect(() => {
+        if (!sess) {
+            // call setSess to ensure it gets saved, rather than setting
+            // the default to random which would be regenerated each refresh
+            setSess((Math.random() + 1).toString(36).substring(2));
+        }
+    }, [sess, setSess]);
 
-    return {
-        ...state,
-        conn: {
-            ...state.conn,
-            user: user,
-            room: room,
-        },
-        loading: "Connecting...",
-    };
-}
+    // biome-ignore lint/correctness/useExhaustiveDependencies: we only want to run this once
+    useEffect(() => {
+        fetch('/rooms')
+            .then((response) => response.json())
+            .then((rooms) => {
+                setRooms(rooms);
+                if (!room && Object.keys(rooms).length > 0) {
+                    setRoom(Object.keys(rooms)[0]);
+                }
+                console.log('Rooms:', rooms);
+            })
+            .catch((error) => {
+                console.error('Error loading logs:', error);
+            });
+    }, []);
 
-function UpdateUser(state: State): State {
-    let user = (document.getElementById("user") as HTMLFormElement).value;
-    sessionStorage.setItem("user", user);
-    return {
-        ...state,
-        conn: {
-            ...state.conn,
-            user: user,
-        },
-    };
-}
+    function login(event: any) {
+        event.preventDefault();
+        if (!user || !room) return null;
+        console.log('Logging in as', user, 'to', room);
+        setConnData({ sess, room, user });
+    }
 
-const MaybeManual = (state: State, event: Event): State => ({
-    ...state,
-    manual_entry:
-        (document.getElementById("room") as HTMLInputElement).value == "",
-});
-
-const ShowHelp = (state: State): State => ({ ...state, help: true });
-
-export const Login = ({ state }: { state: State }) => (
-    <main class="login">
-        <header>
-            <icons.CircleXmark style={{ opacity: 0 }} />
-            <h1>Join a Room</h1>
-            <icons.CircleInfo class="x2" onclick={ShowHelp} />
-        </header>
-        <article>
-            <form onsubmit={LoginAction}>
-                <input
-                    type="text"
-                    id="user"
-                    placeholder="Enter Your Name"
-                    onchange={UpdateUser}
-                    value={state.conn.user}
-                />
-                {Object.entries(state.rooms).length > 0 &&
-                !state.manual_entry ? (
-                    <select id="room" onchange={MaybeManual}>
-                        {Object.entries(state.rooms).map((k) => (
-                            <option value={k[0]}>{k[1]}</option>
-                        ))}
-                        <option value="">Enter a code</option>
-                    </select>
-                ) : (
+    return (
+        <main className="login">
+            <header>
+                <CircleInfo onClick={() => setShowInfo(true)} />
+                <h1>Join a Room</h1>
+                <CircleXmark style={{ opacity: 0 }} />
+            </header>
+            <article>
+                <form onSubmit={(e) => login(e)}>
                     <input
                         type="text"
-                        id="room"
-                        maxlength="4"
-                        placeholder="Enter Room Code"
+                        id="user"
+                        placeholder="Enter Your Name"
+                        onChange={(e) => setUser(e.target.value)}
+                        defaultValue={user}
                     />
-                )}
-                <input type="button" value="Join" onclick={LoginAction} />
-            </form>
-        </article>
-    </main>
-);
+                    {Object.entries(rooms).length > 0 && !manualEntry ? (
+                        <select
+                            id="room"
+                            onChange={(e) => (e.target.value === '' ? setManualEntry(true) : setRoom(e.target.value))}
+                        >
+                            {Object.entries(rooms).map((k) => (
+                                <option key={k[0]} value={k[0]}>
+                                    {k[1]}
+                                </option>
+                            ))}
+                            <option key={''} value="">
+                                Enter a code
+                            </option>
+                        </select>
+                    ) : (
+                        <input
+                            type="text"
+                            id="room"
+                            maxLength={4}
+                            onChange={(e) => setRoom(e.target.value)}
+                            placeholder="Enter Room Code"
+                        />
+                    )}
+                    <button type="submit">Join</button>
+                </form>
+            </article>
+            {showInfo && <InfoMenu setShowInfo={setShowInfo} />}
+        </main>
+    );
+}

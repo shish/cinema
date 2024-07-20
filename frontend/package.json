@@ -1,34 +1,29 @@
 {
-  "name": "cinema",
-  "version": "0.0.0",
-  "description": "shared video watching",
-  "scripts": {
-    "build": "parcel build --public-url . src/index.html",
-    "watch": "parcel watch --public-url . src/index.html --no-hmr",
-    "serve": "parcel serve --port 1236 src/index.html",
-    "analyze": "parcel build --public-url . src/index.html --reporter @parcel/reporter-bundle-analyzer",
-    "format": "prettier --write 'src/**/*.ts{,x}' --tab-width 4 --trailing-comma all"
-  },
-  "repository": "https://github.com/shish/cinema/",
-  "author": "Shish <webmaster@shishnet.org>",
-  "license": "GPL-3.0-only",
-  "bugs": {
-    "url": "https://github.com/shish/cinema/issues"
-  },
-  "homepage": "https://github.com/shish/cinema#readme",
-  "dependencies": {
-    "hls.js": "^1.3.0",
-    "hyperapp": "^2.0.22",
-    "hyperapp-fx": "^2.0.0-beta.2",
-    "hyperapp-jsx-pragma": "^1.3.0",
-    "jsonpatch": "^3.1.0"
-  },
-  "devDependencies": {
-    "@parcel/optimizer-data-url": "^2.8.3",
-    "@parcel/reporter-bundle-analyzer": "^2.8.3",
-    "@parcel/transformer-inline-string": "^2.8.3",
-    "@parcel/transformer-sass": "^2.8.3",
-    "parcel": "^2.8.3",
-    "prettier": "^2.8.3"
-  }
+    "name": "frontend",
+    "private": true,
+    "version": "1.0.0",
+    "scripts": {
+        "build": "rsbuild build",
+        "check": "biome check --write",
+        "dev": "rsbuild dev",
+        "format": "biome format --write",
+        "preview": "rsbuild preview"
+    },
+    "dependencies": {
+        "@uidotdev/usehooks": "^2.4.1",
+        "hls.js": "^1.5.13",
+        "jsonpatch": "^3.1.0",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "^1.8.3",
+        "@rsbuild/core": "1.0.1-beta.2",
+        "@rsbuild/plugin-react": "1.0.1-beta.2",
+        "@rsbuild/plugin-sass": "^1.0.1-beta.2",
+        "@rsbuild/plugin-svgr": "^1.0.1-beta.2",
+        "@types/react": "^18.3.3",
+        "@types/react-dom": "^18.3.0",
+        "typescript": "^5.5.2"
+    }
 }

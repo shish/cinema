@@ -1,117 +1,153 @@
-
 /**********************************************************************
  * Common layout
  */
 
+ :root {
+    --background: #222;
+    --blackout: #111;
+    --header: #444;
+    --admin: #664;
+    --text: #DDD;
+    --link: #BBF;
+    --grid: #999;
+    --chat-timestamp: #666;
+    --chat-system: #888;
+    // color-scheme: dark;
+ }
 * {
-  box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 /* svg wibbling */
 svg {
-  path {
-    fill: currentColor;
-  }
+    path {
+        fill: currentColor;
+    }
 }
-BUTTON svg, SPAN svg {
-  top: .125em;
-  position: relative;
+
+BUTTON svg,
+SPAN svg {
+    top: .125em;
+    position: relative;
+}
+BUTTON svg {
+    margin: 0 .2em;
 }
 
 BODY {
-  margin: 0;
-  padding: 0;
-  font-family: arial, sans-serif;
-  background-color: #222;
-  color: #DDD;
+    margin: 0;
+    padding: 0;
+    font-family: arial, sans-serif;
+    background-color: var(--background);
+    color: var(--text);
 
-  A {
-    color: #BBF;
-  }
+    A {
+        color: var(--link);
+    }
 }
 
 .settings {
-  position: absolute;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 
-  DIV {
-    flex: 0 0 auto;
-    text-align: center;
-    z-index: 9999;
-    background: white;
-    color: black;
-    border: 2px solid black;
-    border-radius: 1em;
-    box-shadow: #000 0 0 1em;
-    padding: 1em;
+    DIV {
+        // FIXME: colours
+        flex: 0 0 auto;
+        text-align: center;
+        z-index: 9999;
+        background: var(--header);
+        border: 2px solid var(--grid);
+        border-radius: 1em;
+        box-shadow: var(--grid) 0 0 1em;
+        padding: 1em;
 
-    H2 {
-      margin: 0;
+        H2 {
+            margin: 0;
+        }
+
+        INPUT[type="text"],
+        BUTTON {
+            width: 100%;
+        }
+
+        A {
+            color: var(--link);
+        }
     }
 
-    INPUT[type="text"],
-    BUTTON {
-      width: 100%;
-    }
-  }
+    TABLE {
+        TD:first-child {
+            text-align: right;
+            padding-right: .25rem;
+        }
 
-  TABLE {
-    TD:first-child {
-      text-align: right;
-      padding-right: .25rem;
+        TD:nth-child(2) {
+            text-align: left;
+        }
     }
-    TD:nth-child(2) {
-      text-align: left;
-    }
-  }
 }
 
 MAIN {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
 
-  // use "height" instead of "bottom" so that we can override
-  // with height=visualViewport.height when the virtual keyboard
-  // causes the viewport height to change
-  height: 100%;
+    // use "height" instead of "bottom" so that we can override
+    // with height=visualViewport.height when the virtual keyboard
+    // causes the viewport height to change
+    height: 100%;
 
-  display: grid;
-  gap: 1px 1px;
-  background-color: #999;
+    display: grid;
+    gap: 1px 1px;
+    background-color: var(--grid);
 
-  HEADER {
-    grid-area: header;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    background: #444;
+    HEADER {
+        grid-area: header;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        background: var(--header);
 
-    svg {
-      flex: 0 0 auto;
-      width: 4rem;
-      font-size: 2rem;
+        svg {
+            flex: 0 0 auto;
+            width: 4rem;
+            font-size: 2rem;
+        }
+
+        H1 {
+            flex: 1 1 auto;
+            font-size: 1.5rem;
+        }
+
+        INPUT {
+            font-size: 1em;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.5rem;
+            max-width: 50%;
+        }
     }
 
-    H1 {
-      flex: 1 1 auto;
-      font-size: 1.5rem;
+    ARTICLE {
+        background: var(--background);
     }
 
-    INPUT {
-      font-size: 1em;
-      padding: 0.2rem 0.5rem;
-      border-radius: 0.5rem;
-      max-width: 50%;
+}
+// FIXME: use this
+MAIN.dimmed {
+    background-color: #444;
+
+    HEADER {
+        background: #111;
+        color: #444;
     }
-  }
+
 }
 
 /**********************************************************************
@@ -119,254 +155,262 @@ MAIN {
  */
 
 MAIN.login {
-  grid-template-columns: 1fr;
-  grid-template-rows: min-content 1fr;
-  grid-template-areas:
-    "header"
-    "content";
-  text-align: center;
+    grid-template-columns: 1fr;
+    grid-template-rows: min-content 1fr;
+    grid-template-areas:
+        "header"
+        "content";
+    text-align: center;
 
-  ARTICLE {
-    grid-area: content;
-    padding: 1rem;
-    background: #222;
+    ARTICLE {
+        grid-area: content;
+        padding: 1rem;
 
-    FORM {
-      max-width: 30em;
-      margin: auto;
+        FORM {
+            max-width: 30em;
+            margin: auto;
+        }
+
+        INPUT[type="text"],
+        BUTTON,
+        SELECT {
+            font-size: 2rem;
+            padding: 0.5rem;
+            width: 100%;
+            border-radius: 0.5rem;
+            margin: .5rem auto;
+        }
     }
-
-    INPUT[type="text"],
-    INPUT[type="button"],
-    SELECT {
-      font-size: 2rem;
-      padding: 0.5rem;
-      width: 100%;
-      border-radius: 0.5rem;
-      margin: .5rem auto;
-    }
-  }
 }
 
-MAIN.room.admin {
-  grid-template-columns: 1fr minmax(5em, min(20em, 50%));
-  grid-template-rows: 4rem 2rem 1fr 2rem 3rem;
-  grid-template-areas:
-    "header   header"
-    "movies   chat"
-    "video    chat"
-    "controls chat"
-    "viewers  chat";
-
-  @media (orientation: portrait) {
-    grid-template-columns: 100%;
-    grid-template-rows: 4rem 2rem min-content 2rem 1fr 3rem;
-    grid-template-areas:
-      "header"
-      "movies"
-      "video"
-      "controls"
-      "chat"
-      "viewers";
-
-    VIDEO {
-      height: auto;
-    }
-  }
-}
-
-MAIN.room.user {
-  grid-template-columns: 1fr minmax(5em, min(20em, 50%));
-  grid-template-rows: 4rem 1fr 3rem;
-  grid-template-areas:
-    "header  header"
-    "video   chat"
-    "viewers chat";
-
-  @media (orientation: portrait) {
-    grid-template-columns: 100%;
-    grid-template-rows: 4rem min-content 1fr;
-    grid-template-areas:
-      "header"
-      "video"
-      "chat";
-
-    VIDEO {
-      height: auto;
+MAIN.room.nochat {
+    .chat {
+        display: none;
     }
 
     .viewers {
-      display: none;
+        display: none;
     }
-  }
+}
+MAIN.room.user {
+    .movie_list {
+        display: none;
+    }
 
-  .movie_list {
-    display: none;
-  }
+    .video {
+        .controls {
+            display: none;
+        }    
+    }
+}
 
-  .controls {
-    display: none;
-  }
+MAIN.room.admin.chat {
+    grid-template-columns: 1fr minmax(5em, min(20em, 50%));
+    grid-template-rows: 4rem 2rem 1fr 3rem;
+    grid-template-areas:
+        "header   header"
+        "movies   chat"
+        "video    chat"
+        "viewers  chat";
 
-  &.nochat {
+    @media (orientation: portrait) {
+        grid-template-columns: 100%;
+        grid-template-rows: 4rem 2rem min-content 1fr 3rem;
+        grid-template-areas:
+            "header"
+            "movies"
+            "video"
+            "chat"
+            "viewers";
+    }
+}
+
+MAIN.room.admin.nochat {
+    grid-template-columns: 1fr;
+    grid-template-rows: 4rem 2rem 1fr;
+    grid-template-areas:
+        "header"
+        "movies"
+        "video";
+}
+
+MAIN.room.user.chat {
+    grid-template-columns: 1fr minmax(5em, min(20em, 50%));
+    grid-template-rows: 4rem 1fr 3rem;
+    grid-template-areas:
+        "header  header"
+        "video   chat"
+        "viewers chat";
+
+    @media (orientation: portrait) {
+        grid-template-columns: 100%;
+        grid-template-rows: 4rem min-content 1fr;
+        grid-template-areas:
+            "header"
+            "video"
+            "chat";
+
+        .viewers {
+            display: none;
+        }
+    }
+}
+MAIN.room.user.nochat {
     grid-template-columns: 1fr;
     grid-template-rows: 4rem 1fr;
     grid-template-areas:
-      "header"
-      "video";
-  background-color: #444;
-
-    header {
-      background: #111;
-      color: #444;
-    }
-    
-    .viewers {
-      display: none;
-    }
-
-    .chat {
-      display: none;
-    }
-  }
+        "header"
+        "video";
 }
 
 MAIN.room {
-  VIDEO {
-    grid-area: video;
-    background: #111;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
+    .movie_list {
+        grid-area: movies;
+        display: flex;
 
-  .blackout {
-    grid-area: video;
-    background: #111;
-  }
-
-  .video_hint {
-    color: black;
-    background: #D44;
-    padding: 0.2em;
-  }
-
-  .chat {
-    background: #222;
-    grid-area: chat;
-    display: flex;
-    flex-direction: column;
-
-    .chat_log {
-      flex: 1 1 auto;
-      height: 2em;
-      overflow-wrap: break-word;
-      overflow-y: scroll;
-      text-align: left;
-      margin: 0;
-      padding: 1em;
-
-      LI {
-        display: block;
-
-        .absolute_timestamp {
-          color: #666;
+        SELECT {
+            flex: 1 1 auto;
+            width: 10px;
         }
 
-        .absolute_timestamp::after {
-          content: " ";
+        BUTTON {
+            flex: 0 0 auto;
         }
-      }
+    }
 
-      LI.system {
-        color: #888;
+    .video {
+        grid-area: video;
+        background: var(--blackout);
+        display: flex;
+        flex-direction: column;
 
-        .user {
-          display: none;
+        VIDEO {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            flex: 1 1 auto;
         }
-      }
 
-      LI.user {
-        .user::before {
-          color: #888;
-          content: "<";
+        .video_hint {
+            color: black;
+            background: #D44;
+            padding: 0.2em;
+            flex: 1 1 auto;
         }
 
-        .user::after {
-          color: #888;
-          content: "> ";
+        .controls {
+            flex: 1 1 auto;
+            display: flex;
+    
+            INPUT {
+                flex: 1 1 auto;
+                min-width: 0px;
+            }
+    
+            BUTTON {
+                flex: 0 0 auto;
+            }
+    
+            SPAN {
+                flex: 0 0 auto;
+                align-self: center;
+                padding: 0 .5rem;
+            }
         }
-      }
     }
 
-    .chat_input {
-      flex: 0 0 auto;
-
-      INPUT {
-        font-size: 1.5rem;
-        width: 100%;
-      }
-    }
-  }
-
-  .viewers {
-    grid-area: viewers;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-evenly;
-    align-items: center;
-    border-top: 1px solid #666;
-    background: #444;
-
-    LI {
-      flex: 0 0 auto;
-      display: inline-block;
-      border: 1px solid #888;
-      background: #444;
-      border-radius: 1em;
-      padding: 0.5em;
+    .blackout {
+        grid-area: video;
+        background: var(--blackout);
     }
 
-    .admin {
-      background: #664;
-      font-weight: bold;
+    .chat {
+        background: var(--background);
+        grid-area: chat;
+        display: flex;
+        flex-direction: column;
+
+        .chat_log {
+            flex: 1 1 auto;
+            height: 2em;
+            overflow-wrap: break-word;
+            overflow-y: scroll;
+            text-align: left;
+
+            display:flex;
+            flex-direction:column-reverse;
+
+            UL {
+                margin: 0;
+                padding: 1em;
+
+                LI {
+                    display: block;
+
+                    .absolute_timestamp {
+                        color: var(--chat-timestamp);
+                    }
+
+                    .absolute_timestamp::after {
+                        content: " ";
+                    }
+                }
+
+                LI.system {
+                    color: var(--chat-system);
+
+                    .user {
+                        display: none;
+                    }
+                }
+
+                LI.user {
+                    .user::before {
+                        color: var(--chat-system);
+                        content: "<";
+                    }
+
+                    .user::after {
+                        color: var(--chat-system);
+                        content: "> ";
+                    }
+                }
+            }
+        }
+
+        .chat_input {
+            flex: 0 0 auto;
+
+            INPUT {
+                font-size: 1.5rem;
+                width: 100%;
+            }
+        }
     }
-  }
 
-  .movie_list {
-    grid-area: movies;
-    display: flex;
+    .viewers {
+        grid-area: viewers;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-evenly;
+        align-items: center;
+        background: var(--header);
 
-    SELECT {
-      flex: 1 1 auto;
-      width: 10px;
+        LI {
+            flex: 0 0 auto;
+            display: inline-block;
+            border: 1px solid var(--grid);
+            background: var(--header);
+            border-radius: 1em;
+            padding: 0.5em;
+        }
+
+        .admin {
+            background: var(--admin);
+            font-weight: bold;
+        }
     }
-
-    BUTTON {
-      flex: 0 0 auto;
-    }
-  }
-
-  .controls {
-    grid-area: controls;
-    display: flex;
-
-    INPUT {
-      flex: 1 1 auto;
-      min-width: 0px;
-    }
-
-    BUTTON {
-      flex: 0 0 auto;
-    }
-
-    SPAN {
-      flex: 0 0 auto;
-      align-self: center;
-      padding: 0 .5rem;
-    }
-  }
 }
