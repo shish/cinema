@@ -29,7 +29,7 @@ export function RoomProvider({ connData, children }: { connData: ConnData; child
     const socketName = getSocketName(connData, errors);
     const { now } = useServerTime({ url: '/time' });
 
-    console.log('Socket name:', socketName);
+    // console.log('Socket name:', socketName);
     useEffect(() => {
         const conn = new WebSocket(socketName);
         let lastResp: any = null;
@@ -58,6 +58,8 @@ export function RoomProvider({ connData, children }: { connData: ConnData; child
         };
     }, [socketName, errors]);
 
+    // FIXME: allow the user to keep watching while the connection
+    // is down, but disable sending messages
     if (conn === null) {
         return (
             <main className="login">
