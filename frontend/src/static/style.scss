@@ -13,7 +13,14 @@
     --chat-timestamp: #666;
     --chat-system: #888;
     // color-scheme: dark;
- }
+}
+// FIXME: use this
+MAIN.dimmed {
+    --header: #111;
+    --text: #444;
+    --grid: #444;
+}
+
 * {
     box-sizing: border-box;
 }
@@ -39,11 +46,6 @@ BODY {
     padding: 0;
     font-family: arial, sans-serif;
     background-color: var(--background);
-    color: var(--text);
-
-    A {
-        color: var(--link);
-    }
 }
 
 .settings {
@@ -57,7 +59,6 @@ BODY {
     bottom: 0;
 
     DIV {
-        // FIXME: colours
         flex: 0 0 auto;
         text-align: center;
         z-index: 9999;
@@ -74,10 +75,6 @@ BODY {
         INPUT[type="text"],
         BUTTON {
             width: 100%;
-        }
-
-        A {
-            color: var(--link);
         }
     }
 
@@ -108,6 +105,12 @@ MAIN {
     gap: 1px 1px;
     background-color: var(--grid);
 
+    color: var(--text);
+
+    A {
+        color: var(--link);
+    }
+
     HEADER {
         grid-area: header;
         text-align: center;
@@ -136,16 +139,6 @@ MAIN {
 
     ARTICLE {
         background: var(--background);
-    }
-
-}
-// FIXME: use this
-MAIN.dimmed {
-    background-color: #444;
-
-    HEADER {
-        background: #111;
-        color: #444;
     }
 
 }

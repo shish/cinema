@@ -1,8 +1,8 @@
-import { useSessionStorage } from '@uidotdev/usehooks';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import { InfoMenu } from '../components/info';
 
+import { SettingsContext } from '../providers/settings';
 import CircleInfo from '../static/icons/circle-info.svg?react';
 import CircleXmark from '../static/icons/circle-xmark.svg?react';
 
@@ -11,22 +11,14 @@ export function Login({
 }: {
     setConnData: (connData: ConnData) => void;
 }) {
+    const { sess, user, setUser } = useContext(SettingsContext);
     const [showInfo, setShowInfo] = useState(false);
     const [manualEntry, setManualEntry] = useState(false);
     const [rooms, setRooms] = useState<{ [name: string]: string }>({});
-    const [sess, setSess] = useSessionStorage<string>('sess2', '');
-    const [user, setUser] = useSessionStorage<string>('user2', '');
     const [room, setRoom] = useState<string>('');
 
-    useEffect(() => {
-        if (!sess) {
-            // call setSess to ensure it gets saved, rather than setting
-            // the default to random which would be regenerated each refresh
-            setSess((Math.random() + 1).toString(36).substring(2));
-        }
-    }, [sess, setSess]);
-
-    // biome-ignore lint/correctness/useExhaustiveDependencies: we only want to run this once
+    // we only want to run this once, not every time `room` changes
+    // biome-ignore lint/correctness/useExhaustiveDependencies:
     useEffect(() => {
         fetch('/rooms')
             .then((response) => response.json())
