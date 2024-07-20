@@ -1,3 +1,4 @@
+import { useServerTime } from '@shish2k/react-use-servertime';
 import * as jsonpatch from 'jsonpatch';
 import { createContext, useEffect, useState } from 'react';
 
@@ -5,6 +6,7 @@ export type RoomContextType = {
     conn: WebSocket;
     room: RoomData;
     send: (data: any) => void;
+    getServerTime: () => number;
 };
 
 export const RoomContext = createContext<RoomContextType>({} as RoomContextType);
@@ -25,6 +27,7 @@ export function RoomProvider({ connData, children }: { connData: ConnData; child
     const [room, setRoom] = useState<RoomData | null>(null);
     const [errors, setErrors] = useState(0);
     const socketName = getSocketName(connData, errors);
+    const { offset } = useServerTime({url: "/time"});
 
     console.log('Socket name:', socketName);
     useEffect(() => {
@@ -55,6 +58,10 @@ export function RoomProvider({ connData, children }: { connData: ConnData; child
         };
     }, [socketName, errors]);
 
+    const getServerTime = () => {
+        return new Date().getTime() / 1000 + offset;
+    }
+
     if (conn === null) {
         return (
             <main className="login">
@@ -84,5 +91,5 @@ export function RoomProvider({ connData, children }: { connData: ConnData; child
         conn.send(JSON.stringify(data));
     }
 
-    return <RoomContext.Provider value={{ room, conn, send }}>{children}</RoomContext.Provider>;
+    return <RoomContext.Provider value={{ room, conn, send, getServerTime }}>{children}</RoomContext.Provider>;
 }

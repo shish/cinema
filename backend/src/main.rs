@@ -61,6 +61,7 @@ async fn main() {
         movies: args.movies,
     });
     let app: _ = Router::new()
+        .route("/time", get(handle_time))
         .route("/room", get(handle_room))
         .route("/rooms", get(handle_rooms))
         .route("/movies", get(handle_movies))
@@ -104,6 +105,14 @@ async fn handle_movies(Extension(state): Extension<Arc<AppState>>) -> impl IntoR
         Ok(list)
     }
     (StatusCode::OK, Json(_list_movies(&state.movies).unwrap()))
+}
+
+async fn handle_time() -> impl IntoResponse {
+    let now = SystemTime::now()
+        .duration_since(SystemTime::UNIX_EPOCH)
+        .unwrap()
+        .as_secs_f64();
+    (StatusCode::OK, Json(now))
 }
 
 async fn handle_rooms(Extension(state): Extension<Arc<AppState>>) -> impl IntoResponse {

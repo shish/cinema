@@ -18,6 +18,7 @@ export default defineConfig({
         proxy: {
             '/movies': { target: 'https://cinema.shish.io' },
             '/rooms': { target: 'https://cinema.shish.io' },
+            '/time': { target: 'https://cinema.shish.io' },
             '/room': {
                 target: 'https://cinema.shish.io',
                 ws: true,

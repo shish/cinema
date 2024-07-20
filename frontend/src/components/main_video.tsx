@@ -4,6 +4,7 @@ import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { SettingsContext } from '../providers/settings';
 import Pause from '../static/icons/pause.svg?react';
 import Play from '../static/icons/play.svg?react';
+import { RoomContext } from '../providers/room';
 
 class HLSVideoElement extends HTMLVideoElement {
     hls: Hls | null = null;
@@ -58,6 +59,7 @@ export function MainVideo({
     send: (data: any) => void;
 }) {
     const movieRef = useRef<HTMLVideoElement>(null);
+    const { getServerTime } = useContext(RoomContext);
     const { showSubs } = useContext(SettingsContext);
     const [currentTime, setCurrentTime] = useState<number>(0);
     const [duration, setDuration] = useState<number>(0);
@@ -95,8 +97,7 @@ export function MainVideo({
             setCurrentTimeIsh(movie, playingState.paused);
         }
         if (playingState.playing !== undefined) {
-            // fixme useServerTime
-            const goalTime = new Date().getTime() / 1000 - playingState.playing;
+            const goalTime = getServerTime() - playingState.playing;
             if (goalTime < 0 || goalTime > (movie.duration || 9999)) {
                 // if we haven't yet started, or we have already finished, then pause at the start
                 if (!movie.paused) movie.pause();
@@ -146,8 +147,7 @@ export function MainVideo({
         send({ pause: [movieFile, currentTime] });
     }
     function play() {
-        // FIXME: useServerTime
-        send({ play: [movieFile, new Date().getTime() / 1000 - currentTime] });
+        send({ play: [movieFile, getServerTime() - currentTime] });
     }
     function seek() {
         send({ pause: [movieFile, currentTime] });
