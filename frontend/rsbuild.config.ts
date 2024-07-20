@@ -4,11 +4,7 @@ import { pluginSass } from '@rsbuild/plugin-sass';
 import { pluginSvgr } from '@rsbuild/plugin-svgr';
 
 export default defineConfig({
-    plugins: [
-        pluginReact(),
-        pluginSass(),
-        pluginSvgr({ svgrOptions: { svgProps: { width: '1em', height: '1em' } } }),
-    ],
+    plugins: [pluginReact(), pluginSass(), pluginSvgr({ svgrOptions: { svgProps: { width: '1em', height: '1em' } } })],
     html: {
         title: 'Cinema',
         favicon: 'src/static/favicon.svg',

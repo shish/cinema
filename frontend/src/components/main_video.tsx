@@ -1,10 +1,10 @@
 import Hls from 'hls.js';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 
+import { RoomContext } from '../providers/room';
 import { SettingsContext } from '../providers/settings';
 import Pause from '../static/icons/pause.svg?react';
 import Play from '../static/icons/play.svg?react';
-import { RoomContext } from '../providers/room';
 
 class HLSVideoElement extends HTMLVideoElement {
     hls: Hls | null = null;
@@ -40,15 +40,6 @@ function ts2hms(ts: number): string {
     return new Date(ts * 1000).toISOString().substring(11, 19);
 }
 
-function setCurrentTimeIsh(movie: HTMLVideoElement, goal: number) {
-    // if our time is nearly-correct, leave it as-is
-    const diff = Math.abs(movie.currentTime - goal);
-    if (diff > 3) {
-        console.log(`Time is ${movie.currentTime} and should be ${goal}`);
-        movie.currentTime = goal;
-    }
-}
-
 export function MainVideo({
     movieFile,
     playingState,
@@ -59,12 +50,12 @@ export function MainVideo({
     send: (data: any) => void;
 }) {
     const movieRef = useRef<HTMLVideoElement>(null);
-    const { getServerTime } = useContext(RoomContext);
+    const { now } = useContext(RoomContext);
     const { showSubs } = useContext(SettingsContext);
     const [currentTime, setCurrentTime] = useState<number>(0);
     const [duration, setDuration] = useState<number>(0);
     const [isPlaying, setIsPlaying] = useState<boolean>(false);
-    const [isMuted, setIsMuted] = useState<boolean>(true);
+    const [isMuted, setIsMuted] = useState<boolean>(false);
 
     // Monitor HTML video element for changes
     useEffect(() => {
@@ -92,43 +83,50 @@ export function MainVideo({
 
     useEffect(() => {
         const movie = movieRef.current!;
-        if (playingState.paused !== undefined) {
-            if (!movie.paused) movie.pause();
-            setCurrentTimeIsh(movie, playingState.paused);
-        }
-        if (playingState.playing !== undefined) {
-            const goalTime = getServerTime() - playingState.playing;
-            if (goalTime < 0 || goalTime > (movie.duration || 9999)) {
-                // if we haven't yet started, or we have already finished, then pause at the start
-                if (!movie.paused) movie.pause();
-                setCurrentTimeIsh(movie, 0);
-            } else {
-                setCurrentTimeIsh(movie, goalTime);
 
-                // if we're supposed to be playing, but we're paused, attempt to
-                // trigger auto-play
-                if (movie.paused) {
+        // Figure out the goal time, whether we're goal-paused or goal-playing.
+        // If our goal time is invalid, then pause at the start
+        // (goal time may become valid, eg if it is set to the future and then
+        // we wait for the the future to arrive)
+        let goalTime = playingState.paused || now - (playingState.playing || 0);
+        if (goalTime < 0 || goalTime > (movie.duration || 9999)) {
+            movie.pause();
+            goalTime = 0;
+        }
+
+        // Set the movie time, whether we're movie-paused or movie-playing.
+        // If we're currently playing, then only bother to set the time if it's
+        // more than 3 seconds off, to avoid stuttering.
+        if (movie.paused || Math.abs(movie.currentTime - goalTime) > 3) {
+            console.log(`Time is ${movie.currentTime} and should be ${goalTime}`);
+            movie.currentTime = goalTime;
+        }
+
+        if (playingState.paused && !movie.paused) {
+            movie.pause();
+        }
+        if (playingState.playing && movie.paused) {
+            // if we're supposed to be playing, but we're paused, attempt to
+            // trigger auto-play
+            movie
+                .play()
+                .then((_) => {
+                    // everything is awesome
+                })
+                .catch((error) => {
+                    // attempt to play while muted
+                    movie.muted = true;
                     movie
                         .play()
                         .then((_) => {
-                            // everything is awesome
+                            // playing but muted
                         })
                         .catch((error) => {
-                            // attempt to play while muted
-                            movie.muted = true;
-                            movie
-                                .play()
-                                .then((_) => {
-                                    // playing but muted
-                                })
-                                .catch((error) => {
-                                    movie.muted = false;
-                                });
+                            movie.muted = false;
                         });
-                }
-            }
+                });
         }
-    }, [playingState]);
+    }, [now, playingState]);
 
     useEffect(() => {
         const movie = movieRef.current!;
@@ -147,7 +145,7 @@ export function MainVideo({
         send({ pause: [movieFile, currentTime] });
     }
     function play() {
-        send({ play: [movieFile, getServerTime() - currentTime] });
+        send({ play: [movieFile, now - currentTime] });
     }
     function seek() {
         send({ pause: [movieFile, currentTime] });
