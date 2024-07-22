@@ -6,7 +6,7 @@ import { SettingsContext } from '../providers/settings';
 import CircleInfo from '../static/icons/circle-info.svg?react';
 import CircleXmark from '../static/icons/circle-xmark.svg?react';
 
-export function Login({
+export function LoginScreen({
     setConnData,
 }: {
     setConnData: (connData: ConnData) => void;
@@ -56,6 +56,7 @@ export function Login({
                         placeholder="Enter Your Name"
                         onChange={(e) => setUser(e.target.value)}
                         defaultValue={user}
+                        autoComplete="off"
                     />
                     {Object.entries(rooms).length > 0 && !manualEntry ? (
                         <select
@@ -78,6 +79,7 @@ export function Login({
                             maxLength={4}
                             onChange={(e) => setRoom(e.target.value)}
                             placeholder="Enter Room Code"
+                            autoComplete="off"
                         />
                     )}
                     <button type="submit">Join</button>

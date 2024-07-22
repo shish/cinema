@@ -1,4 +1,6 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
+import Picker from 'emoji-picker-react';
+
 import { SettingsContext } from '../providers/settings';
 
 function absolute_timestamp(ts: number): string {
@@ -46,7 +48,6 @@ export function Chat({
     send: (data: any) => void;
 }) {
     const { showSystem } = useContext(SettingsContext);
-    const [input, setInput] = useState<string>('');
 
     // we really do want to run this every time the chat changes, even though
     // the code "doesn't depend on log" (chat_log.scrollHeight does depend on
@@ -59,6 +60,7 @@ export function Chat({
         }
     }, [log]);
 
+    // FIXME markdown support
     return (
         <div className="chat">
             <div className="chat_log" id="chat_log">
@@ -68,31 +70,98 @@ export function Chat({
                         .map((p) => (
                             <li key={p.absolute_timestamp} className={p.user === 'system' ? 'system' : 'user'}>
                                 <span className="absolute_timestamp">{absolute_timestamp(p.absolute_timestamp)}</span>
-                                <span className="user" style={{ color: name2color(p.user) }}>
-                                    {p.user}
-                                </span>
+                                <span className="user" style={{ color: name2color(p.user) }}>{p.user}</span>
                                 <span className="message">{addAts(p.message)}</span>
                             </li>
                         ))}
                 </ul>
             </div>
-            <form
-                className="chat_input"
-                onSubmit={(e) => {
-                    e.preventDefault();
-                    send({ chat: input });
-                    setInput('');
+            <ChatInput
+                onSend={(text) => {
+                    send({ chat: text });
                 }}
-            >
-                <input
-                    id="chat_input"
-                    autoComplete={'off'}
-                    enterKeyHint={'send'}
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    placeholder="Type to chat"
-                />
-            </form>
+                users={[]}
+            />
         </div>
+    );
+}
+
+/**
+ * A generic instant-messenger style chat input box.
+ * 
+ * TODO list:
+ *   * Preview-rendered basic markdown (*bold* and _italic_ rendered as such)
+ *   * Emoji selector button
+ *   * Emoji autocompletion with ":"
+ *   * Username autocompletion with "@"
+ * 
+ * Params:
+ *   * `onSend` is a callback that is called when the user hits enter.
+ *   * `users` is a list of usernames to use for autocompletion.
+ * 
+ */
+export function ChatInput({
+    onSend,
+    users = [],
+}: {
+    onSend: (text: string) => void,
+    users: string[],
+}) {
+    const chatInput = useRef<HTMLInputElement>(null);
+    const pickerButton = useRef<HTMLButtonElement>(null);
+    const [cursorPos, setCursorPos] = useState(0);
+    const [input, setInput] = useState<string>('');
+    const [showPicker, setShowPicker] = useState(false);
+    const [mouses, setMouses] = useState(0);
+    const emojis = ['😃', '😁', '😀', '🥰', '😂'];
+
+    const onEmojiClick = (emojiObject: any) => {
+        // FIXME: insert emoji at cursor
+        setInput((prevInput) => prevInput + emojiObject.emoji);
+        setShowPicker(false);
+        // FIXME: return cursor to where it was before emoji button was clicked
+        chatInput.current?.focus();
+    };
+
+    return (
+        <form
+            className="chat_input"
+            onSubmit={(e) => {
+                e.preventDefault();
+                onSend(input);
+                setInput('');
+            }}
+        >
+            <input
+                ref={chatInput}
+                id="chat_input"
+                autoComplete={'off'}
+                enterKeyHint={'send'}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Type to chat"
+            />
+            <button
+                ref={pickerButton}
+                type="button"
+                onClick={() => setShowPicker(!showPicker)}
+                onMouseEnter={() => setMouses(mouses + 1)}
+                onMouseLeave={() => setMouses(mouses + 1)}
+            >
+                &nbsp;{emojis[mouses % emojis.length]}&nbsp;
+            </button>
+            {showPicker && (
+                <div
+                    className="emoji-picker"
+                    style={{
+                        position: "absolute",
+                        bottom: document.getElementsByTagName("main")[0].offsetHeight - (pickerButton.current?.offsetTop || 0),
+                        right: 0,
+                    }}
+                >
+                    <Picker onEmojiClick={onEmojiClick} previewConfig={{ showPreview: false }} />
+                </div>
+            )}
+        </form>
     );
 }

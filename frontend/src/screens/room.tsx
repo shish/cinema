@@ -13,7 +13,25 @@ import { SettingsContext } from '../providers/settings';
 import CircleInfo from '../static/icons/circle-info.svg?react';
 import Gears from '../static/icons/gears.svg?react';
 
-export function Room({ connData }: { connData: ConnData }) {
+function Header({
+    setShowInfo,
+    setShowSettings,
+}: {
+    setShowInfo: (show: boolean) => void;
+    setShowSettings: (show: boolean) => void;
+}) {
+    const { room } = useContext(RoomContext);
+
+    return (
+        <header>
+            <CircleInfo onClick={() => setShowInfo(true)} />
+            <h1>{room.title}</h1>
+            <Gears onClick={() => setShowSettings(true)} />
+        </header>
+    );
+}
+
+export function RoomScreen({ connData }: { connData: ConnData }) {
     const { room, send } = useContext(RoomContext);
     const { showChat } = useContext(SettingsContext);
     const [showInfo, setShowInfo] = useState<boolean>(false);
@@ -22,11 +40,7 @@ export function Room({ connData }: { connData: ConnData }) {
 
     return (
         <main className={`room ${isAdmin ? 'admin' : 'user'} ${showChat ? 'chat' : 'nochat'}`}>
-            <header>
-                <CircleInfo onClick={() => setShowInfo(true)} />
-                <h1>{room.title}</h1>
-                <Gears onClick={() => setShowSettings(true)} />
-            </header>
+            <Header setShowInfo={setShowInfo} setShowSettings={setShowSettings}/>
             {isAdmin && <MovieList movieFile={room.video_state.video?.[0] || null} send={send} />}
             {room.video_state.video ? (
                 <MainVideo movieFile={room.video_state.video[0]} playingState={room.video_state.video[1]} send={send} />

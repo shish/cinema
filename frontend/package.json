@@ -12,6 +12,7 @@
     "dependencies": {
         "@shish2k/react-use-servertime": "^0.0.3",
         "@uidotdev/usehooks": "^2.4.1",
+        "emoji-picker-react": "^4.11.1",
         "hls.js": "^1.5.13",
         "jsonpatch": "^3.1.0",
         "react": "^18.3.1",

@@ -373,8 +373,10 @@ MAIN.room {
 
         .chat_input {
             flex: 0 0 auto;
+            display: flex;
 
             INPUT {
+                flex: 1 1 auto;
                 font-size: 1.5rem;
                 width: 100%;
             }

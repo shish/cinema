@@ -3,8 +3,8 @@ import { useState } from 'react';
 import { RoomProvider } from '../providers/room';
 import { SettingsProvider } from '../providers/settings';
 
-import { Login } from './login';
-import { Room } from './room';
+import { LoginScreen } from './login';
+import { RoomScreen } from './room';
 
 import '../static/style.scss';
 
@@ -28,10 +28,10 @@ export function Root() {
         <SettingsProvider>
             {connData ? (
                 <RoomProvider connData={connData}>
-                    <Room connData={connData} />
+                    <RoomScreen connData={connData} />
                 </RoomProvider>
             ) : (
-                <Login setConnData={setConnData} />
+                <LoginScreen setConnData={setConnData} />
             )}
         </SettingsProvider>
     );
