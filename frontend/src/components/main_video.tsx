@@ -98,7 +98,7 @@ export function MainVideo({
         // If we're currently playing, then only bother to set the time if it's
         // more than 3 seconds off, to avoid stuttering.
         if (movie.paused || Math.abs(movie.currentTime - goalTime) > 3) {
-            console.log(`Time is ${movie.currentTime} and should be ${goalTime}`);
+            if(!movie.paused) console.log(`Time is ${movie.currentTime} and should be ${goalTime}`);
             movie.currentTime = goalTime;
         }
 
@@ -139,7 +139,7 @@ export function MainVideo({
         const movie = movieRef.current!;
         setCurrentTime(movie.currentTime);
         setDuration(movie.duration || 0);
-        console.log('updateDuration', currentTime, duration);
+        // console.log('updateDuration', currentTime, duration);
     }
     function pause() {
         send({ pause: [movieFile, currentTime] });
