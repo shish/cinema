@@ -98,7 +98,6 @@ export function Chat({
         }
     }, [log]);
 
-    // FIXME markdown support
     return (
         <div className="chat">
             <div className="chat_log" id="chat_log">
@@ -131,7 +130,6 @@ export function Chat({
  *
  * TODO list:
  *   * Preview-rendered basic markdown (*bold* and _italic_ rendered as such)
- *   * Emoji selector button
  *   * Emoji autocompletion with ":"
  *   * Username autocompletion with "@"
  *
