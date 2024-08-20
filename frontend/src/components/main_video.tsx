@@ -147,8 +147,8 @@ export function MainVideo({
     function play() {
         send({ play: [movieFile, now - currentTime] });
     }
-    function seek() {
-        send({ pause: [movieFile, currentTime] });
+    function seek(time: number) {
+        send({ pause: [movieFile, time] });
     }
 
     return (
@@ -180,7 +180,7 @@ export function MainVideo({
                         <Play />
                     </button>
                 )}
-                <input id="seekbar" type="range" onChange={() => seek()} min={0} max={duration} value={currentTime} />
+                <input id="seekbar" type="range" onChange={(e) => seek(parseFloat(e.target.value))} min={0} max={duration} value={currentTime} />
                 <span>
                     {ts2hms(currentTime)} / {ts2hms(duration)}
                 </span>
