@@ -44,6 +44,10 @@ export function RoomProvider({ connData, children }: { connData: ConnData; child
         };
         conn.onclose = () => {
             console.log('WebSocket closed');
+            // "closed" indicates intentional closing, but we never intentionally close,
+            // so let's treat "something in the middle of the stack closed the connection"
+            // as an error
+            setErrors(errors + 1);
             setConn(null);
             setRoom(null);
         };
