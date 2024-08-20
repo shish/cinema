@@ -4,10 +4,10 @@ A thing to watch videos at the same time as other people
 
 ## Frontend setup:
 
-```
+```bash
 cd frontend
 npm install
-npm run watch
+npm run dev
 ```
 
 The frontend will then be auto-compiled each time it changes, run
@@ -15,14 +15,14 @@ the backend if you want to have a web server to view it.
 
 ## Backend setup:
 
-```
+```bash
 cd backend
 cargo run -- -m /path/to/some/hls/videos/
 ```
 
 Or to run with logging and auto-restart whenever the code changes:
 
-```
+```bash
 RUST_LOG=cinema_be=info cargo watch -s 'cargo run -- -m /Users/shish2k/Movies/Cinema/'
 ```
 
@@ -30,25 +30,24 @@ Traffic served on http://localhost:8074/
 
 ## Media setup:
 
-Use `encode.sh` to convert videos to a variety of HLS streams with different
+Use `hls.py` to convert videos to a variety of HLS streams with different
 quality settings that the client can then select from based on bandwidth.
 
 ```
 $ ls
-blah.mp4
-blah.srt
+blah.mp4    # original video
+blah.srt    # subtitles (optional)
 
-$ ~/Projects/cinema/encode.sh blah.mp4
+$ ~/Projects/cinema/hls.py blah.mp4
 
 $ ls
 blah.mp4
 blah.srt
-blah.m3u8
-blah.vtt
-blah_0
-blah_1
-blah_2
-blah_3
+blah.m3u8   # index of available quality streams
+blah.vtt    # web-format subtitles
+blah_0      # folder full of high-quality stream chunks
+blah_1      # folder full of mid-quality stream chunks
+blah_2      # folder full of low-quality stream chunks
 ```
 
 ## Protocol
@@ -64,5 +63,5 @@ blah_3
   * `{"pause", ["foo.mp4", 20.4]}` -- timestamp inside the file where we paused
   * `{"play", ["bar.mp4", 1652775941.2]]` -- absolute timestamp for "the moment
     when the movie started" (specified this way so that people who arrive late
-	and receive this message after everybody else will still be in sync)
+	  and receive this message after everybody else will still be in sync)
   * `{"chat", "Hello there friends"}`
