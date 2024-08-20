@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import Picker from 'emoji-picker-react';
-import SimpleMarkdown, { OutputRules, ParserRules, ReactRules } from '@khanacademy/simple-markdown';
+import SimpleMarkdown, { ReactRules } from '@khanacademy/simple-markdown';
 
 import { SettingsContext } from '../providers/settings';
 
