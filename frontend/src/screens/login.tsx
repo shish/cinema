@@ -27,7 +27,7 @@ export function LoginScreen({
                 if (!room && Object.keys(rooms).length > 0) {
                     setRoom(Object.keys(rooms)[0]);
                 }
-                console.log('Rooms:', rooms);
+                // console.log('Rooms:', rooms);
             })
             .catch((error) => {
                 console.error('Error loading logs:', error);
@@ -37,7 +37,7 @@ export function LoginScreen({
     function login(event: any) {
         event.preventDefault();
         if (!user || !room) return null;
-        console.log('Logging in as', user, 'to', room);
+        // console.log('Logging in as', user, 'to', room);
         setConnData({ sess, room, user });
     }
 

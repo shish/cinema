@@ -53,7 +53,7 @@ export function RoomProvider({ connData, children }: { connData: ConnData; child
                 resp = jsonpatch.apply_patch(lastResp, resp);
             }
             lastResp = resp;
-            console.log('Room:', resp);
+            // console.log('Room:', resp);
             setRoom(resp);
         };
     }, [socketName, errors]);

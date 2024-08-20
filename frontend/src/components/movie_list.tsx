@@ -17,7 +17,7 @@ export function MovieList({
             .then((response) => response.json())
             .then((movies) => {
                 setMovies(movies);
-                console.log('Movies:', movies);
+                // console.log('Movies:', movies);
             })
             .catch((error) => {
                 console.error('Error loading movies:', error);
