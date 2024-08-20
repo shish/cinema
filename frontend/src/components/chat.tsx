@@ -1,5 +1,6 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import Picker from 'emoji-picker-react';
+import SimpleMarkdown, { OutputRules, ParserRules, ReactRules } from '@khanacademy/simple-markdown';
 
 import { SettingsContext } from '../providers/settings';
 
@@ -31,13 +32,50 @@ function name2color(name: string): string {
     return `rgb(${b1}, ${b2}, ${b3})`;
 }
 
-function addAts(message: string) {
+function CustomSpoiler({ children }: { children: any }) {
+    const [show, setShow] = useState(false);
     return (
-        message
-            .split(/(@[a-zA-Z0-9]+)/)
-            // biome-ignore lint/correctness/useJsxKeyInIterable: there is no key, and the list doesn't change
-            .map((x) => (x.startsWith('@') ? <span style={{ color: name2color(x.substring(1)) }}>{x}</span> : x))
+        <span className={'spoiler ' + (show ? ' show' : '')} onClick={() => setShow(!show)}>
+            {children}
+        </span>
     );
+}
+
+// @ts-ignore - I'm not sure what type this is supposed to be,
+// some combination of ParserRules and OutputRules<ReactRule> ?
+const rules: ReactRules = {
+    ...SimpleMarkdown.defaultRules,
+    user: {
+        order: 1, // ???
+        match: function (source, state, lookbehind) {
+            return /^(@[a-zA-Z0-9]+)/.exec(source);
+        },
+        parse: function (capture, recurseParse, state) {
+            return { content: capture[1] };
+        },
+        react: function (node, recurseOutput) {
+            return <span style={{ color: name2color(node.content.substring(1)) }}>{node.content}</span>;
+        },
+    },
+    spoiler: {
+        order: 1, // ???
+        match: function (source, state, lookbehind) {
+            return /^\|\|([^|]+)\|\|/.exec(source);
+        },
+        parse: function (capture, recurseParse, state) {
+            return { content: recurseParse(capture[1], state) };
+        },
+        react: function (node, recurseOutput) {
+            return <CustomSpoiler>{recurseOutput(node.content)}</CustomSpoiler>;
+        },
+    },
+};
+const parser = SimpleMarkdown.parserFor(rules);
+const reactOutput = SimpleMarkdown.outputFor(rules, 'react');
+function md(source: string) {
+    var parseTree = parser(source, { inline: true });
+    var outputResult = reactOutput(parseTree);
+    return outputResult;
 }
 
 export function Chat({
@@ -70,8 +108,10 @@ export function Chat({
                         .map((p) => (
                             <li key={p.absolute_timestamp} className={p.user === 'system' ? 'system' : 'user'}>
                                 <span className="absolute_timestamp">{absolute_timestamp(p.absolute_timestamp)}</span>
-                                <span className="user" style={{ color: name2color(p.user) }}>{p.user}</span>
-                                <span className="message">{addAts(p.message)}</span>
+                                <span className="user" style={{ color: name2color(p.user) }}>
+                                    {p.user}
+                                </span>
+                                <span className="message">{md(p.message)}</span>
                             </li>
                         ))}
                 </ul>
@@ -88,24 +128,24 @@ export function Chat({
 
 /**
  * A generic instant-messenger style chat input box.
- * 
+ *
  * TODO list:
  *   * Preview-rendered basic markdown (*bold* and _italic_ rendered as such)
  *   * Emoji selector button
  *   * Emoji autocompletion with ":"
  *   * Username autocompletion with "@"
- * 
+ *
  * Params:
  *   * `onSend` is a callback that is called when the user hits enter.
  *   * `users` is a list of usernames to use for autocompletion.
- * 
+ *
  */
 export function ChatInput({
     onSend,
     users = [],
 }: {
-    onSend: (text: string) => void,
-    users: string[],
+    onSend: (text: string) => void;
+    users: string[];
 }) {
     const chatInput = useRef<HTMLInputElement>(null);
     const pickerButton = useRef<HTMLButtonElement>(null);
@@ -154,8 +194,10 @@ export function ChatInput({
                 <div
                     className="emoji-picker"
                     style={{
-                        position: "absolute",
-                        bottom: document.getElementsByTagName("main")[0].offsetHeight - (pickerButton.current?.offsetTop || 0),
+                        position: 'absolute',
+                        bottom:
+                            document.getElementsByTagName('main')[0].offsetHeight -
+                            (pickerButton.current?.offsetTop || 0),
                         right: 0,
                     }}
                 >

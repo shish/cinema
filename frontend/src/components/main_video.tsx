@@ -98,7 +98,7 @@ export function MainVideo({
         // If we're currently playing, then only bother to set the time if it's
         // more than 3 seconds off, to avoid stuttering.
         if (movie.paused || Math.abs(movie.currentTime - goalTime) > 3) {
-            if(!movie.paused) console.log(`Time is ${movie.currentTime} and should be ${goalTime}`);
+            if (!movie.paused) console.log(`Time is ${movie.currentTime} and should be ${goalTime}`);
             movie.currentTime = goalTime;
         }
 
@@ -180,7 +180,14 @@ export function MainVideo({
                         <Play />
                     </button>
                 )}
-                <input id="seekbar" type="range" onChange={(e) => seek(parseFloat(e.target.value))} min={0} max={duration} value={currentTime} />
+                <input
+                    id="seekbar"
+                    type="range"
+                    onChange={(e) => seek(parseFloat(e.target.value))}
+                    min={0}
+                    max={duration}
+                    value={currentTime}
+                />
                 <span>
                     {ts2hms(currentTime)} / {ts2hms(duration)}
                 </span>

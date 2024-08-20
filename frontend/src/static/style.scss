@@ -347,6 +347,21 @@ MAIN.room {
                     .absolute_timestamp::after {
                         content: " ";
                     }
+                    .message {
+                        .spoiler {
+                            color: var(--blackout);
+                            background: var(--blackout);
+                            //border: 1px solid var(--grid);
+                            cursor: pointer;
+                            //padding: 0.1em;
+                            //border-radius: 0.2em;
+                        }
+                        .spoiler:hover,
+                        .spoiler.show {
+                            color: var(--text);
+                            background: var(--background);
+                        }
+                    }
                 }
 
                 LI.system {
