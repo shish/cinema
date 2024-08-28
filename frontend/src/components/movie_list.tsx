@@ -13,6 +13,7 @@ export function MovieList({
     const [folder, setFolder] = useState<string>('');
 
     const refreshMovies = useCallback(() => {
+        setMovies([]);
         fetch('/movies')
             .then((response) => response.json())
             .then((movies) => {
@@ -30,8 +31,13 @@ export function MovieList({
 
     return (
         <form className="movie_list">
-            <select id="movie_dirs" onChange={(e) => setFolder(e.target.value)} defaultValue={folder}>
-                <option value="">Folder</option>
+            <select
+                id="movie_dirs"
+                onChange={(e) => setFolder(e.target.value)}
+                defaultValue={folder}
+                disabled={movies.length === 0}
+            >
+                <option value="">Folder{movies.length === 0 && ' (Loading...)'}</option>
                 {[...new Set(movies.map((p) => p.split('/')[0]))].map((p) => (
                     <option key={p}>{p}</option>
                 ))}
@@ -40,8 +46,9 @@ export function MovieList({
                 id="movie_list"
                 onChange={(e) => send(e.target.value ? { pause: [e.target.value, 0] } : { stop: null })}
                 value={movieFile || ''}
+                disabled={movies.length === 0}
             >
-                <option value="">Select Movie</option>
+                <option value="">Select Movie{movies.length === 0 && ' (Loading...)'}</option>
                 {movies
                     .filter((p) => !folder || p.startsWith(`${folder}/`))
                     .map((p) => (
