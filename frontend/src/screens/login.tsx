@@ -57,6 +57,7 @@ export function LoginScreen({
                         onChange={(e) => setUser(e.target.value)}
                         defaultValue={user}
                         autoComplete="off"
+                        autoFocus={user.length === 0}
                     />
                     {Object.entries(rooms).length > 0 && !manualEntry ? (
                         <select
