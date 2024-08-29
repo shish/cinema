@@ -7,18 +7,13 @@ import Pause from '../static/icons/pause.svg?react';
 import Play from '../static/icons/play.svg?react';
 
 class HLSVideoElement extends HTMLVideoElement {
+    static observedAttributes = ['src'];
     hls: Hls | null = null;
 
-    get src() {
-        return this.getAttribute('src') || '';
-    }
-
-    set src(val) {
-        if (val !== this.src) {
-            if (this.hls && val.endsWith('.m3u8')) {
-                this.hls.loadSource(val);
-            } else {
-                this.setAttribute('src', val);
+    attributeChangedCallback(name: string, oldValue: string, newValue: string) {
+        if (name === 'src' && oldValue !== newValue) {
+            if (this.hls && newValue.endsWith('.m3u8')) {
+                this.hls.loadSource(newValue);
             }
         }
     }
