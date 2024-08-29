@@ -6,7 +6,9 @@ import subprocess
 from pathlib import Path
 
 parser = argparse.ArgumentParser(description="Generate HLS stream from video file")
+parser.add_argument("--force", action="store_true", help="overwrite existing files")
 parser.add_argument("--dry-run", action="store_true", help="print commands instead of executing them")
+parser.add_argument("--thumbnail", help="where to take thumbnail from (eg 00:42)")
 parser.add_argument("files", nargs="+", help="video files to process", type=Path)
 args = parser.parse_args()
 
@@ -27,7 +29,9 @@ for path_in in args.files:
 
     if path_in.exists():
         # generate VTT subtitles if needed
-        if not path_vtt.exists():
+        if path_vtt.exists() and not args.force:
+            print(f"Skipping {path_vtt} (already exists)")
+        else:
             if path_srt.exists():
                 # convert .srt to .vtt
                 cmd = ["ffmpeg", "-i", path_srt, path_vtt]
@@ -40,14 +44,19 @@ for path_in in args.files:
                 subprocess.run(cmd)
 
         # generate thumbnail if needed
-        if not path_thumb.exists():
+        # (if the user has specified a thumbnail timestamp, we can't tell if the existing
+        # thumbnail is the one they want, so we always regenerate it)
+        if not args.thumbnail and (path_thumb.exists() and not args.force):
+            print(f"Skipping {path_thumb} (already exists)")
+        else:
             cmd = [
                 "ffmpeg",
                 "-i", path_in,
-                "-ss", "00:02:00",
+                "-ss", args.thumbnail or "00:02:00",
                 "-vf", "thumbnail",
                 "-frames:v", "1",
                 "-update", "true",
+                "-y",
                 path_thumb
             ]
             if args.dry_run:
@@ -57,7 +66,9 @@ for path_in in args.files:
 
 
         # create HLS stream if needed
-        if not path_index.exists():
+        if path_index.exists() and not args.force:
+            print(f"Skipping {path_index} (already exists)")
+        else:
             cmd = ["ffmpeg", "-i", path_in]
 
             # clone input video stream, resize clone #n to height=fmts[n][0]
