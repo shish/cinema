@@ -3,12 +3,14 @@
 import os
 import sys
 import subprocess
-import shlex
+from pathlib import Path
 
-for fn_in in sys.argv[1:]:
-    fn_base, fn_ext = os.path.splitext(fn_in)
-    fn_srt = f"{fn_base}.srt"
-    fn_vtt = f"{fn_base}.vtt"
+for arg in sys.argv[1:]:
+    path_in = Path(arg)
+    path_srt = path_in.with_suffix(".srt")
+    path_vtt = path_in.with_suffix(".vtt")
+    path_index = path_in.with_suffix(".m3u8")
+    path_stream = path_in.with_name(path_in.stem + "_%v")
 
     # height, video bandwidth, audio bandwidth
     fmts = [
@@ -17,17 +19,17 @@ for fn_in in sys.argv[1:]:
         (360, "1M", "128k"),
     ]
 
-    if os.path.exists(fn_in):
+    if path_in.exists():
         # generate VTT subtitles if needed
-        if not os.path.exists(fn_vtt):
-            if os.path.exists(fn_srt):
+        if not path_vtt.exists():
+            if path_srt.exists():
                 # convert .srt to .vtt
-                subprocess.run(["ffmpeg", "-i", fn_srt, fn_vtt])
+                subprocess.run(["ffmpeg", "-i", path_srt, path_vtt])
             else:
                 # extract subtitles from the video container
-                subprocess.run(["ffmpeg", "-i", fn_in, fn_vtt])
+                subprocess.run(["ffmpeg", "-i", path_in, path_vtt])
 
-        cmd = ["ffmpeg", "-i", fn_in]
+        cmd = ["ffmpeg", "-i", path_in]
 
         # clone input video stream, resize clone #n to height=fmts[n][0]
         filt = "[0:v]split=%d" % len(fmts)
@@ -70,10 +72,10 @@ for fn_in in sys.argv[1:]:
             "-hls_playlist_type", "vod",
             "-hls_flags", "independent_segments",
             "-hls_segment_type", "mpegts",
-            "-hls_segment_filename", f"{fn_base}_%v/data%02d.ts",
-            "-master_pl_name", f"{fn_base}.m3u8"
+            "-hls_segment_filename", path_stream / "data%02d.ts",
+            "-master_pl_name", path_index
         ])
 
-        cmd.extend(["-var_stream_map", " ".join(f"v:{n},a:{n}" for n in range(len(fmts))), f"{fn_base}_%v/index.m3u8"])
+        cmd.extend(["-var_stream_map", " ".join(f"v:{n},a:{n}" for n in range(len(fmts))), path_stream / "index.m3u8"])
         subprocess.run(cmd)
         # print(shlex.join(cmd))
