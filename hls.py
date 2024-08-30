@@ -3,7 +3,13 @@
 import argparse
 import shlex
 import subprocess
+import logging
 from pathlib import Path
+
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
+log = logging.getLogger(__name__)
+
 
 parser = argparse.ArgumentParser(description="Generate HLS stream from video file")
 parser.add_argument("--force", action="store_true", help="overwrite existing files")
@@ -12,12 +18,21 @@ parser.add_argument("--thumbnail", help="where to take thumbnail from (eg 00:42)
 parser.add_argument("files", nargs="+", help="video files to process", type=Path)
 args = parser.parse_args()
 
+
+def run(cmd, logfile: Path):
+    log.info(shlex.join(str(x) for x in cmd))
+    if not args.dry_run:
+        with logfile.open("a") as f:
+            subprocess.run(cmd, stdout=f, stderr=f)
+
+
 for path_in in args.files:
     assert isinstance(path_in, Path)
     path_srt = path_in.with_suffix(".srt")
     path_vtt = path_in.with_suffix(".vtt")
     path_thumb = path_in.with_suffix(".jpg")
     path_index = path_in.with_suffix(".m3u8")
+    path_log = path_in.with_suffix(".log")
     path_stream = path_in.with_name(path_in.stem + "_%v")
 
     # height, video bandwidth, audio bandwidth
@@ -30,7 +45,7 @@ for path_in in args.files:
     if path_in.exists():
         # generate VTT subtitles if needed
         if path_vtt.exists() and not args.force:
-            print(f"Skipping {path_vtt} (already exists)")
+            log.info(f"Skipping {path_vtt} (already exists)")
         else:
             if path_srt.exists():
                 # convert .srt to .vtt
@@ -38,16 +53,13 @@ for path_in in args.files:
             else:
                 # extract subtitles from the video container
                 cmd = ["ffmpeg", "-i", path_in, path_vtt]
-            if args.dry_run:
-                print(shlex.join(cmd))
-            else:
-                subprocess.run(cmd)
+            run(cmd, path_log)
 
         # generate thumbnail if needed
         # (if the user has specified a thumbnail timestamp, we can't tell if the existing
         # thumbnail is the one they want, so we always regenerate it)
         if not args.thumbnail and (path_thumb.exists() and not args.force):
-            print(f"Skipping {path_thumb} (already exists)")
+            log.info(f"Skipping {path_thumb} (already exists)")
         else:
             cmd = [
                 "ffmpeg",
@@ -59,15 +71,12 @@ for path_in in args.files:
                 "-y",
                 path_thumb
             ]
-            if args.dry_run:
-                print(shlex.join(cmd))
-            else:
-                subprocess.run(cmd)
+            run(cmd, path_log)
 
 
         # create HLS stream if needed
         if path_index.exists() and not args.force:
-            print(f"Skipping {path_index} (already exists)")
+            log.info(f"Skipping {path_index} (already exists)")
         else:
             cmd = ["ffmpeg", "-i", path_in]
 
@@ -118,7 +127,4 @@ for path_in in args.files:
 
             cmd.extend(["-var_stream_map", " ".join(f"v:{n},a:{n}" for n in range(len(fmts))), path_stream / "index.m3u8"])
 
-            if args.dry_run:
-                print(shlex.join(cmd))
-            else:
-                subprocess.run(cmd)
+            run(cmd, path_log)
