@@ -58,6 +58,7 @@ export function LoginScreen({
                         defaultValue={user}
                         autoComplete="off"
                         autoFocus={user.length === 0}
+                        required={true}
                     />
                     {Object.entries(rooms).length > 0 && !manualEntry ? (
                         <select
@@ -81,6 +82,7 @@ export function LoginScreen({
                             onChange={(e) => setRoom(e.target.value)}
                             placeholder="Enter Room Code"
                             autoComplete="off"
+                            required={true}
                         />
                     )}
                     <button type="submit">Join</button>
