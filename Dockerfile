@@ -1,5 +1,5 @@
 # output frontend code in /app/dist
-FROM node:16 AS build-frontend
+FROM node:22 AS build-frontend
 COPY frontend/package.json frontend/package-lock.json /app/
 WORKDIR /app
 RUN npm install
@@ -7,7 +7,7 @@ COPY frontend /app
 RUN npm run build
 
 # output backend code in /app/target
-FROM rust:1.73 AS build-backend
+FROM rust:1.80 AS build-backend
 COPY backend/Cargo.toml backend/Cargo.lock /app/
 WORKDIR /app
 RUN mkdir src && echo "fn main() {println!(\"stub\")}" > /app/src/main.rs && cargo build --release && rm -rf src target/release/deps/cinema*
