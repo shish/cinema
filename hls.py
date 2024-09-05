@@ -10,6 +10,13 @@ from pathlib import Path
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
 log = logging.getLogger(__name__)
 
+# height, video bandwidth, audio bandwidth
+FMTS = [
+    (720, "3M", "256k"),
+    (480, "2M", "192k"),
+    (360, "1M", "128k"),
+]
+
 
 parser = argparse.ArgumentParser(description="Generate HLS stream from video file")
 parser.add_argument("--force", action="store_true", help="overwrite existing files")
@@ -34,13 +41,6 @@ for path_in in args.files:
     path_index = path_in.with_suffix(".m3u8")
     path_log = path_in.with_suffix(".log")
     path_stream = path_in.with_name(path_in.stem + "_%v")
-
-    # height, video bandwidth, audio bandwidth
-    fmts = [
-        (720, "3M", "256k"),
-        (480, "2M", "192k"),
-        (360, "1M", "128k"),
-    ]
 
     if path_in.exists():
         # generate VTT subtitles if needed
@@ -78,17 +78,35 @@ for path_in in args.files:
         if path_index.exists() and not args.force:
             log.info(f"Skipping {path_index} (already exists)")
         else:
+            input_height = subprocess.check_output([
+                "ffprobe",
+                "-v", "error",
+                "-select_streams", "v:0",
+                "-show_entries", "stream=height",
+                "-of", "default=noprint_wrappers=1:nokey=1",
+                path_in
+            ]).decode().strip()
+
             cmd = ["ffmpeg", "-i", path_in]
 
+            active_fmts = []
+            for fmt in FMTS:
+                if int(input_height) < px:
+                    log.warning(f"Input video height {input_height} is less than {px} - skipping instead of upscaling")
+                    continue
+                active_fms.append(fmt)
+
+
             # clone input video stream, resize clone #n to height=fmts[n][0]
-            filt = "[0:v]split=%d" % len(fmts)
-            filt += "".join(f"[v{d+1}]" for d in range(len(fmts))) + "; "
-            filt += "; ".join([f"[v{n}]scale=w=-2:h={px}[v{n}out]" for n, (px, bw, abw) in enumerate(fmts, start=1)])
+            filt = "[0:v]split=%d" % len(active_fmts)
+            filt += "".join(f"[v{d+1}]" for d in range(len(active_fmts))) + "; "
+            filt += "; ".join([f"[v{n}]scale=w=-2:h={px}[v{n}out]" for n, (px, bw, abw) in enumerate(active_fmts, start=1)])
             cmd.extend(["-filter_complex", filt])
 
             cmd.extend(["-filter:a", "loudnorm"])
 
-            for n, (px, bw, abw) in enumerate(fmts, start=0):
+            for n, (px, bw, abw) in enumerate(active_fmts):
+                # video encoding settings
                 cmd.extend([
                     "-map", f"[v{n+1}out]",
                     # codec for video stream n
@@ -104,7 +122,7 @@ for path_in in args.files:
                     "-preset", "slow", "-g", "48", "-sc_threshold", "0", "-keyint_min", "48"
                 ])
 
-            for n, (px, bw, abw) in enumerate(fmts, start=0):
+                # audio encoding settings
                 cmd.extend([
                     "-map", f"a:0",
                     # codec for audio stream n
@@ -125,6 +143,6 @@ for path_in in args.files:
                 "-master_pl_name", path_index
             ])
 
-            cmd.extend(["-var_stream_map", " ".join(f"v:{n},a:{n}" for n in range(len(fmts))), path_stream / "index.m3u8"])
+            cmd.extend(["-var_stream_map", " ".join(f"v:{n},a:{n}" for n in range(len(active_fmts))), path_stream / "index.m3u8"])
 
             run(cmd, path_log)
