@@ -148,22 +148,24 @@ export function MainVideo({
 
     return (
         <div className="video">
-            <video
-                ref={movieRef}
-                id="movie"
-                src={`/movies/${movieFile}`}
-                poster={`/movies/${movieFile.replace('.m3u8', '.jpg')}`}
-                playsInline={true}
-                // Keep the progress bar in the controls section in-sync with
-                // the playing movie.
-                onTimeUpdate={() => updateDuration()}
-                // load metadata and update duration ASAP
-                preload="metadata"
-                onCanPlay={() => updateDuration()}
-                is="hls-video"
-            >
-                <track kind="captions" src={`/movies/${movieFile.replace('.m3u8', '.vtt')}`} default />
-            </video>
+            <div className="videoScaler">
+                <video
+                    ref={movieRef}
+                    id="movie"
+                    src={`/movies/${movieFile}`}
+                    poster={`/movies/${movieFile.replace('.m3u8', '.jpg')}`}
+                    playsInline={true}
+                    // Keep the progress bar in the controls section in-sync with
+                    // the playing movie.
+                    onTimeUpdate={() => updateDuration()}
+                    // load metadata and update duration ASAP
+                    preload="metadata"
+                    onCanPlay={() => updateDuration()}
+                    is="hls-video"
+                >
+                    <track kind="captions" src={`/movies/${movieFile.replace('.m3u8', '.vtt')}`} default />
+                </video>
+            </div>
             {videoHint && <div className="video_hint">{videoHint}</div>}
             <form className="controls">
                 {playingState.playing ? (
