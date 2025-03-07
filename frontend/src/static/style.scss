@@ -277,10 +277,10 @@ MAIN.room {
         display: flex;
         flex-direction: column;
 
-        // scaling a video to 100% of its container doesn't work, but
-        // scaling a div to 100% of container, and then setting the video
-        // to "position: absolute; top: 0; left: 0; bottom: 0; right: 0;"
-        // (so that it matches the size of the div), does work...
+        // scaling a video to 100% of its container doesn't work when
+        // the container is flex-y or grid-y, but scaling a div to 100%
+        // of container, and then setting the video to "position: absolute;"
+        // within the div, seems ok...
         .videoScaler {
             flex: 1 1 auto;
             width: 100%;
@@ -289,10 +289,8 @@ MAIN.room {
 
             VIDEO {
                 position: absolute;
-                top: 0;
-                left: 0;
-                bottom: 0;
-                right: 0;
+                width: 100%;
+                height: 100%;
             }
         }
 
