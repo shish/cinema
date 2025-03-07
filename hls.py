@@ -91,10 +91,10 @@ for path_in in args.files:
 
             active_fmts = []
             for fmt in FMTS:
-                if int(input_height) < px:
-                    log.warning(f"Input video height {input_height} is less than {px} - skipping instead of upscaling")
+                if int(input_height) < fmt[0]:
+                    log.warning(f"Input video height {input_height} is less than {fmt[0]} - skipping instead of upscaling")
                     continue
-                active_fms.append(fmt)
+                active_fmts.append(fmt)
 
 
             # clone input video stream, resize clone #n to height=fmts[n][0]
