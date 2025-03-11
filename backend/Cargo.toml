@@ -4,8 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-axum = { version = "0.5", features = ["ws"]}
-axum-extra = { version = "0.3", features = ["spa"] }
+axum = { version = "0.5", features = ["ws"] }
+axum-extra = { version = "0.10" }
 tokio = { version = "1.0", features = ["full"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
@@ -13,7 +13,7 @@ tower-http = { version = "0.3.0", features = ["fs", "trace"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 futures = "0.3"
-clap = { version = "3.1.18", features = ["derive"] }
-globwalk = "0.8"
+clap = { version = "^4.5", features = ["derive"] }
+globwalk = "^0.9.1"
 json-patch = "*"
 anyhow = "*"
