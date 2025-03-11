@@ -1,6 +1,6 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import SimpleMarkdown, { type ReactRules } from '@khanacademy/simple-markdown';
 import Picker from 'emoji-picker-react';
-import SimpleMarkdown, { ReactRules } from '@khanacademy/simple-markdown';
+import { useContext, useEffect, useRef, useState } from 'react';
 
 import { SettingsContext } from '../providers/settings';
 
@@ -35,7 +35,15 @@ function name2color(name: string): string {
 function CustomSpoiler({ children }: { children: any }) {
     const [show, setShow] = useState(false);
     return (
-        <span className={'spoiler ' + (show ? ' show' : '')} onClick={() => setShow(!show)}>
+        <span
+            className={`spoiler ${show ? 'show' : ''}`}
+            onClick={() => setShow(!show)}
+            onKeyDown={(e) => {
+                if (e.key === 'Space') {
+                    setShow(!show);
+                }
+            }}
+        >
             {children}
         </span>
     );
@@ -47,34 +55,24 @@ const rules: ReactRules = {
     ...SimpleMarkdown.defaultRules,
     user: {
         order: 1, // ???
-        match: function (source, state, lookbehind) {
-            return /^(@[a-zA-Z0-9]+)/.exec(source);
-        },
-        parse: function (capture, recurseParse, state) {
-            return { content: capture[1] };
-        },
-        react: function (node, recurseOutput) {
-            return <span style={{ color: name2color(node.content.substring(1)) }}>{node.content}</span>;
-        },
+        match: (source, state, lookbehind) => /^(@[a-zA-Z0-9]+)/.exec(source),
+        parse: (capture, recurseParse, state) => ({ content: capture[1] }),
+        react: (node, recurseOutput) => (
+            <span style={{ color: name2color(node.content.substring(1)) }}>{node.content}</span>
+        ),
     },
     spoiler: {
         order: 1, // ???
-        match: function (source, state, lookbehind) {
-            return /^\|\|([^|]+)\|\|/.exec(source);
-        },
-        parse: function (capture, recurseParse, state) {
-            return { content: recurseParse(capture[1], state) };
-        },
-        react: function (node, recurseOutput) {
-            return <CustomSpoiler>{recurseOutput(node.content)}</CustomSpoiler>;
-        },
+        match: (source, state, lookbehind) => /^\|\|([^|]+)\|\|/.exec(source),
+        parse: (capture, recurseParse, state) => ({ content: recurseParse(capture[1], state) }),
+        react: (node, recurseOutput) => <CustomSpoiler>{recurseOutput(node.content)}</CustomSpoiler>,
     },
 };
 const parser = SimpleMarkdown.parserFor(rules);
 const reactOutput = SimpleMarkdown.outputFor(rules, 'react');
 function md(source: string) {
-    var parseTree = parser(source, { inline: true });
-    var outputResult = reactOutput(parseTree);
+    const parseTree = parser(source, { inline: true });
+    const outputResult = reactOutput(parseTree);
     return outputResult;
 }
 

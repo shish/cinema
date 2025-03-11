@@ -1,4 +1,4 @@
-import { useSessionStorage } from '@uidotdev/usehooks';
+import { useSessionStorage } from 'usehooks-ts';
 import { createContext, useEffect, useState } from 'react';
 
 export type SettingsContextType = {
