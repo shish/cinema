@@ -78,24 +78,26 @@ for path_in in args.files:
         if path_index.exists() and not args.force:
             log.info(f"Skipping {path_index} (already exists)")
         else:
-            input_height = subprocess.check_output([
+            input_height = int(subprocess.check_output([
                 "ffprobe",
                 "-v", "error",
                 "-select_streams", "v:0",
                 "-show_entries", "stream=height",
                 "-of", "default=noprint_wrappers=1:nokey=1",
                 path_in
-            ]).decode().strip()
+            ]).decode().strip())
 
             cmd = ["ffmpeg", "-i", path_in]
 
             active_fmts = []
             for fmt in FMTS:
-                if int(input_height) < fmt[0]:
+                if input_height < fmt[0]:
                     log.warning(f"Input video height {input_height} is less than {fmt[0]} - skipping instead of upscaling")
                     continue
                 active_fmts.append(fmt)
-
+            if not active_fmts:
+                log.warning(f"Input video too small, using {input_height}")
+                active_fmts.append((input_height, "1M", "128k"))
 
             # clone input video stream, resize clone #n to height=fmts[n][0]
             filt = "[0:v]split=%d" % len(active_fmts)
