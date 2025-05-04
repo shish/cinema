@@ -180,7 +180,7 @@ export function MainVideo({
                 <input
                     id="seekbar"
                     type="range"
-                    onChange={(e) => seek(Number.parseFloat(e.target.value))}
+                    onChange={(e) => seek(e.target.valueAsNumber)}
                     min={0}
                     max={duration}
                     value={currentTime}
