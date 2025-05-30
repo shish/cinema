@@ -3,7 +3,7 @@ import { pluginReact } from '@rsbuild/plugin-react';
 import { pluginSass } from '@rsbuild/plugin-sass';
 import { pluginSvgr } from '@rsbuild/plugin-svgr';
 
-const backend = process.env.BACKEND || 'http://127.0.0.1:8074';
+const backend = process.env.BACKEND ?? 'http://127.0.0.1:8074';
 
 export default defineConfig({
     plugins: [pluginReact(), pluginSass(), pluginSvgr({ svgrOptions: { svgProps: { width: '1em', height: '1em' } } })],
