@@ -10,7 +10,7 @@
         "preview": "rsbuild preview"
     },
     "dependencies": {
-        "@khanacademy/simple-markdown": "^0.14.0",
+        "@khanacademy/simple-markdown": "^2",
         "@shish2k/react-use-servertime": "^0.0.4",
         "usehooks-ts": "^3.1.1",
         "emoji-picker-react": "^4.11.1",
