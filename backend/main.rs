@@ -43,7 +43,7 @@ async fn main() {
     let args = Args::parse();
     tracing_subscriber::registry()
         .with(tracing_subscriber::EnvFilter::new(
-            std::env::var("RUST_LOG").unwrap_or_else(|_| "cinema_be=info".into()),
+            std::env::var("RUST_LOG").unwrap_or_else(|_| "cinema=info".into()),
         ))
         .with(
             tracing_subscriber::fmt::layer(), //.with_span_events(FmtSpan::ENTER | FmtSpan::CLOSE)
