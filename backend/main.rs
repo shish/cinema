@@ -1,7 +1,7 @@
 use axum::body::Bytes;
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
-use axum::extract::Extension;
 use axum::extract::Query;
+use axum::extract::State;
 use axum::{http::StatusCode, response::IntoResponse, routing::get, Json, Router};
 use clap::Parser;
 use futures::stream::StreamExt;
@@ -73,7 +73,7 @@ async fn main() {
     axum::serve(listener, app).await.unwrap();
 }
 
-async fn handle_movies(Extension(state): Extension<Arc<AppState>>) -> impl IntoResponse {
+async fn handle_movies(State(state): State<Arc<AppState>>) -> impl IntoResponse {
     fn _list_movies(prefix: &String) -> anyhow::Result<Vec<String>> {
         let mut list =
             globwalk::GlobWalkerBuilder::from_patterns(prefix, &["*.m3u8", "!index.m3u8"])
@@ -101,7 +101,7 @@ async fn handle_time() -> impl IntoResponse {
     (StatusCode::OK, Json(now))
 }
 
-async fn handle_rooms(Extension(state): Extension<Arc<AppState>>) -> impl IntoResponse {
+async fn handle_rooms(State(state): State<Arc<AppState>>) -> impl IntoResponse {
     let mut rooms = HashMap::new();
     for (name, locked_room) in state.rooms.read().await.iter() {
         let room = locked_room.read().await;
@@ -115,7 +115,7 @@ async fn handle_rooms(Extension(state): Extension<Arc<AppState>>) -> impl IntoRe
 async fn handle_room(
     ws: WebSocketUpgrade,
     Query(mut login): Query<LoginArgs>,
-    Extension(state): Extension<Arc<AppState>>,
+    State(state): State<Arc<AppState>>,
 ) -> impl IntoResponse {
     login.room = login.room.to_uppercase();
     ws.on_upgrade(|socket| websocket(socket, login, state))
