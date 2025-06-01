@@ -6,14 +6,10 @@ import { pluginSvgr } from '@rsbuild/plugin-svgr';
 const backend = process.env.BACKEND ?? 'http://127.0.0.1:8074';
 
 export default defineConfig({
-    plugins: [
-		pluginReact(),
-		pluginSass(),
-		pluginSvgr({ svgrOptions: { svgProps: { width: '1em', height: '1em' } } }),
-	],
-	source: {
-		entry: {index: "./frontend/index.tsx"}
-	},
+    plugins: [pluginReact(), pluginSass(), pluginSvgr({ svgrOptions: { svgProps: { width: '1em', height: '1em' } } })],
+    source: {
+        entry: { index: './frontend/index.tsx' },
+    },
     html: {
         title: 'Cinema',
         favicon: 'frontend/static/favicon.svg',
@@ -26,5 +22,5 @@ export default defineConfig({
             '/time': { target: backend },
             '/room': { target: backend, ws: true },
         },
-    }
+    },
 });
