@@ -65,7 +65,7 @@ async fn main() {
         .route("/room", get(handle_room))
         .route("/rooms", get(handle_rooms))
         .route("/movies", get(handle_movies))
-        .nest(
+        .nest_service(
             "/movies/",
             get_service(ServeDir::new(&app_state.movies)).handle_error(
                 |error: io::Error| async move {
@@ -90,17 +90,18 @@ async fn main() {
 
 async fn handle_movies(Extension(state): Extension<Arc<AppState>>) -> impl IntoResponse {
     fn _list_movies(prefix: &String) -> anyhow::Result<Vec<String>> {
-        let mut list = globwalk::GlobWalkerBuilder::from_patterns(prefix, &["*.m3u8", "!index.m3u8"])
-            .build()?
-            .map(|entry| {
-                Ok(entry?
-                    .into_path()
-                    .strip_prefix(&prefix)?
-                    .to_str()
-                    .unwrap()
-                    .to_string())
-            })
-            .collect::<anyhow::Result<Vec<String>>>()?;
+        let mut list =
+            globwalk::GlobWalkerBuilder::from_patterns(prefix, &["*.m3u8", "!index.m3u8"])
+                .build()?
+                .map(|entry| {
+                    Ok(entry?
+                        .into_path()
+                        .strip_prefix(&prefix)?
+                        .to_str()
+                        .unwrap()
+                        .to_string())
+                })
+                .collect::<anyhow::Result<Vec<String>>>()?;
         list.sort();
         Ok(list)
     }
