@@ -8,12 +8,12 @@ name = "cinema"
 path = "backend/main.rs"
 
 [dependencies]
-axum = { version = "0.6", features = ["ws"] }
+axum = { version = "0.7", features = ["ws"] }
 axum-extra = { version = "0.10" }
 tokio = { version = "1.0", features = ["full"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-tower-http = { version = "0.3.0", features = ["fs", "trace"] }
+tower-http = { version = "0.5.0", features = ["fs", "trace"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 futures = "0.3"
@@ -21,3 +21,4 @@ clap = { version = "^4.5", features = ["derive"] }
 globwalk = "^0.9.1"
 json-patch = "*"
 anyhow = "*"
+tower = "0.5.2"

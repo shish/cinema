@@ -1,25 +1,19 @@
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
 use axum::extract::Extension;
 use axum::extract::Query;
-use axum::{
-    http::StatusCode,
-    response::IntoResponse,
-    routing::{get, get_service},
-    Json, Router,
-};
+use axum::{http::StatusCode, response::IntoResponse, routing::get, Json, Router};
 use clap::Parser;
 use futures::stream::StreamExt;
 use futures::SinkExt;
 use serde::Deserialize;
-//use tracing_subscriber::fmt::format::FmtSpan;
 use std::collections::HashMap;
+use std::net::SocketAddr;
 use std::sync::Arc;
 use std::time::{Duration, SystemTime};
-use std::{io, net::SocketAddr};
+use tokio::net::TcpListener;
 use tokio::sync::RwLock;
 use tower_http::{services::ServeDir, trace::TraceLayer};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-
 mod room;
 
 #[derive(Debug, Deserialize, Clone)]
@@ -60,32 +54,22 @@ async fn main() {
         rooms: RwLock::new(rooms),
         movies: args.movies,
     });
-    let app: _ = Router::new()
+    let app = Router::new()
         .route("/time", get(handle_time))
         .route("/room", get(handle_room))
         .route("/rooms", get(handle_rooms))
         .route("/movies", get(handle_movies))
-        .nest_service(
-            "/movies/",
-            get_service(ServeDir::new(&app_state.movies)).handle_error(
-                |error: io::Error| async move {
-                    (
-                        StatusCode::INTERNAL_SERVER_ERROR,
-                        format!("Unhandled internal error: {}", error),
-                    )
-                },
-            ),
-        )
-        .fallback(get_service(ServeDir::new("../frontend/dist/")).handle_error(handle_error))
+        .nest_service("/movies/", ServeDir::new(&app_state.movies))
+        .fallback_service(ServeDir::new("./dist/"))
         .layer(TraceLayer::new_for_http())
-        .layer(Extension(app_state));
+        .with_state(app_state);
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 8074));
-    tracing::info!("listening on {}", addr);
-    axum::Server::bind(&addr)
-        .serve(app.into_make_service())
+    let listener = TcpListener::bind(addr)
         .await
-        .unwrap();
+        .expect("Failed to bind to address");
+    tracing::info!("listening on {}", addr);
+    axum::serve(listener, app).await.unwrap();
 }
 
 async fn handle_movies(Extension(state): Extension<Arc<AppState>>) -> impl IntoResponse {
@@ -125,10 +109,6 @@ async fn handle_rooms(Extension(state): Extension<Arc<AppState>>) -> impl IntoRe
         }
     }
     (StatusCode::OK, Json(rooms))
-}
-
-async fn handle_error(_err: io::Error) -> impl IntoResponse {
-    (StatusCode::INTERNAL_SERVER_ERROR, "Something went wrong...")
 }
 
 async fn handle_room(
