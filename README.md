@@ -5,7 +5,6 @@ A thing to watch videos at the same time as other people
 ## Frontend setup:
 
 ```bash
-cd frontend
 npm install
 npm run dev
 ```
@@ -16,14 +15,13 @@ the backend if you want to have a web server to view it.
 ## Backend setup:
 
 ```bash
-cd backend
-cargo run -- -m /path/to/some/hls/videos/
+RUST_LOG=cinema=info cargo run -- -m /path/to/some/hls/videos/
 ```
 
 Or to run with logging and auto-restart whenever the code changes:
 
 ```bash
-RUST_LOG=cinema_be=info cargo watch -s 'cargo run -- -m /Users/shish2k/Movies/Cinema/'
+RUST_LOG=cinema=info cargo watch -s 'cargo run -- -m /Users/shish2k/Movies/Cinema/'
 ```
 
 Traffic served on http://localhost:8074/

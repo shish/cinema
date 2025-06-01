@@ -3,6 +3,10 @@ name = "cinema_be"
 version = "0.1.0"
 edition = "2021"
 
+[[bin]]
+name = "cinema"
+path = "backend/main.rs"
+
 [dependencies]
 axum = { version = "0.5", features = ["ws"] }
 axum-extra = { version = "0.10" }
