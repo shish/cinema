@@ -1,3 +1,4 @@
+use axum::body::Bytes;
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
 use axum::extract::Extension;
 use axum::extract::Query;
@@ -201,7 +202,7 @@ async fn _websocket_loop(
         tokio::select! {
             // If nothing is happening, keep the connection alive.
             _ = tokio::time::sleep(Duration::from_secs(30)) => {
-                sender.send(Message::Ping(vec![])).await?;
+                sender.send(Message::Ping(Bytes::new())).await?;
             },
             // Receive messages from client and send them to broadcast subscribers.
             state = receiver.next() => {
@@ -224,7 +225,7 @@ async fn _websocket_loop(
                     serde_json::to_string(&state)?
                 };
                 maybe_last_state = Some(state);
-                sender.send(Message::Text(msg)).await?;
+                sender.send(Message::Text(msg.into())).await?;
             },
         }
     }
