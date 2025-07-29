@@ -65,6 +65,16 @@ def run(cmd, logfile: Path, duration: float|None = None):
                 #    raise subprocess.CalledProcessError(proc.returncode, cmd)
 
 
+def is_needed(path: Path) -> bool:
+    """Check if the file needs processing."""
+    if not path.exists():
+        return True
+    if args.force:
+        return True
+    log.info(f"Skipping {path.name} (already exists)")
+    return False
+
+
 for path_in in args.files:
     assert isinstance(path_in, Path)
     path_srt = path_in.with_suffix(".srt")
@@ -78,9 +88,7 @@ for path_in in args.files:
         ffmpeg_base = ["ffmpeg", "-hide_banner", "-loglevel", "quiet", "-stats"]
 
         # generate VTT subtitles if needed
-        if path_vtt.exists() and not args.force:
-            log.info(f"Skipping {path_vtt} (already exists)")
-        else:
+        if is_needed(path_vtt):
             if path_srt.exists():
                 # convert .srt to .vtt
                 cmd = ffmpeg_base + ["-i", path_srt, path_vtt]
@@ -92,9 +100,7 @@ for path_in in args.files:
         # generate thumbnail if needed
         # (if the user has specified a thumbnail timestamp, we can't tell if the existing
         # thumbnail is the one they want, so we always regenerate it)
-        if not args.thumbnail and (path_thumb.exists() and not args.force):
-            log.info(f"Skipping {path_thumb} (already exists)")
-        else:
+        if is_needed(path_thumb) or args.thumbnail:
             cmd = ffmpeg_base + [
                 "-i", path_in,
                 "-ss", args.thumbnail or "00:02:00",
@@ -108,9 +114,7 @@ for path_in in args.files:
 
 
         # create HLS stream if needed
-        if path_index.exists() and not args.force:
-            log.info(f"Skipping {path_index} (already exists)")
-        else:
+        if is_needed(path_index):
             ffprobe_json = json.loads(subprocess.check_output([
                 "ffprobe",
                 "-v", "error",
