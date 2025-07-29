@@ -4,7 +4,10 @@ import argparse
 import shlex
 import subprocess
 import logging
+import json
+import re
 from pathlib import Path
+from tqdm import tqdm
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
@@ -26,11 +29,40 @@ parser.add_argument("files", nargs="+", help="video files to process", type=Path
 args = parser.parse_args()
 
 
-def run(cmd, logfile: Path):
+def run(cmd, logfile: Path, duration: float|None = None):
     log.info(shlex.join(str(x) for x in cmd))
     if not args.dry_run:
         with logfile.open("a") as f:
-            subprocess.run(cmd, stdout=f, stderr=f)
+            # subprocess.run(cmd, stdout=f, stderr=f)
+
+            with tqdm(
+                total=int(duration) if duration else None,
+                unit="s",
+                disable=duration is None,
+                leave=False
+            ) as pbar:
+                proc = subprocess.Popen(
+                    cmd,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    text=True,
+                    errors="ignore",  # some files contain non-utf8 metadata
+                )
+
+                assert proc.stdout is not None
+                while line := proc.stdout.readline():
+                    f.write(line)
+                    if match := re.search(r"time=(\d+):(\d+):(\d+.\d+)", line):
+                        hours, minutes, seconds = match.groups()
+                        current_s = int(int(hours) * 60 * 60 + int(minutes) * 60 + float(seconds))
+                        pbar.update(current_s - pbar.n)
+
+                proc.stdout.close()
+                proc.wait()
+
+                #if proc.returncode != 0:
+                #    log.error(f"Command failed with return code {proc.returncode}")
+                #    raise subprocess.CalledProcessError(proc.returncode, cmd)
 
 
 for path_in in args.files:
@@ -43,16 +75,18 @@ for path_in in args.files:
     path_stream = path_in.with_name(path_in.stem + "_%v")
 
     if path_in.exists():
+        ffmpeg_base = ["ffmpeg", "-hide_banner", "-loglevel", "quiet", "-stats"]
+
         # generate VTT subtitles if needed
         if path_vtt.exists() and not args.force:
             log.info(f"Skipping {path_vtt} (already exists)")
         else:
             if path_srt.exists():
                 # convert .srt to .vtt
-                cmd = ["ffmpeg", "-i", path_srt, path_vtt]
+                cmd = ffmpeg_base + ["-i", path_srt, path_vtt]
             else:
                 # extract subtitles from the video container
-                cmd = ["ffmpeg", "-i", path_in, path_vtt]
+                cmd = ffmpeg_base + ["-i", path_in, path_vtt]
             run(cmd, path_log)
 
         # generate thumbnail if needed
@@ -61,8 +95,7 @@ for path_in in args.files:
         if not args.thumbnail and (path_thumb.exists() and not args.force):
             log.info(f"Skipping {path_thumb} (already exists)")
         else:
-            cmd = [
-                "ffmpeg",
+            cmd = ffmpeg_base + [
                 "-i", path_in,
                 "-ss", args.thumbnail or "00:02:00",
                 "-vf", "thumbnail",
@@ -78,16 +111,18 @@ for path_in in args.files:
         if path_index.exists() and not args.force:
             log.info(f"Skipping {path_index} (already exists)")
         else:
-            input_height = int(subprocess.check_output([
+            ffprobe_json = json.loads(subprocess.check_output([
                 "ffprobe",
                 "-v", "error",
                 "-select_streams", "v:0",
-                "-show_entries", "stream=height",
-                "-of", "default=noprint_wrappers=1:nokey=1",
+                "-show_streams",
+                "-of", "json",
                 path_in
-            ]).decode().strip())
+            ]).decode().strip())["streams"][0]
+            input_height = ffprobe_json["height"]
+            input_duration = float(ffprobe_json["duration"])
 
-            cmd = ["ffmpeg", "-i", path_in]
+            cmd = ffmpeg_base + ["-i", path_in]
 
             active_fmts = []
             for fmt in FMTS:
@@ -126,7 +161,7 @@ for path_in in args.files:
 
                 # audio encoding settings
                 cmd.extend([
-                    "-map", f"a:0",
+                    "-map", "a:0",
                     # codec for audio stream n
                     f"-c:a:{n}", "aac",
                     # bitrate for audio stream n
@@ -142,9 +177,12 @@ for path_in in args.files:
                 "-hls_flags", "independent_segments",
                 "-hls_segment_type", "mpegts",
                 "-hls_segment_filename", path_stream / "data%02d.ts",
-                "-master_pl_name", path_index
+                "-master_pl_name", path_index.name
             ])
 
-            cmd.extend(["-var_stream_map", " ".join(f"v:{n},a:{n}" for n in range(len(active_fmts))), path_stream / "index.m3u8"])
+            cmd.extend([
+                "-var_stream_map", " ".join(f"v:{n},a:{n}" for n in range(len(active_fmts))),
+                path_stream / "index.m3u8"
+            ])
 
-            run(cmd, path_log)
+            run(cmd, path_log, duration=input_duration)
