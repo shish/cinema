@@ -120,11 +120,12 @@ for path_in in args.files:
                 "-v", "error",
                 "-select_streams", "v:0",
                 "-show_streams",
+                "-show_format",
                 "-of", "json",
                 path_in
-            ]).decode().strip())["streams"][0]
-            input_height = ffprobe_json["height"]
-            input_duration = float(ffprobe_json["duration"])
+            ]).decode().strip())
+            input_height = ffprobe_json["streams"][0]["height"]
+            input_duration = float(ffprobe_json["format"]["duration"])
 
             cmd = ffmpeg_base + ["-i", path_in]
 
