@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-
-import Rotate from '../static/icons/rotate.svg?react';
+import { FontAwesomeIcon } from './FontAwesomeIcon';
+import { faRotate } from '@fortawesome/free-solid-svg-icons';
 
 export function MovieList({
     movieFile,
@@ -58,7 +58,7 @@ export function MovieList({
                     ))}
             </select>
             <button type="button" onClick={(e) => refreshMovies()}>
-                <Rotate />
+                <FontAwesomeIcon icon={faRotate} />
             </button>
         </form>
     );

@@ -10,21 +10,21 @@
         "preview": "rsbuild preview"
     },
     "dependencies": {
+        "@fortawesome/free-solid-svg-icons": "^7.0.1",
         "@khanacademy/simple-markdown": "^2",
         "@shish2k/react-use-servertime": "^0.0.4",
-        "usehooks-ts": "^3.1.1",
         "emoji-picker-react": "^4.13.2",
         "hls.js": "^1.6.11",
         "jsonpatch": "^3.1.0",
         "react": "^18.3.1",
-        "react-dom": "^18.3.1"
+        "react-dom": "^18.3.1",
+        "usehooks-ts": "^3.1.1"
     },
     "devDependencies": {
         "@biomejs/biome": "^2.2.2",
         "@rsbuild/core": "^1.5.3",
         "@rsbuild/plugin-react": "^1.4.0",
         "@rsbuild/plugin-sass": "^1.4.0",
-        "@rsbuild/plugin-svgr": "^1.2.1",
         "@types/react": "^18.3.3",
         "@types/react-dom": "^18.3.0",
         "typescript": "^5.9.2"

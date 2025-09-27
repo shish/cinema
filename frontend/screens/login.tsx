@@ -1,10 +1,10 @@
 import { useContext, useEffect, useState } from 'react';
+import { faCircleInfo, faCircleXmark } from "@fortawesome/free-solid-svg-icons";
 
 import { InfoMenu } from '../components/info';
 
 import { SettingsContext } from '../providers/settings';
-import CircleInfo from '../static/icons/circle-info.svg?react';
-import CircleXmark from '../static/icons/circle-xmark.svg?react';
+import { FontAwesomeIcon } from '../components/FontAwesomeIcon';
 
 export function LoginScreen({
     setConnData,
@@ -44,9 +44,9 @@ export function LoginScreen({
     return (
         <main className="login">
             <header>
-                <CircleInfo onClick={() => setShowInfo(true)} />
+                <a onClick={() => setShowInfo(true)}><FontAwesomeIcon icon={faCircleInfo} /></a>
                 <h1>Join a Room</h1>
-                <CircleXmark style={{ opacity: 0 }} />
+                <a style={{ opacity: 0 }}><FontAwesomeIcon icon={faCircleXmark} /></a>
             </header>
             <article>
                 <form onSubmit={(e) => login(e)}>

@@ -1,4 +1,5 @@
 import { useContext, useState } from 'react';
+import { faCircleInfo, faGears } from "@fortawesome/free-solid-svg-icons";
 
 import { RoomContext } from '../providers/room';
 
@@ -9,9 +10,7 @@ import { MovieList } from '../components/movie_list';
 import { SettingsMenu } from '../components/settings';
 import { ViewerList } from '../components/viewer_list';
 import { SettingsContext } from '../providers/settings';
-
-import CircleInfo from '../static/icons/circle-info.svg?react';
-import Gears from '../static/icons/gears.svg?react';
+import { FontAwesomeIcon } from '../components/FontAwesomeIcon';
 
 function Header({
     setShowInfo,
@@ -24,9 +23,9 @@ function Header({
 
     return (
         <header>
-            <CircleInfo onClick={() => setShowInfo(true)} />
+            <a onClick={() => setShowInfo(true)}><FontAwesomeIcon icon={faCircleInfo} /></a>
             <h1>{room.title}</h1>
-            <Gears onClick={() => setShowSettings(true)} />
+            <a onClick={() => setShowSettings(true)}><FontAwesomeIcon icon={faGears} /></a>
         </header>
     );
 }
