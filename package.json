@@ -12,7 +12,7 @@
     "dependencies": {
         "@fortawesome/free-solid-svg-icons": "^7.0.1",
         "@khanacademy/simple-markdown": "^2",
-        "@shish2k/react-use-servertime": "^0.0.4",
+        "@shish2k/react-use-servertime": "^0.0.6",
         "emoji-picker-react": "^4.13.2",
         "hls.js": "^1.6.11",
         "jsonpatch": "^3.1.0",
