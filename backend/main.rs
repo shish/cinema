@@ -2,7 +2,7 @@ use axum::body::Bytes;
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
 use axum::extract::Query;
 use axum::extract::State;
-use axum::{http::StatusCode, response::IntoResponse, routing::get, Json, Router};
+use axum::{response::IntoResponse, routing::get, Json, Router};
 use clap::Parser;
 use futures::stream::StreamExt;
 use futures::SinkExt;
@@ -15,6 +15,8 @@ use tokio::net::TcpListener;
 use tokio::sync::RwLock;
 use tower_http::{services::ServeDir, trace::TraceLayer};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+
+mod errs;
 mod room;
 
 #[derive(Debug, Deserialize, Clone)]
@@ -39,7 +41,7 @@ pub struct Args {
 }
 
 #[tokio::main]
-async fn main() {
+async fn main() -> anyhow::Result<()> {
     let args = Args::parse();
     tracing_subscriber::registry()
         .with(tracing_subscriber::EnvFilter::new(
@@ -66,42 +68,40 @@ async fn main() {
         .with_state(app_state);
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 8074));
-    let listener = TcpListener::bind(addr)
-        .await
-        .expect("Failed to bind to address");
+    let listener = TcpListener::bind(addr).await?;
     tracing::info!("listening on {}", addr);
-    axum::serve(listener, app).await.unwrap();
+    axum::serve(listener, app).await?;
+
+    Ok(())
 }
 
-async fn handle_movies(State(state): State<Arc<AppState>>) -> impl IntoResponse {
-    fn _list_movies(prefix: &String) -> anyhow::Result<Vec<String>> {
-        let mut list =
-            globwalk::GlobWalkerBuilder::from_patterns(prefix, &["*.m3u8", "!index.m3u8"])
-                .build()?
-                .map(|entry| {
-                    Ok(entry?
-                        .into_path()
-                        .strip_prefix(&prefix)?
-                        .to_str()
-                        .unwrap()
-                        .to_string())
-                })
-                .collect::<anyhow::Result<Vec<String>>>()?;
-        list.sort();
-        Ok(list)
-    }
-    (StatusCode::OK, Json(_list_movies(&state.movies).unwrap()))
+async fn handle_movies(
+    State(state): State<Arc<AppState>>,
+) -> axum::response::Result<impl IntoResponse, errs::CustomError> {
+    let mut list =
+        globwalk::GlobWalkerBuilder::from_patterns(&state.movies, &["*.m3u8", "!index.m3u8"])
+            .build()?
+            .map(|entry| {
+                Ok(entry?
+                    .into_path()
+                    .strip_prefix(&state.movies)?
+                    .to_str()
+                    .ok_or(anyhow::anyhow!("Invalid UTF-8 in path"))?
+                    .to_string())
+            })
+            .collect::<anyhow::Result<Vec<String>>>()?;
+    list.sort();
+    Ok(Json(list))
 }
 
-async fn handle_time() -> impl IntoResponse {
-    let now = SystemTime::now()
-        .duration_since(SystemTime::UNIX_EPOCH)
-        .unwrap()
-        .as_secs_f64();
-    (StatusCode::OK, Json(now))
+async fn handle_time() -> axum::response::Result<impl IntoResponse, errs::CustomError> {
+    let duration = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH)?;
+    Ok(Json(duration.as_secs_f64()))
 }
 
-async fn handle_rooms(State(state): State<Arc<AppState>>) -> impl IntoResponse {
+async fn handle_rooms(
+    State(state): State<Arc<AppState>>,
+) -> axum::response::Result<impl IntoResponse, errs::CustomError> {
     let mut rooms = HashMap::new();
     for (name, locked_room) in state.rooms.read().await.iter() {
         let room = locked_room.read().await;
@@ -109,16 +109,16 @@ async fn handle_rooms(State(state): State<Arc<AppState>>) -> impl IntoResponse {
             rooms.insert(name.clone(), room.title.clone());
         }
     }
-    (StatusCode::OK, Json(rooms))
+    Ok(Json(rooms))
 }
 
 async fn handle_room(
     ws: WebSocketUpgrade,
     Query(mut login): Query<LoginArgs>,
     State(state): State<Arc<AppState>>,
-) -> impl IntoResponse {
+) -> axum::response::Result<impl IntoResponse, errs::CustomError> {
     login.room = login.room.to_uppercase();
-    ws.on_upgrade(|socket| websocket(socket, login, state))
+    Ok(ws.on_upgrade(|socket| websocket(socket, login, state)))
 }
 
 #[tracing::instrument(name="", skip_all, fields(room=?login.room, user=?login.user))]
@@ -136,11 +136,15 @@ async fn _websocket(
     // Find our room, creating it if it doesn't exist
     let locked_room = {
         let mut rooms_lookup = state.rooms.write().await;
-        if rooms_lookup.get(&login.room).is_none() {
-            let new_room = room::Room::new(login.room.clone(), login.user.clone());
-            rooms_lookup.insert(login.room.clone(), Arc::new(RwLock::new(new_room)));
-        }
-        rooms_lookup.get(&login.room).unwrap().clone()
+        rooms_lookup
+            .entry(login.room.clone())
+            .or_insert_with(|| {
+                Arc::new(RwLock::new(room::Room::new(
+                    login.room.clone(),
+                    login.user.clone(),
+                )))
+            })
+            .clone()
     };
 
     // Subscribe to the room state, so that we see the first sync that we generate
@@ -210,7 +214,7 @@ async fn _websocket_loop(
                 if let Message::Text(msg) = msg? {
                     let cmd = serde_json::from_str(&msg)?;
                     let mut room = locked_room.write().await;
-                    room.command(&login, &cmd)?;
+                    room.command(login, &cmd)?;
                 }
             },
             // Receive broadcast room updates and send text message to our client.

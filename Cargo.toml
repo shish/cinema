@@ -22,3 +22,8 @@ globwalk = "^0.9.1"
 json-patch = "*"
 anyhow = "1.0"
 tower = "0.5.2"
+
+[lints.clippy]
+dbg_macro = "deny"
+unwrap_used = "deny"
+expect_used = "deny"

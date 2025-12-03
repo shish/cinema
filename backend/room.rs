@@ -69,7 +69,7 @@ impl Room {
         let (tx, _rx) = broadcast::channel(100);
         Room {
             public: true,
-            name: name,
+            name,
             title: format!("{}'s Room", user),
             video_state: VideoState::NoVideo(()),
             admins: vec![user],
@@ -84,7 +84,7 @@ impl Room {
         let is_admin = self.admins.contains(&login.user);
         match (is_admin, cmd) {
             (_, Command::Chat(message)) => {
-                self.chat(&login.user, message);
+                self.chat(&login.user, message)?;
             }
             (true, Command::Stop(())) => {
                 tracing::info!("Stopping");
@@ -131,7 +131,7 @@ impl Room {
 
     pub fn add_viewer(&mut self, login: &crate::LoginArgs) -> anyhow::Result<()> {
         tracing::info!("Adding user session ({})", login.sess);
-        self.chat(&"system".to_string(), &format!("{} connected", login.user));
+        self.chat(&"system".to_string(), &format!("{} connected", login.user))?;
         self.viewers.push(Viewer {
             name: login.user.clone(),
             sess: login.sess.clone(),
@@ -147,20 +147,19 @@ impl Room {
         self.chat(
             &"system".to_string(),
             &format!("{} disconnected", login.user),
-        );
+        )?;
         self.sync()
     }
 
-    pub fn chat(&mut self, user: &String, message: &String) {
+    pub fn chat(&mut self, user: &String, message: &String) -> anyhow::Result<()> {
         tracing::info!("<{}> {}", user, message);
-        let since_the_epoch = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .expect("Time went backwards");
+        let since_the_epoch = SystemTime::now().duration_since(UNIX_EPOCH)?;
         self.chat.push(ChatMessage {
             absolute_timestamp: since_the_epoch.as_secs_f64(),
             user: user.clone(),
             message: message.clone(),
         });
+        Ok(())
     }
 
     pub fn sync(&mut self) -> anyhow::Result<()> {
