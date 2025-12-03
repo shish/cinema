@@ -1,6 +1,7 @@
 {
     "name": "frontend",
     "private": true,
+    "type": "module",
     "version": "1.0.0",
     "scripts": {
         "build": "rsbuild build",
@@ -12,6 +13,7 @@
     "dependencies": {
         "@fortawesome/free-solid-svg-icons": "^7.0.1",
         "@khanacademy/simple-markdown": "^2",
+        "@shish2k/react-faicon": "^0.0.1",
         "@shish2k/react-use-servertime": "^0.0.6",
         "emoji-picker-react": "^4.16.1",
         "hls.js": "^1.6.15",

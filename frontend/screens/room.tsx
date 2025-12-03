@@ -1,5 +1,6 @@
 import { useContext, useState } from 'react';
 import { faCircleInfo, faGears } from '@fortawesome/free-solid-svg-icons';
+import { FAIcon } from '@shish2k/react-faicon';
 
 import { RoomContext } from '../providers/room';
 
@@ -10,7 +11,6 @@ import { MovieList } from '../components/movie_list';
 import { SettingsMenu } from '../components/settings';
 import { ViewerList } from '../components/viewer_list';
 import { SettingsContext } from '../providers/settings';
-import { FontAwesomeIcon } from '../components/FontAwesomeIcon';
 
 function Header({
     setShowInfo,
@@ -23,13 +23,9 @@ function Header({
 
     return (
         <header>
-            <a onClick={() => setShowInfo(true)}>
-                <FontAwesomeIcon icon={faCircleInfo} />
-            </a>
+            <FAIcon icon={faCircleInfo} onClick={() => setShowInfo(true)} />
             <h1>{room.title}</h1>
-            <a onClick={() => setShowSettings(true)}>
-                <FontAwesomeIcon icon={faGears} />
-            </a>
+            <FAIcon icon={faGears} onClick={() => setShowSettings(true)} />
         </header>
     );
 }

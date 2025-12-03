@@ -1,10 +1,10 @@
 import Hls from 'hls.js';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { faPause, faPlay } from '@fortawesome/free-solid-svg-icons';
+import { FAIcon } from '@shish2k/react-faicon';
 
 import { RoomContext } from '../providers/room';
 import { SettingsContext } from '../providers/settings';
-import { FontAwesomeIcon } from './FontAwesomeIcon';
 
 class HLSVideoElement extends HTMLVideoElement {
     static observedAttributes = ['src'];
@@ -170,11 +170,11 @@ export function MainVideo({
             <form className="controls">
                 {playingState.playing ? (
                     <button type="button" onClick={() => pause()}>
-                        <FontAwesomeIcon icon={faPause} />
+                        <FAIcon icon={faPause} />
                     </button>
                 ) : (
                     <button type="button" onClick={() => play()}>
-                        <FontAwesomeIcon icon={faPlay} />
+                        <FAIcon icon={faPlay} />
                     </button>
                 )}
                 <input

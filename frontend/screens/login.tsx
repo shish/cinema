@@ -1,10 +1,10 @@
 import { useContext, useEffect, useState } from 'react';
 import { faCircleInfo, faCircleXmark } from '@fortawesome/free-solid-svg-icons';
+import { FAIcon } from '@shish2k/react-faicon';
 
 import { InfoMenu } from '../components/info';
 
 import { SettingsContext } from '../providers/settings';
-import { FontAwesomeIcon } from '../components/FontAwesomeIcon';
 
 export function LoginScreen({ setConnData }: { setConnData: (connData: ConnData) => void }) {
     const { sess, user, setUser } = useContext(SettingsContext);
@@ -40,13 +40,9 @@ export function LoginScreen({ setConnData }: { setConnData: (connData: ConnData)
     return (
         <main className="login">
             <header>
-                <a onClick={() => setShowInfo(true)}>
-                    <FontAwesomeIcon icon={faCircleInfo} />
-                </a>
+                <FAIcon icon={faCircleInfo} onClick={() => setShowInfo(true)} />
                 <h1>Join a Room</h1>
-                <a style={{ opacity: 0 }}>
-                    <FontAwesomeIcon icon={faCircleXmark} />
-                </a>
+                <FAIcon icon={faCircleXmark} style={{ opacity: 0 }} />
             </header>
             <article>
                 <form onSubmit={(e) => login(e)}>

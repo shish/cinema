@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { FontAwesomeIcon } from './FontAwesomeIcon';
 import { faRotate } from '@fortawesome/free-solid-svg-icons';
+import { FAIcon } from '@shish2k/react-faicon';
 
 export function MovieList({ movieFile, send }: { movieFile: string | null; send: (data: any) => void }) {
     const [movies, setMovies] = useState<string[]>([]);
@@ -52,7 +52,7 @@ export function MovieList({ movieFile, send }: { movieFile: string | null; send:
                     ))}
             </select>
             <button type="button" onClick={(e) => refreshMovies()}>
-                <FontAwesomeIcon icon={faRotate} />
+                <FAIcon icon={faRotate} />
             </button>
         </form>
     );
