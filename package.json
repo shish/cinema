@@ -18,7 +18,7 @@
         "emoji-picker-react": "^4.16.1",
         "hls.js": "^1.6.15",
         "jsonpatch": "^3.1.0",
-        "react": "^18.3.1",
+        "react": "^19.2.0",
         "react-dom": "^18.3.1",
         "usehooks-ts": "^3.1.1"
     },
@@ -27,7 +27,7 @@
         "@rsbuild/core": "^1.6.11",
         "@rsbuild/plugin-react": "^1.4.0",
         "@rsbuild/plugin-sass": "^1.4.0",
-        "@types/react": "^18.3.3",
+        "@types/react": "^19.2.7",
         "@types/react-dom": "^18.3.0",
         "typescript": "^5.9.2"
     }
