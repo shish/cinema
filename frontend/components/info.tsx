@@ -1,8 +1,4 @@
-export function InfoMenu({
-    setShowInfo,
-}: {
-    setShowInfo: (show: boolean) => void;
-}) {
+export function InfoMenu({ setShowInfo }: { setShowInfo: (show: boolean) => void }) {
     return (
         <div className={'settings'}>
             <div>

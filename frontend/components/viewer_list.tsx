@@ -1,12 +1,4 @@
-export function ViewerList({
-    viewers,
-    admins,
-    send,
-}: {
-    viewers: Viewer[];
-    admins: string[];
-    send: (s: any) => void;
-}) {
+export function ViewerList({ viewers, admins, send }: { viewers: Viewer[]; admins: string[]; send: (s: any) => void }) {
     const unique_viewers = Array.from(new Set(viewers.map((p) => p.name)));
 
     function toggle(name: string) {

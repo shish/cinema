@@ -2,13 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { FontAwesomeIcon } from './FontAwesomeIcon';
 import { faRotate } from '@fortawesome/free-solid-svg-icons';
 
-export function MovieList({
-    movieFile,
-    send,
-}: {
-    movieFile: string | null;
-    send: (data: any) => void;
-}) {
+export function MovieList({ movieFile, send }: { movieFile: string | null; send: (data: any) => void }) {
     const [movies, setMovies] = useState<string[]>([]);
     const [folder, setFolder] = useState<string>('');
 

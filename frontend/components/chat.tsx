@@ -76,13 +76,7 @@ function md(source: string) {
     return outputResult;
 }
 
-export function Chat({
-    log,
-    send,
-}: {
-    log: Array<ChatMessage>;
-    send: (data: any) => void;
-}) {
+export function Chat({ log, send }: { log: Array<ChatMessage>; send: (data: any) => void }) {
     const { showSystem } = useContext(SettingsContext);
 
     // we really do want to run this every time the chat changes, even though
@@ -136,13 +130,7 @@ export function Chat({
  *   * `users` is a list of usernames to use for autocompletion.
  *
  */
-export function ChatInput({
-    onSend,
-    users = [],
-}: {
-    onSend: (text: string) => void;
-    users: string[];
-}) {
+export function ChatInput({ onSend, users = [] }: { onSend: (text: string) => void; users: string[] }) {
     const chatInput = useRef<HTMLInputElement>(null);
     const pickerButton = useRef<HTMLButtonElement>(null);
     const [cursorPos, setCursorPos] = useState(0);

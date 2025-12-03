@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react';
-import { faCircleInfo, faGears } from "@fortawesome/free-solid-svg-icons";
+import { faCircleInfo, faGears } from '@fortawesome/free-solid-svg-icons';
 
 import { RoomContext } from '../providers/room';
 
@@ -23,9 +23,13 @@ function Header({
 
     return (
         <header>
-            <a onClick={() => setShowInfo(true)}><FontAwesomeIcon icon={faCircleInfo} /></a>
+            <a onClick={() => setShowInfo(true)}>
+                <FontAwesomeIcon icon={faCircleInfo} />
+            </a>
             <h1>{room.title}</h1>
-            <a onClick={() => setShowSettings(true)}><FontAwesomeIcon icon={faGears} /></a>
+            <a onClick={() => setShowSettings(true)}>
+                <FontAwesomeIcon icon={faGears} />
+            </a>
         </header>
     );
 }
