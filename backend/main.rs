@@ -58,6 +58,7 @@ async fn main() -> anyhow::Result<()> {
         movies: args.movies,
     });
     let app = Router::new()
+        .route("/robots.txt", get(handle_robots))
         .route("/time", get(handle_time))
         .route("/room", get(handle_room))
         .route("/rooms", get(handle_rooms))
@@ -73,6 +74,10 @@ async fn main() -> anyhow::Result<()> {
     axum::serve(listener, app).await?;
 
     Ok(())
+}
+
+async fn handle_robots() -> axum::response::Result<impl IntoResponse, errs::CustomError> {
+    Ok("User-agent: *\nDisallow: /\n")
 }
 
 async fn handle_movies(
