@@ -5,30 +5,20 @@ import { FAIcon } from '@shish2k/react-faicon';
 import { InfoMenu } from '../components/info';
 
 import { SettingsContext } from '../providers/settings';
+import { ServerContext } from '../providers/server';
 
 export function LoginScreen({ setConnData }: { setConnData: (connData: ConnData) => void }) {
+    const { loading, rooms } = useContext(ServerContext);
     const { sess, user, setUser } = useContext(SettingsContext);
     const [showInfo, setShowInfo] = useState(false);
     const [manualEntry, setManualEntry] = useState(false);
-    const [rooms, setRooms] = useState<{ [name: string]: string }>({});
     const [room, setRoom] = useState<string>('');
 
-    // we only want to run this once, not every time `room` changes
-    // biome-ignore lint/correctness/useExhaustiveDependencies:
     useEffect(() => {
-        fetch('/rooms')
-            .then((response) => response.json())
-            .then((rooms) => {
-                setRooms(rooms);
-                if (!room && Object.keys(rooms).length > 0) {
-                    setRoom(Object.keys(rooms)[0]);
-                }
-                // console.log('Rooms:', rooms);
-            })
-            .catch((error) => {
-                console.error('Error loading logs:', error);
-            });
-    }, []);
+        if (!room && Object.keys(rooms).length > 0) {
+            setRoom(Object.keys(rooms)[0]);
+        }
+    }, [rooms, room]);
 
     function login(event: any) {
         event.preventDefault();
@@ -81,7 +71,7 @@ export function LoginScreen({ setConnData }: { setConnData: (connData: ConnData)
                             required={true}
                         />
                     )}
-                    <button type="submit">Join</button>
+                    <button type="submit" disabled={loading}>{loading ? "Loading..." : "Join"}</button>
                 </form>
             </article>
             {showInfo && <InfoMenu setShowInfo={setShowInfo} />}

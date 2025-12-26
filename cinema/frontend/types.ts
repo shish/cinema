@@ -34,3 +34,11 @@ type ConnData = {
     room: string;
     user: string;
 };
+
+type Movie = {
+    id: string;
+    title: string;
+    video: string;
+    subtitles: string;
+    thumbnail: string;
+};

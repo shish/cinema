@@ -5,3 +5,10 @@ services:
       - "2001:2001"
     volumes:
       - ./media/processed:/media/processed:ro
+
+  encode:
+    build: ./encode
+    user: 1001
+    volumes:
+      - ./media/source:/media/source:ro
+      - ./media/processed:/media/processed:rw

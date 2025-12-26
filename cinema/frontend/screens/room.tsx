@@ -11,6 +11,7 @@ import { MovieList } from '../components/movie_list';
 import { SettingsMenu } from '../components/settings';
 import { ViewerList } from '../components/viewer_list';
 import { SettingsContext } from '../providers/settings';
+import { ServerContext } from '../providers/server';
 
 function Header({
     setShowInfo,
@@ -31,6 +32,7 @@ function Header({
 }
 
 export function RoomScreen({ connData }: { connData: ConnData }) {
+    const { movies } = useContext(ServerContext);
     const { room, send } = useContext(RoomContext);
     const { showChat } = useContext(SettingsContext);
     const [showInfo, setShowInfo] = useState<boolean>(false);
@@ -40,9 +42,13 @@ export function RoomScreen({ connData }: { connData: ConnData }) {
     return (
         <main className={`room ${isAdmin ? 'admin' : 'user'} ${showChat ? 'chat' : 'nochat'}`}>
             <Header setShowInfo={setShowInfo} setShowSettings={setShowSettings} />
-            {isAdmin && <MovieList movieFile={room.video_state.video?.[0] || null} send={send} />}
+            {isAdmin && <MovieList selectedMovieId={room.video_state.video?.[0] || null} send={send} />}
             {room.video_state.video ? (
-                <MainVideo movieFile={room.video_state.video[0]} playingState={room.video_state.video[1]} send={send} />
+                <MainVideo
+                    movie={movies[room.video_state.video[0]]}
+                    playingState={room.video_state.video[1]}
+                    send={send}
+                />
             ) : (
                 <div className="blackout" />
             )}

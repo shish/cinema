@@ -36,11 +36,11 @@ function ts2hms(ts: number): string {
 }
 
 export function MainVideo({
-    movieFile,
+    movie,
     playingState,
     send,
 }: {
-    movieFile: string;
+    movie: Movie;
     playingState: PlayingState;
     send: (data: any) => void;
 }) {
@@ -85,8 +85,11 @@ export function MainVideo({
         // we wait for the the future to arrive)
         let goalTime = playingState.paused || now - (playingState.playing || 0);
         if (goalTime < 0 || goalTime > (movie.duration || 9999)) {
+            if(!movie.paused) {
+                console.log("Goal time is outside of [0..duration], pausing");
+            }
             movie.pause();
-            goalTime = 0;
+            return;
         }
 
         // Set the movie time, whether we're movie-paused or movie-playing.
@@ -137,13 +140,13 @@ export function MainVideo({
         // console.log('updateDuration', currentTime, duration);
     }
     function pause() {
-        send({ pause: [movieFile, currentTime] });
+        send({ pause: [movie.id, currentTime] });
     }
     function play() {
-        send({ play: [movieFile, now - currentTime] });
+        send({ play: [movie.id, now - currentTime] });
     }
     function seek(time: number) {
-        send({ pause: [movieFile, time] });
+        send({ pause: [movie.id, time] });
     }
 
     return (
@@ -152,8 +155,8 @@ export function MainVideo({
                 <video
                     ref={movieRef}
                     id="movie"
-                    src={`/movies/${movieFile}`}
-                    poster={`/movies/${movieFile.replace('.m3u8', '.jpg')}`}
+                    src={`/movies/${movie.video}/movie.m3u8`}
+                    poster={`/movies/${movie.thumbnail}`}
                     playsInline={true}
                     // Keep the progress bar in the controls section in-sync with
                     // the playing movie.
@@ -163,7 +166,7 @@ export function MainVideo({
                     onCanPlay={() => updateDuration()}
                     is="hls-video"
                 >
-                    <track kind="captions" src={`/movies/${movieFile.replace('.m3u8', '.vtt')}`} default />
+                    <track kind="captions" src={`/movies/${movie.subtitles}`} default />
                 </video>
             </div>
             {videoHint && <div className="video_hint">{videoHint}</div>}

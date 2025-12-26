@@ -62,7 +62,6 @@ async fn main() -> anyhow::Result<()> {
         .route("/time", get(handle_time))
         .route("/room", get(handle_room))
         .route("/rooms", get(handle_rooms))
-        .route("/movies", get(handle_movies))
         .nest_service("/movies/", ServeDir::new(&app_state.movies))
         .fallback_service(ServeDir::new("./dist/"))
         .layer(TraceLayer::new_for_http())
@@ -78,25 +77,6 @@ async fn main() -> anyhow::Result<()> {
 
 async fn handle_robots() -> axum::response::Result<impl IntoResponse, errs::CustomError> {
     Ok("User-agent: *\nDisallow: /\n")
-}
-
-async fn handle_movies(
-    State(state): State<Arc<AppState>>,
-) -> axum::response::Result<impl IntoResponse, errs::CustomError> {
-    let mut list =
-        globwalk::GlobWalkerBuilder::from_patterns(&state.movies, &["*.m3u8", "!index.m3u8"])
-            .build()?
-            .map(|entry| {
-                Ok(entry?
-                    .into_path()
-                    .strip_prefix(&state.movies)?
-                    .to_str()
-                    .ok_or(anyhow::anyhow!("Invalid UTF-8 in path"))?
-                    .to_string())
-            })
-            .collect::<anyhow::Result<Vec<String>>>()?;
-    list.sort();
-    Ok(Json(list))
 }
 
 async fn handle_time() -> axum::response::Result<impl IntoResponse, errs::CustomError> {
