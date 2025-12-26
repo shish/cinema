@@ -36,7 +36,7 @@ struct AppState {
 #[clap(author, version, about, long_about = None)]
 pub struct Args {
     /// Where the source videos are
-    #[clap(short = 'm', default_value = "/data")]
+    #[clap(short = 'm', default_value = "/media/processed")]
     pub movies: String,
 }
 
@@ -68,7 +68,7 @@ async fn main() -> anyhow::Result<()> {
         .layer(TraceLayer::new_for_http())
         .with_state(app_state);
 
-    let addr = SocketAddr::from(([0, 0, 0, 0], 8074));
+    let addr = SocketAddr::from(([0, 0, 0, 0], 2001));
     let listener = TcpListener::bind(addr).await?;
     tracing::info!("listening on {}", addr);
     axum::serve(listener, app).await?;

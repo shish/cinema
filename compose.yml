@@ -1,0 +1,7 @@
+services:
+  cinema:
+    build: ./cinema
+    ports:
+      - "2001:2001"
+    volumes:
+      - ./media/processed:/media/processed:ro

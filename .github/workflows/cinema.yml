@@ -1,10 +1,16 @@
-name: Docker Push
+name: Cinema
 
 on:
   push:
     branches:
       - main
+    paths:
+      - "cinema/**"
+      - ".github/workflows/cinema.yml"
   pull_request:
+    paths:
+      - "cinema/**"
+      - ".github/workflows/cinema.yml"
 
 jobs:
   build:
@@ -22,9 +28,9 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./cinema
           push: ${{ github.ref == 'refs/heads/main' }}
-          tags: ${{ vars.DOCKER_IMAGE }}:latest
+          tags: shish2k/cinema:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -38,4 +44,4 @@ jobs:
         with:
           url: https://watchtower.shish.io/v1/update
           api_token: ${{ secrets.WATCHTOWER_TOKEN }}
-          images: ${{ vars.DOCKER_IMAGE }}
+          images: shish2k/cinema
