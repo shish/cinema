@@ -1,16 +1,16 @@
-name: Encoder
+name: Encode
 
 on:
   push:
     branches:
       - main
     paths:
-      - "encoder/**"
-      - ".github/workflows/encoder.yml"
+      - "encode/**"
+      - ".github/workflows/encode.yml"
   pull_request:
     paths:
-      - "encoder/**"
-      - ".github/workflows/encoder.yml"
+      - "encode/**"
+      - ".github/workflows/encode.yml"
 
 jobs:
   build:
@@ -28,9 +28,9 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./encoder
+          context: ./encode
           push: ${{ github.ref == 'refs/heads/main' }}
-          tags: shish2k/cinema-encoder:latest
+          tags: shish2k/cinema-encode:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -44,4 +44,4 @@ jobs:
         with:
           url: https://watchtower.shish.io/v1/update
           api_token: ${{ secrets.WATCHTOWER_TOKEN }}
-          images: shish2k/cinema-encoder
+          images: shish2k/cinema-encode

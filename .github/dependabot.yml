@@ -24,3 +24,15 @@ updates:
         update-types:
           - "minor"
           - "patch"
+  - package-ecosystem: "pypi"
+    directory: "/encode/"
+    schedule:
+      interval: "monthly"
+    groups:
+      minor-bumps:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
