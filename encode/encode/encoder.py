@@ -32,10 +32,11 @@ def ffprobe(path_in: Path) -> dict:
 
 
 class Encoder(ABC):
+    # fmt: off
     FFMPEG_BASE: list[str] = [
         "ffmpeg",
         "-hide_banner",
-        # "-loglevel", "quiet",
+        "-loglevel", "quiet",
         "-stats",
     ]
 
@@ -59,7 +60,11 @@ class Encoder(ABC):
     def encode(self) -> None: ...
 
     def encode_if_needed(self) -> None:
-        if not self.get_output_path().exists():
+        if (
+            not self.get_output_path().exists()
+            or self.get_output_path().stat().st_mtime
+            < max(s.path.stat().st_mtime for s in self.sources)
+        ):
             log.info(f"Encoding: {self}")
             self.encode()
         else:
@@ -120,12 +125,12 @@ class EncodeVideo(Encoder):
         return [s for s in sources if s.path.suffix in VIDEO_EXTS]
 
     def get_output_path(self) -> Path:
-        return self.processed / Path(self.hash)
+        return self.processed / Path(self.hash) / "movie.m3u8"
 
     # fmt: off
     def encode(self) -> None:
         source_path = self.sources[0].path
-        output_path = self.get_output_path()
+        output_path = self.get_output_path().parent
 
         path_stream = output_path / "stream_%v"
 
