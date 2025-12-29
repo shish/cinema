@@ -92,13 +92,15 @@ class Encoder(ABC):
                     )
                     if duration:
                         pbar.update(current_s - pbar.n)
+                else:
+                    log.info(line.strip())
 
             proc.stdout.close()
             proc.wait()
 
-            # if proc.returncode != 0:
-            #    log.error(f"Command failed with return code {proc.returncode}")
-            #    raise subprocess.CalledProcessError(proc.returncode, cmd)
+            if proc.returncode != 0:
+                log.error(f"Command failed with return code {proc.returncode}")
+                raise subprocess.CalledProcessError(proc.returncode, cmd)
 
 
 class EncodeVideo(Encoder):
@@ -218,7 +220,10 @@ class EncodeSubs(Encoder):
         source_path = self.sources[0].path
         output_path = self.get_output_path()
         cmd = self.FFMPEG_BASE + ["-i", source_path, output_path]
-        self.run(cmd)
+        try:
+            self.run(cmd)
+        except subprocess.CalledProcessError:
+            log.warning(f"Failed to extract subtitles from {source_path}")
         if not output_path.exists():
             with output_path.open("w", encoding="utf-8") as f:
                 f.write("WEBVTT\n\n")
