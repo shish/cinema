@@ -9,6 +9,8 @@ from pathlib import Path
 
 from tqdm import tqdm
 
+from encode.util import SUBTITLE_EXTS, VIDEO_EXTS
+
 from .source import Source
 
 log = logging.getLogger(__name__)
@@ -108,7 +110,7 @@ class EncodeVideo(Encoder):
     ]
 
     def find_relevant_sources(self, sources: list[Source]) -> list[Source]:
-        return [s for s in sources if s.path.suffix in {".mp4", ".mkv", ".avi"}][:1]
+        return [s for s in sources if s.path.suffix in VIDEO_EXTS]
 
     def get_output_path(self) -> Path:
         return self.processed / Path(self.hash)
@@ -206,9 +208,9 @@ class EncodeVideo(Encoder):
 
 class EncodeSubs(Encoder):
     def find_relevant_sources(self, sources: list[Source]) -> list[Source]:
-        return [s for s in sources if s.path.suffix == ".srt"] or [
-            s for s in sources if s.path.suffix in {".mp4", ".mkv", ".avi"}
-        ][:1]
+        return [s for s in sources if s.path.suffix in SUBTITLE_EXTS] or [
+            s for s in sources if s.path.suffix in VIDEO_EXTS
+        ]
 
     def get_output_path(self) -> Path:
         return self.processed / Path(self.hash).with_suffix(".vtt")
@@ -223,7 +225,7 @@ class EncodeSubs(Encoder):
 
 class EncodeThumb(Encoder):
     def find_relevant_sources(self, sources: list[Source]) -> list[Source]:
-        return [s for s in sources if s.path.suffix in {".mp4", ".mkv", ".avi"}][:1]
+        return [s for s in sources if s.path.suffix in VIDEO_EXTS]
 
     def get_output_path(self) -> Path:
         return self.processed / Path(self.hash).with_suffix(".jpg")

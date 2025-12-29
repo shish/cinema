@@ -1,5 +1,8 @@
 from pathlib import Path
 
+VIDEO_EXTS = {".mp4", ".mkv", ".avi", ".mov"}
+SUBTITLE_EXTS = {".srt", ".vtt"}
+
 
 def get_lang(video: Path, subtitle: Path) -> str:
     """

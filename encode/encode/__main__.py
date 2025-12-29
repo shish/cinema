@@ -6,18 +6,21 @@ from time import sleep
 
 from .movie import Movie
 from .source import Source
+from .util import VIDEO_EXTS
 
 log = logging.getLogger(__name__)
 
 
 def scan(source: Path, processed: Path, match: str | None) -> list[Movie]:
     movies: list[Movie] = []
-    for video in source.rglob(f"*{match}*.mp4" if match else "*.mp4"):
-        log.info(f"Found video file: {video.relative_to(source)}")
-        id = str(video.relative_to(source).with_suffix(""))
-        subtitles = [Source(s) for s in video.parent.glob(f"{video.stem}*.srt")]
-        movie = Movie(id, [Source(video), *subtitles], source, processed)
-        movies.append(movie)
+    for ext in VIDEO_EXTS:
+        pattern = f"*{match}*{ext}" if match else f"*{ext}"
+        for video in source.rglob(pattern):
+            log.info(f"Found video file: {video.relative_to(source)}")
+            id = str(video.relative_to(source).with_suffix(""))
+            subtitles = [Source(s) for s in video.parent.glob(f"{video.stem}*.srt")]
+            movie = Movie(id, [Source(video), *subtitles], source, processed)
+            movies.append(movie)
     return movies
 
 
