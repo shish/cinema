@@ -32,7 +32,12 @@ def ffprobe(path_in: Path) -> dict:
 
 
 class Encoder(ABC):
-    FFMPEG_BASE: list[str] = ["ffmpeg", "-hide_banner", "-loglevel", "quiet", "-stats"]
+    FFMPEG_BASE: list[str] = [
+        "ffmpeg",
+        "-hide_banner",
+        # "-loglevel", "quiet",
+        "-stats",
+    ]
 
     def __init__(self, sources: list[Source], source: Path, processed: Path) -> None:
         self.source = source
@@ -242,8 +247,8 @@ class EncodeThumb(Encoder):
         # fmt: off
         cmd = self.FFMPEG_BASE + [
             "-i", source_path,
-            "-ss", "00:02:00",
-            "-vf", "thumbnail",
+            # "-ss", "00:02:00",
+            "-filter:v", "thumbnail",
             "-frames:v", "1",
             "-update", "true",
             "-y",
