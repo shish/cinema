@@ -87,8 +87,8 @@ export function MainVideo({
         if (goalTime < 0 || goalTime > (movie.duration || 9999)) {
             if(!movie.paused) {
                 console.log("Goal time is outside of [0..duration], pausing");
+                movie.pause();
             }
-            movie.pause();
             return;
         }
 

@@ -8,7 +8,7 @@ services:
 
   encode:
     build: ./encode
-    user: 1001
+    user: "1000"
     volumes:
       - ./media/source:/media/source:ro
       - ./media/processed:/media/processed:rw

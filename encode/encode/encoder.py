@@ -56,7 +56,7 @@ class Encoder(ABC):
             log.info(f"Encoding: {self}")
             self.encode()
         else:
-            log.info(f"Already done: {self}")
+            log.debug(f"Already done: {self}")
 
     def __str__(self) -> str:
         return f"{self.__class__.__name__}({str(self.get_output_path().relative_to(self.processed))!r}, {[str(s.path.relative_to(self.source)) for s in self.sources]})"

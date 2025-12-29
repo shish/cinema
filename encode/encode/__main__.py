@@ -2,6 +2,7 @@ import argparse
 import json
 import logging
 from pathlib import Path
+from time import sleep
 
 from .movie import Movie
 from .source import Source
@@ -60,8 +61,17 @@ def main():
         default=Path("../media/processed"),
     )
     parser.add_argument(
+        "--loop",
+        type=int,
+        default=0,
+        help="Check for new files every N seconds",
+        metavar="SECONDS",
+    )
+    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
+    parser.add_argument(
         "cmd",
         default="all",
+        nargs="?",
         choices=["all", "encode", "export", "cleanup"],
         help="Run one step of the process",
     )
@@ -70,12 +80,21 @@ def main():
     )
     args = parser.parse_args()
 
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
+    logging.basicConfig(
+        level=logging.DEBUG if args.debug else logging.INFO,
+        format="%(asctime)s %(message)s",
+    )
 
-    movies = scan(args.source, args.processed, args.match)
-    if args.cmd in {"all", "encode"}:
-        encode(movies, args.source, args.processed)
-    if args.cmd in {"all", "export"} and not args.match:
-        export(movies, args.source, args.processed)
-    if args.cmd in {"cleanup"} and not args.match:
-        cleanup(movies, args.processed)
+    while True:
+        movies = scan(args.source, args.processed, args.match)
+        if args.cmd in {"all", "encode"}:
+            encode(movies, args.source, args.processed)
+        if args.cmd in {"all", "export"} and not args.match:
+            export(movies, args.source, args.processed)
+        if args.cmd in {"cleanup"} and not args.match:
+            cleanup(movies, args.processed)
+        if args.loop > 0:
+            log.info(f"Sleeping for {args.loop} seconds...")
+            sleep(args.loop)
+        else:
+            break
