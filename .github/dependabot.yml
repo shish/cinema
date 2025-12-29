@@ -24,7 +24,7 @@ updates:
         update-types:
           - "minor"
           - "patch"
-  - package-ecosystem: "pypi"
+  - package-ecosystem: "pip"
     directory: "/encode/"
     schedule:
       interval: "monthly"
