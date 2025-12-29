@@ -119,7 +119,6 @@ class EncodeVideo(Encoder):
     def encode(self) -> None:
         source_path = self.sources[0].path
         output_path = self.get_output_path()
-        log.info(f"Encoding video from {source_path} to {output_path}")
 
         path_stream = output_path / "stream_%v"
 
@@ -218,9 +217,11 @@ class EncodeSubs(Encoder):
     def encode(self) -> None:
         source_path = self.sources[0].path
         output_path = self.get_output_path()
-        log.info(f"Encoding subtitles from {source_path} to {output_path}")
         cmd = self.FFMPEG_BASE + ["-i", source_path, output_path]
         self.run(cmd)
+        if not output_path.exists():
+            with output_path.open("w", encoding="utf-8") as f:
+                f.write("WEBVTT\n\n")
 
 
 class EncodeThumb(Encoder):
@@ -233,7 +234,6 @@ class EncodeThumb(Encoder):
     def encode(self) -> None:
         source_path = self.sources[0].path
         output_path = self.get_output_path()
-        log.info(f"Encoding thumbnail from {source_path} to {output_path}")
         # fmt: off
         cmd = self.FFMPEG_BASE + [
             "-i", source_path,
