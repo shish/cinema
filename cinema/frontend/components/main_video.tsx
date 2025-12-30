@@ -155,7 +155,7 @@ export function MainVideo({
                 <video
                     ref={movieRef}
                     id="movie"
-                    src={`/movies/${movie.video}/movie.m3u8`}
+                    src={`/movies/${movie.video}`}
                     poster={`/movies/${movie.thumbnail}`}
                     playsInline={true}
                     // Keep the progress bar in the controls section in-sync with
