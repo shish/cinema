@@ -8,4 +8,4 @@ RUN pip install -e .
 
 VOLUME /source
 VOLUME /processed
-CMD ["encode", "--loop", "60", "--source", "/media/source", "--processed", "/media/processed"]
+CMD ["encoder", "--loop", "60", "--source", "/media/source", "--processed", "/media/processed"]

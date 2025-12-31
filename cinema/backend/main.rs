@@ -59,10 +59,10 @@ async fn main() -> anyhow::Result<()> {
     });
     let app = Router::new()
         .route("/robots.txt", get(handle_robots))
-        .route("/time", get(handle_time))
-        .route("/room", get(handle_room))
-        .route("/rooms", get(handle_rooms))
-        .nest_service("/movies/", ServeDir::new(&app_state.movies))
+        .route("/api/time", get(handle_time))
+        .route("/api/room", get(handle_room))
+        .route("/api/rooms", get(handle_rooms))
+        .nest_service("/files/", ServeDir::new(&app_state.movies))
         .fallback_service(ServeDir::new("./dist/"))
         .layer(TraceLayer::new_for_http())
         .with_state(app_state);

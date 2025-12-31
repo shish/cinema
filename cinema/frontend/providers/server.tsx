@@ -14,7 +14,7 @@ export function ServerProvider({ children }: { children: React.ReactNode }) {
     const loading = Object.keys(movies).length === 0;
 
     useEffect(() => {
-        fetch('/rooms')
+        fetch('/api/rooms')
             .then((response) => response.json())
             .then((rooms) => setRooms(rooms))
             .catch((error) => {
@@ -23,7 +23,7 @@ export function ServerProvider({ children }: { children: React.ReactNode }) {
     }, []);
 
     useEffect(() => {
-        fetch('/movies/movies.json')
+        fetch('/files/movies.json')
             .then((res) => res.json())
             .then((data) => setMovies(data))
             .catch((error) => {

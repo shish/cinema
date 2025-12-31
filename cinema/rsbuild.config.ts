@@ -16,10 +16,8 @@ export default defineConfig({
     },
     server: {
         proxy: {
-            "/movies": { target: backend },
-            "/rooms": { target: backend },
-            "/time": { target: backend },
-            "/room": { target: backend, ws: true },
+            "/files": { target: backend },
+            "/api": { target: backend, ws: true },
         },
     },
 });

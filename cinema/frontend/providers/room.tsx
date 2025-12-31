@@ -19,7 +19,7 @@ export function getSocketName(connData: ConnData, errors: number): string {
         sess: connData.sess,
         errors: errors.toString(),
     });
-    return `${proto}//${window.location.host}/room?${params.toString()}`;
+    return `${proto}//${window.location.host}/api/room?${params.toString()}`;
 }
 
 export function RoomProvider({ connData, children }: { connData: ConnData; children: React.ReactNode }) {
@@ -27,7 +27,7 @@ export function RoomProvider({ connData, children }: { connData: ConnData; child
     const [room, setRoom] = useState<RoomData | null>(null);
     const [errors, setErrors] = useState(0);
     const socketName = getSocketName(connData, errors);
-    const { now } = useServerTime({ url: '/time' });
+    const { now } = useServerTime({ url: '/api/time' });
 
     // console.log('Socket name:', socketName);
     useEffect(() => {

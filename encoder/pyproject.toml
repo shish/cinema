@@ -9,7 +9,7 @@ dependencies = [
 ]
 
 [project.scripts]
-encode = "encode.__main__:main"
+encoder = "encoder.__main__:main"
 
 [tool.uv]
 package = true
