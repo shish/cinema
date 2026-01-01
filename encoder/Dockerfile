@@ -8,4 +8,5 @@ RUN pip install -e .
 
 VOLUME /source
 VOLUME /processed
-CMD ["encoder", "--loop", "60", "--source", "/media/source", "--processed", "/media/processed"]
+ENTRYPOINT ["encoder", "--source", "/media/source", "--processed", "/media/processed"]
+CMD ["all", "--loop", "60"]

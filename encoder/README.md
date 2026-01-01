@@ -8,3 +8,9 @@ uv run encoder \
     --source /data/cinema-files/source/ \
     --processed /data/cinema-files/processed/
 ```
+
+or
+
+```bash
+docker compose run encoder
+```
