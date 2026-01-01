@@ -155,8 +155,8 @@ export function MainVideo({
                 <video
                     ref={movieRef}
                     id="movie"
-                    src={`/movies/${movie.video}`}
-                    poster={`/movies/${movie.thumbnail}`}
+                    src={`/files/${movie.video}`}
+                    poster={`/files/${movie.thumbnail}`}
                     playsInline={true}
                     // Keep the progress bar in the controls section in-sync with
                     // the playing movie.
@@ -166,7 +166,7 @@ export function MainVideo({
                     onCanPlay={() => updateDuration()}
                     is="hls-video"
                 >
-                    <track kind="captions" src={`/movies/${movie.subtitles}`} default />
+                    <track kind="captions" src={`/files/${movie.subtitles}`} default />
                 </video>
             </div>
             {videoHint && <div className="video_hint">{videoHint}</div>}
