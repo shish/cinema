@@ -9,9 +9,8 @@ from pathlib import Path
 
 from tqdm import tqdm
 
-from .util import SUBTITLE_EXTS, VIDEO_EXTS
-
 from .source import Source
+from .util import SUBTITLE_EXTS, VIDEO_EXTS
 
 log = logging.getLogger(__name__)
 
@@ -59,12 +58,16 @@ class Encoder(ABC):
     @abstractmethod
     def encode(self) -> None: ...
 
+    def is_encoded(self) -> bool:
+        return (
+            self.get_output_path().exists()
+            and self.get_output_path().stat().st_mtime
+            >= max(s.path.stat().st_mtime for s in self.sources)
+        )
+
+
     def encode_if_needed(self) -> None:
-        if (
-            not self.get_output_path().exists()
-            or self.get_output_path().stat().st_mtime
-            < max(s.path.stat().st_mtime for s in self.sources)
-        ):
+        if not self.is_encoded():
             log.info(f"Encoding: {self}")
             self.encode()
         else:

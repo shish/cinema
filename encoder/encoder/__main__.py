@@ -16,7 +16,7 @@ def scan(source: Path, processed: Path, match: str | None) -> list[Movie]:
     for ext in VIDEO_EXTS:
         pattern = f"*{match}*{ext}" if match else f"*{ext}"
         for video in source.rglob(pattern):
-            log.info(f"Found video file: {video.relative_to(source)}")
+            log.debug(f"Found video file: {video.relative_to(source)}")
             id = str(video.relative_to(source).with_suffix(""))
             subtitles = [Source(s) for s in video.parent.glob(f"{video.stem}*.srt")]
             movie = Movie(id, [Source(video), *subtitles], source, processed)
@@ -38,6 +38,21 @@ def export(movies: list[Movie], source: Path, processed: Path) -> None:
     with output_file.open("w", encoding="utf-8") as f:
         json.dump(data, f, indent=4)
     # print(json.dumps(data, indent=4))
+
+
+def status(movies: list[Movie], match: str | None) -> None:
+    GREEN = "\033[92m"
+    RED = "\033[91m"
+    ENDC = "\033[0m"
+    OK = GREEN + "✔" + ENDC
+    FAIL = RED + "✘" + ENDC
+    for m in movies:
+        if match and match not in m.id:
+            continue
+        log.info(f"Movie: {m.id}")
+        for name, tgt in m.targets.items():
+            status = OK if tgt.is_encoded() else FAIL
+            log.info(f"  {name}: {status}")
 
 
 def cleanup(movies: list[Movie], processed: Path) -> None:
@@ -75,7 +90,7 @@ def main():
         "cmd",
         default="all",
         nargs="?",
-        choices=["all", "encode", "export", "cleanup"],
+        choices=["all", "encode", "export", "status", "cleanup"],
         help="Run one step of the process",
     )
     parser.add_argument(
@@ -94,6 +109,8 @@ def main():
             encode(movies, args.source, args.processed)
         if args.cmd in {"all", "export"} and not args.match:
             export(movies, args.source, args.processed)
+        if args.cmd in {"status"}:
+            status(movies, args.match)
         if args.cmd in {"cleanup"} and not args.match:
             cleanup(movies, args.processed)
         if args.loop > 0:

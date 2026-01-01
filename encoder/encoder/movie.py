@@ -28,3 +28,9 @@ class Movie:
         for n, tgt in self.targets.items():
             d[n] = str(tgt.get_output_path().relative_to(self.processed))
         return d
+
+    def __str__(self) -> str:
+        all_encoded = all(tgt.is_encoded() for tgt in self.targets.values())
+        return f"Movie({self.id!r}) " + (
+            "[encoded]" if all_encoded else "[not encoded]"
+        )
