@@ -9,7 +9,7 @@ from pathlib import Path
 
 from tqdm import tqdm
 
-from encode.util import SUBTITLE_EXTS, VIDEO_EXTS
+from .util import SUBTITLE_EXTS, VIDEO_EXTS
 
 from .source import Source
 
