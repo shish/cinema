@@ -54,13 +54,32 @@ def status(movies: list[Movie], match: str | None) -> None:
             log.info(f"  {name}: {status}")
 
 
-def cleanup(movies: list[Movie], processed: Path) -> None:
+def cleanup(movies: list[Movie], processed: Path, delete: bool) -> None:
     # get a list of output files for each movie
     # get a list of each file in the processed dir
     # remove any files in the processed dir that aren't associated with a track
     # ignoring any special files (eg movies.json)
-    special_files = ["movies.json"]
-    ...
+    special_files = ["movies.json*"]
+    valid_files = set()
+    for m in movies:
+        for t in m.targets.values():
+            p = t.get_output_path()
+            if p.name == "movie.m3u8":
+                p = p.parent
+            valid_files.add(p)
+
+    for file in processed.glob("*"):
+        if any(file.match(pattern) for pattern in special_files):
+            continue
+        if file not in valid_files:
+            log.info(f"Removing orphaned file: {file.relative_to(processed)}")
+            if delete:
+                if file.is_dir():
+                    for subfile in file.rglob("*"):
+                        subfile.unlink()
+                    file.rmdir()
+                else:
+                    file.unlink()
 
 
 def main():
@@ -85,6 +104,9 @@ def main():
         metavar="SECONDS",
     )
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
+    parser.add_argument(
+        "--delete", action="store_true", help="Actually delete files during cleanup"
+    )
     parser.add_argument(
         "cmd",
         default="all",
@@ -111,4 +133,4 @@ def main():
         if args.cmd in {"status"}:
             status(movies, args.match)
         if args.cmd in {"cleanup"} and not args.match:
-            cleanup(movies, args.processed)
+            cleanup(movies, args.processed, args.delete)
