@@ -2,11 +2,10 @@ import argparse
 import json
 import logging
 from pathlib import Path
-from time import sleep
 
 from .movie import Movie
 from .source import Source
-from .util import VIDEO_EXTS
+from .util import VIDEO_EXTS, wait_for_changes
 
 log = logging.getLogger(__name__)
 
@@ -103,7 +102,7 @@ def main():
         format="%(asctime)s %(message)s",
     )
 
-    while True:
+    for _ in wait_for_changes(args.source, VIDEO_EXTS, args.loop):
         movies = scan(args.source, args.processed, args.match)
         if args.cmd in {"all", "encode"}:
             encode(movies, args.source, args.processed)
@@ -113,8 +112,3 @@ def main():
             status(movies, args.match)
         if args.cmd in {"cleanup"} and not args.match:
             cleanup(movies, args.processed)
-        if args.loop > 0:
-            log.info(f"Sleeping for {args.loop} seconds...")
-            sleep(args.loop)
-        else:
-            break

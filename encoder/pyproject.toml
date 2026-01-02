@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
+    "inotify>=0.2.12",
     "tqdm>=4.67.1",
 ]
 
