@@ -33,10 +33,17 @@ def export(movies: list[Movie], source: Path, processed: Path) -> None:
     data = {}
     for m in movies:
         data[m.id] = m.to_json(source)
+    data = dict(sorted(data.items()))
+
     output_file = processed / "movies.json"
-    with output_file.open("w", encoding="utf-8") as f:
-        json.dump(data, f, indent=4)
-    # print(json.dumps(data, indent=4))
+    try:
+        old_data = json.loads(output_file.read_text())
+    except Exception:
+        old_data = {}
+
+    if data != old_data:
+        with output_file.open("w", encoding="utf-8") as f:
+            json.dump(data, f, indent=4)
 
 
 def status(movies: list[Movie], match: str | None) -> None:
