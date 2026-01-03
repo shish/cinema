@@ -1,6 +1,5 @@
 import logging
 from pathlib import Path
-from time import time
 
 import inotify.constants
 from inotify.adapters import InotifyTree
