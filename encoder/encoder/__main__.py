@@ -89,7 +89,7 @@ def cleanup(movies: list[Movie], processed: Path, delete: bool) -> None:
                     file.unlink()
 
 
-def main():
+def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Cinema Movie Encoder")
     parser.add_argument(
         "--source",
@@ -124,20 +124,31 @@ def main():
     parser.add_argument(
         "match", default=None, nargs="?", help="Only encode files matching this pattern"
     )
-    args = parser.parse_args()
+    return parser.parse_args()
 
-    logging.basicConfig(
-        level=logging.DEBUG if args.debug else logging.INFO,
-        format="%(asctime)s %(message)s",
-    )
 
-    for _ in wait_for_changes(args.source, VIDEO_EXTS, args.loop):
-        movies = scan(args.source, args.processed, args.match)
-        if args.cmd in {"all", "encode"}:
-            encode(movies, args.source, args.processed)
-        if args.cmd in {"all", "export"} and not args.match:
-            export(movies, args.source, args.processed)
-        if args.cmd in {"status"}:
-            status(movies, args.match)
-        if args.cmd in {"cleanup"} and not args.match:
-            cleanup(movies, args.processed, args.delete)
+def _main_loop(args: argparse.Namespace) -> None:
+    movies = scan(args.source, args.processed, args.match)
+    if args.cmd in {"all", "encode"}:
+        encode(movies, args.source, args.processed)
+    if args.cmd in {"all", "export"} and not args.match:
+        export(movies, args.source, args.processed)
+    if args.cmd in {"status"}:
+        status(movies, args.match)
+    if args.cmd in {"cleanup"} and not args.match:
+        cleanup(movies, args.processed, args.delete)
+
+
+def main():
+    try:
+        args = _parse_args()
+
+        logging.basicConfig(
+            level=logging.DEBUG if args.debug else logging.INFO,
+            format="%(asctime)s %(message)s",
+        )
+
+        for _ in wait_for_changes(args.source, args.loop):
+            _main_loop(args)
+    except KeyboardInterrupt:
+        log.info("Exiting on user request")
