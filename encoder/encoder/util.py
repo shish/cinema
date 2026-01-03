@@ -4,7 +4,7 @@ from pathlib import Path
 import inotify.constants
 from inotify.adapters import InotifyTree
 
-VIDEO_EXTS = {".mp4", ".mkv", ".avi", ".mov"}
+VIDEO_EXTS = {".mp4", ".mkv", ".avi", ".mov", ".webm"}
 SUBTITLE_EXTS = {".srt", ".vtt"}
 
 log = logging.getLogger(__name__)
