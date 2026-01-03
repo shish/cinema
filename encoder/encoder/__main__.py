@@ -1,13 +1,33 @@
-import argparse
 import json
 import logging
 from pathlib import Path
+from typing import Literal
+
+from tap import Tap
 
 from .movie import Movie
 from .source import Source
 from .util import VIDEO_EXTS, wait_for_changes
 
 log = logging.getLogger(__name__)
+
+
+class Args(Tap):
+    "Cinema Movie Encoder"
+
+    # fmt: off
+    source: Path = Path("../media/source")  # Source directory containing movies
+    processed: Path = Path("../media/processed")  # Output directory for processed movies
+    loop: int = 0  # Check for new files every N seconds
+    debug: bool = False  # Enable debug logging
+    delete: bool = False  # Actually delete files during cleanup
+    cmd: Literal["all", "encode", "export", "status", "cleanup"]  # Run one step of the process
+    match: str | None  # Only encode files matching this pattern
+    # fmt: on
+
+    def configure(self):
+        self.add_argument("cmd", nargs="?", default="all")
+        self.add_argument("match", nargs="?", default=None)
 
 
 def scan(source: Path, processed: Path, match: str | None) -> list[Movie]:
@@ -89,45 +109,7 @@ def cleanup(movies: list[Movie], processed: Path, delete: bool) -> None:
                     file.unlink()
 
 
-def _parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Cinema Movie Encoder")
-    parser.add_argument(
-        "--source",
-        type=Path,
-        help="Source directory containing movies",
-        default=Path("../media/source"),
-    )
-    parser.add_argument(
-        "--processed",
-        type=Path,
-        help="Output directory for processed movies",
-        default=Path("../media/processed"),
-    )
-    parser.add_argument(
-        "--loop",
-        type=int,
-        default=0,
-        help="Check for new files every N seconds",
-        metavar="SECONDS",
-    )
-    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
-    parser.add_argument(
-        "--delete", action="store_true", help="Actually delete files during cleanup"
-    )
-    parser.add_argument(
-        "cmd",
-        default="all",
-        nargs="?",
-        choices=["all", "encode", "export", "status", "cleanup"],
-        help="Run one step of the process",
-    )
-    parser.add_argument(
-        "match", default=None, nargs="?", help="Only encode files matching this pattern"
-    )
-    return parser.parse_args()
-
-
-def _main_loop(args: argparse.Namespace) -> None:
+def _main_loop(args: Args) -> None:
     movies = scan(args.source, args.processed, args.match)
     if args.cmd in {"all", "encode"}:
         encode(movies, args.source, args.processed)
@@ -141,7 +123,7 @@ def _main_loop(args: argparse.Namespace) -> None:
 
 def main():
     try:
-        args = _parse_args()
+        args = Args().parse_args()
 
         logging.basicConfig(
             level=logging.DEBUG if args.debug else logging.INFO,
