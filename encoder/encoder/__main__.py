@@ -49,10 +49,10 @@ def encode(movies: list[Movie], source: Path, processed: Path) -> None:
             t.encode_if_needed()
 
 
-def export(movies: list[Movie], source: Path, processed: Path) -> None:
+def export(movies: list[Movie], processed: Path) -> None:
     data = {}
     for m in movies:
-        data[m.id] = m.to_json(source)
+        data[m.id] = m.to_json()
     data = dict(sorted(data.items()))
 
     output_file = processed / "movies.json"
@@ -114,7 +114,7 @@ def _main_loop(args: Args) -> None:
     if args.cmd in {"all", "encode"}:
         encode(movies, args.source, args.processed)
     if args.cmd in {"all", "export"} and not args.match:
-        export(movies, args.source, args.processed)
+        export(movies, args.processed)
     if args.cmd in {"status"}:
         status(movies, args.match)
     if args.cmd in {"cleanup"} and not args.match:

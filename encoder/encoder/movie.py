@@ -23,7 +23,7 @@ class Movie:
             "thumbnail": EncodeThumb(sources, source, processed),
         }
 
-    def to_json(self, source: Path) -> dict[str, t.Any]:
+    def to_json(self) -> dict[str, t.Any]:
         d = {"id": self.id, "title": self.title}
         for n, tgt in self.targets.items():
             d[n] = str(tgt.get_output_path().relative_to(self.processed))
