@@ -49,85 +49,73 @@ export function MainVideo({
     const { showSubs } = useContext(SettingsContext);
     const [currentTime, setCurrentTime] = useState<number>(0);
     const [duration, setDuration] = useState<number>(0);
-    const [isPlaying, setIsPlaying] = useState<boolean>(false);
-    const [isMuted, setIsMuted] = useState<boolean>(false);
+    const [videoHint, setVideoHint] = useState<string | null>(null);
 
-    // Figure out the goal time, whether we're goal-paused or goal-playing.
-    const goalTime = playingState.paused || now - (playingState.playing || 0);
-    const isGoalTimeInBounds = goalTime >= 0 && goalTime <= (duration || 9999);
-
-    // If the HTML video element seems to be having issues, show a warning
-    const videoHint = useMemo(() => {
-        if (playingState.playing) {
-            if (!isPlaying && isGoalTimeInBounds) {
-                return 'Auto-play failed, you will need to tap the video and then push the play button manually';
-            }
-            if (isMuted) {
-                return 'Auto-play failed, you will need to tap the video and then un-mute it manually';
-            }
-        }
-        return null;
-    }, [playingState, isPlaying, isMuted, isGoalTimeInBounds]);
     // If there is a warning, show the controls so the user can deal with it
     useEffect(() => {
         movieRef.current!.controls = !!videoHint;
     }, [videoHint]);
 
-    // If our goal time is invalid, pause
-    // (goal time may become valid, eg if it is set to the future and then
-    // we wait for the the future to arrive)
-    useEffect(() => {
-        const movie = movieRef.current!;
-        if (!isGoalTimeInBounds) {
-            if(!movie.paused) {
-                console.log("Goal time is outside of [0..duration], pausing");
-                movie.pause();
-            }
-        }
-    }, [isGoalTimeInBounds]);
-
     // Try to keep the video element in-sync with our goal time and playing state
     useEffect(() => {
         const movie = movieRef.current!;
 
-        // Don't do anything if our goal time is invalid
-        if (!isGoalTimeInBounds) {
-            return;
+        // Sanity-check the goal state
+        let goalTime = playingState.paused || now - (playingState.playing || 0);
+        let goalPaused = playingState.paused !== undefined;
+        if (goalTime < 0) {
+            goalTime = 0;
+            goalPaused = true;
+        }
+        if (duration && goalTime > duration) {
+            goalTime = duration;
+            goalPaused = true;
         }
 
-        // Set the movie time, whether we're movie-paused or movie-playing.
-        // If we're currently playing, then only bother to set the time if it's
-        // more than 3 seconds off, to avoid stuttering.
+        // If we're supposed to be at time X, make sure we're at time X
+        // (Allow a couple of seconds of desync while playing to avoid stuttering).
         if (movie.paused || Math.abs(movie.currentTime - goalTime) > 3) {
             if (!movie.paused) console.log(`Time is ${movie.currentTime} and should be ${goalTime}`);
             movie.currentTime = goalTime;
         }
 
-        if (playingState.paused && !movie.paused) {
-            movie.pause();
+        // If we're supposed to be paused
+        if (goalPaused) {
+            // Make sure we're paused
+            if(!movie.paused) movie.pause();
+            setVideoHint(null);
         }
-        if (playingState.playing && movie.paused) {
-            // if we're supposed to be playing, but we're paused, attempt to
-            // trigger auto-play
-            movie
-                .play()
-                .then((_) => {
-                    // everything is awesome
-                })
-                .catch((error) => {
-                    // attempt to play while muted
-                    movie.muted = true;
-                    movie
-                        .play()
-                        .then((_) => {
-                            // playing but muted
-                        })
-                        .catch((error) => {
-                            movie.muted = false;
-                        });
-                });
+        // If we're supposed to be playing
+        if (!goalPaused) {
+            // Make sure we're playing
+            if (movie.paused) {
+                movie
+                    .play()
+                    .then((_) => {
+                        // everything is awesome
+                        setVideoHint(null);
+                    })
+                    .catch((error) => {
+                        console.log('Loud auto-play failed, trying muted auto-play...', error);
+                        movie.muted = true;
+                        movie
+                            .play()
+                            .then((_) => {
+                                setVideoHint('Auto-play failed, you will need to tap the video and then un-mute it manually');
+                                console.log("Muted auto-play succeeded");
+                            })
+                            .catch((error) => {
+                                setVideoHint('Auto-play failed, you will need to tap the video and then push the play button manually');
+                                console.log('Auto-play while muted also failed.', error);
+                                movie.muted = false;
+                            });
+                    });
+            }
+            if (!movie.paused && !movie.muted) {
+                setVideoHint(null);
+            }
         }
-    }, [now, playingState, isGoalTimeInBounds]);
+    }, [now, playingState]);
 
     useEffect(() => {
         const movie = movieRef.current!;
@@ -160,9 +148,6 @@ export function MainVideo({
                     src={`/files/${movie.video}`}
                     poster={`/files/${movie.thumbnail}`}
                     playsInline={true}
-                    onPlay={() => setIsPlaying(true)}
-                    onPause={() => setIsPlaying(false)}
-                    onVolumeChange={(e) => setIsMuted(e.currentTarget.muted)}
                     // Keep the progress bar in the controls section in-sync with
                     // the playing movie.
                     onTimeUpdate={(e) => updateDuration(e.currentTarget)}
