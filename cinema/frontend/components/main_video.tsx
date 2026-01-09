@@ -52,13 +52,6 @@ export function MainVideo({
     const [isPlaying, setIsPlaying] = useState<boolean>(false);
     const [isMuted, setIsMuted] = useState<boolean>(false);
 
-    // Monitor HTML video element for changes
-    useEffect(() => {
-        const movie = movieRef.current!;
-        movie.onplay = () => setIsPlaying(true);
-        movie.onpause = () => setIsPlaying(false);
-        movie.onvolumechange = () => setIsMuted(movie.muted);
-    }, []);
     // If the HTML video element seems to be having issues, show a warning
     const videoHint = useMemo(() => {
         if (playingState.playing) {
@@ -133,11 +126,9 @@ export function MainVideo({
         }
     }, [showSubs]);
 
-    function updateDuration() {
-        const movie = movieRef.current!;
+    function updateDuration(movie: HTMLVideoElement) {
         setCurrentTime(movie.currentTime);
         setDuration(movie.duration || 0);
-        // console.log('updateDuration', currentTime, duration);
     }
     function pause() {
         send({ pause: [movie.id, currentTime] });
@@ -155,15 +146,19 @@ export function MainVideo({
                 <video
                     ref={movieRef}
                     id="movie"
+                    key={movie.id}
                     src={`/files/${movie.video}`}
                     poster={`/files/${movie.thumbnail}`}
                     playsInline={true}
+                    onPlay={() => setIsPlaying(true)}
+                    onPause={() => setIsPlaying(false)}
+                    onVolumeChange={(e) => setIsMuted(e.currentTarget.muted)}
                     // Keep the progress bar in the controls section in-sync with
                     // the playing movie.
-                    onTimeUpdate={() => updateDuration()}
+                    onTimeUpdate={(e) => updateDuration(e.currentTarget)}
                     // load metadata and update duration ASAP
                     preload="metadata"
-                    onCanPlay={() => updateDuration()}
+                    onCanPlay={(e) => updateDuration(e.currentTarget)}
                     is="hls-video"
                 >
                     <track kind="captions" src={`/files/${movie.subtitles}`} default />
