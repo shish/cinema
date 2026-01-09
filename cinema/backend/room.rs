@@ -88,35 +88,50 @@ impl Room {
             }
             (true, Command::Stop(())) => {
                 tracing::info!("Stopping");
+                self.chat_sys(&format!("{} stopped", login.user))?;
                 self.video_state = VideoState::NoVideo(());
             }
             (true, Command::Pause(movie, pause_pos)) => {
                 tracing::info!("Pausing {} at {}", movie, pause_pos);
+                self.chat_sys(&format!("{} paused", login.user))?;
                 self.video_state =
                     VideoState::Video(movie.clone(), PlayingState::Paused(*pause_pos));
             }
             (true, Command::Play(movie, start_ts)) => {
                 tracing::info!("Playing {} at {}", movie, start_ts);
+                self.chat_sys(&format!("{} playing", login.user))?;
                 self.video_state =
                     VideoState::Video(movie.clone(), PlayingState::Playing(*start_ts));
             }
             (true, Command::Admin(user)) => {
                 tracing::info!("Making {} an admin", user);
+                self.chat_sys(&format!("{} made {} an admin", login.user, user))?;
                 self.admins.push(user.clone());
             }
             (true, Command::Unadmin(user)) => {
                 if &login.user != user {
                     tracing::info!("Dethroning {}", user);
+                    self.chat_sys(&format!("{} removed {} from admins", login.user, user))?;
                     self.admins.retain(|x| x != user);
                 }
             }
             (true, Command::Title(title)) => {
-                tracing::info!("Renaming room {}", title);
-                self.title = title.clone();
+                if title != &self.title {
+                    tracing::info!("Renaming room {}", title);
+                    self.chat_sys(&format!("{} renamed room to '{}'", login.user, title))?;
+                    self.title = title.clone();
+                }
             }
             (true, Command::Public(public)) => {
-                tracing::info!("Setting public = {}", public);
-                self.public = *public;
+                if *public != self.public {
+                    tracing::info!("Setting public = {}", public);
+                    self.chat_sys(&format!(
+                        "{} made room {}",
+                        login.user,
+                        if *public { "public" } else { "hidden" }
+                    ))?;
+                    self.public = *public;
+                }
             }
             (false, _) => {
                 tracing::warn!(
@@ -131,7 +146,7 @@ impl Room {
 
     pub fn add_viewer(&mut self, login: &crate::LoginArgs) -> anyhow::Result<()> {
         tracing::info!("Adding user session ({})", login.sess);
-        self.chat(&"system".to_string(), &format!("{} connected", login.user))?;
+        self.chat_sys(&format!("{} connected", login.user))?;
         self.viewers.push(Viewer {
             name: login.user.clone(),
             sess: login.sess.clone(),
@@ -144,10 +159,7 @@ impl Room {
         if let Some(pos) = self.viewers.iter().position(|x| *x.sess == login.sess) {
             self.viewers.remove(pos);
         }
-        self.chat(
-            &"system".to_string(),
-            &format!("{} disconnected", login.user),
-        )?;
+        self.chat_sys(&format!("{} disconnected", login.user))?;
         self.sync()
     }
 
@@ -160,6 +172,10 @@ impl Room {
             message: message.clone(),
         });
         Ok(())
+    }
+
+    pub fn chat_sys(&mut self, message: &String) -> anyhow::Result<()> {
+        self.chat(&"system".to_string(), message)
     }
 
     pub fn sync(&mut self) -> anyhow::Result<()> {
