@@ -44,7 +44,7 @@ export function MainVideo({
     playingState: PlayingState;
     send: (data: any) => void;
 }) {
-    const movieRef = useRef<HTMLVideoElement>(null);
+    const videoRef = useRef<HTMLVideoElement>(null);
     const { now } = useContext(RoomContext);
     const { showSubs } = useContext(SettingsContext);
     const [currentTime, setCurrentTime] = useState<number>(0);
@@ -53,12 +53,12 @@ export function MainVideo({
 
     // If there is a warning, show the controls so the user can deal with it
     useEffect(() => {
-        movieRef.current!.controls = !!videoHint;
+        videoRef.current!.controls = !!videoHint;
     }, [videoHint]);
 
     // Try to keep the video element in-sync with our goal time and playing state
     useEffect(() => {
-        const movie = movieRef.current!;
+        const video = videoRef.current!;
 
         // Sanity-check the goal state
         let goalTime = playingState.paused ?? now - (playingState.playing || 0);
@@ -67,29 +67,29 @@ export function MainVideo({
             goalTime = 0;
             goalPaused = true;
         }
-        if (duration && goalTime > duration) {
-            goalTime = duration;
+        if (video.duration > 0 && goalTime > video.duration) {
+            goalTime = video.duration;
             goalPaused = true;
         }
 
         // If we're supposed to be at time X, make sure we're at time X
         // (Allow a couple of seconds of desync while playing to avoid stuttering).
-        if (movie.paused || Math.abs(movie.currentTime - goalTime) > 3) {
-            if (!movie.paused) console.log(`Time is ${movie.currentTime} and should be ${goalTime}`);
-            movie.currentTime = goalTime;
+        if (video.paused || Math.abs(video.currentTime - goalTime) > 3) {
+            if (!video.paused) console.log(`Time is ${video.currentTime} and should be ${goalTime}`);
+            video.currentTime = goalTime;
         }
 
         // If we're supposed to be paused
         if (goalPaused) {
             // Make sure we're paused
-            if(!movie.paused) movie.pause();
+            if(!video.paused) video.pause();
             setVideoHint(null);
         }
         // If we're supposed to be playing
         if (!goalPaused) {
             // Make sure we're playing
-            if (movie.paused) {
-                movie
+            if (video.paused) {
+                video
                     .play()
                     .then((_) => {
                         // everything is awesome
@@ -97,8 +97,8 @@ export function MainVideo({
                     })
                     .catch((error) => {
                         console.log('Loud auto-play failed, trying muted auto-play...', error);
-                        movie.muted = true;
-                        movie
+                        video.muted = true;
+                        video
                             .play()
                             .then((_) => {
                                 setVideoHint('Auto-play failed, you will need to tap the video and then un-mute it manually');
@@ -107,26 +107,26 @@ export function MainVideo({
                             .catch((error) => {
                                 setVideoHint('Auto-play failed, you will need to tap the video and then push the play button manually');
                                 console.log('Auto-play while muted also failed.', error);
-                                movie.muted = false;
+                                video.muted = false;
                             });
                     });
             }
-            if (!movie.paused && !movie.muted) {
+            if (!video.paused && !video.muted) {
                 setVideoHint(null);
             }
         }
     }, [now, playingState]);
 
     useEffect(() => {
-        const movie = movieRef.current!;
-        if (movie.textTracks.length > 0) {
-            movie.textTracks[0].mode = showSubs ? 'showing' : 'hidden';
+        const video = videoRef.current!;
+        if (video.textTracks.length > 0) {
+            video.textTracks[0].mode = showSubs ? 'showing' : 'hidden';
         }
     }, [showSubs]);
 
-    function updateDuration(movie: HTMLVideoElement) {
-        setCurrentTime(movie.currentTime);
-        setDuration(movie.duration || 0);
+    function updateDuration(video: HTMLVideoElement) {
+        setCurrentTime(video.currentTime);
+        setDuration(video.duration || 0);
     }
     function pause() {
         send({ pause: [movie.id, currentTime] });
@@ -142,7 +142,12 @@ export function MainVideo({
         <div className="video">
             <div className="videoScaler">
                 <video
-                    ref={movieRef}
+                    // NOTE: The HLS custom element is kinda funky and doesn't respond
+                    // when attributes are updated, so we only use constant-ish values
+                    // here and use key={...} to force re-creation when needed. For any
+                    // dynamic values (eg currentTime, controls, subtitle visibility),
+                    // we have to set them manually via videoRef.
+                    ref={videoRef}
                     id="movie"
                     key={movie.id}
                     src={`/files/${movie.video}`}
