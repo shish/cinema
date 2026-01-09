@@ -43,7 +43,7 @@ export function RoomScreen({ connData }: { connData: ConnData }) {
         <main className={`room ${isAdmin ? 'admin' : 'user'} ${showChat ? 'chat' : 'nochat'}`}>
             <Header setShowInfo={setShowInfo} setShowSettings={setShowSettings} />
             {isAdmin && <MovieList selectedMovieId={room.video_state.video?.[0] || null} send={send} />}
-            {room.video_state.video ? (
+            {(room.video_state.video && movies[room.video_state.video[0]]) ? (
                 <MainVideo
                     movie={movies[room.video_state.video[0]]}
                     playingState={room.video_state.video[1]}
