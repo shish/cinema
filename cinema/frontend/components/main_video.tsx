@@ -52,10 +52,14 @@ export function MainVideo({
     const [isPlaying, setIsPlaying] = useState<boolean>(false);
     const [isMuted, setIsMuted] = useState<boolean>(false);
 
+    // Figure out the goal time, whether we're goal-paused or goal-playing.
+    const goalTime = playingState.paused || now - (playingState.playing || 0);
+    const isGoalTimeInBounds = goalTime >= 0 && goalTime <= (duration || 9999);
+
     // If the HTML video element seems to be having issues, show a warning
     const videoHint = useMemo(() => {
         if (playingState.playing) {
-            if (!isPlaying) {
+            if (!isPlaying && isGoalTimeInBounds) {
                 return 'Auto-play failed, you will need to tap the video and then push the play button manually';
             }
             if (isMuted) {
@@ -63,25 +67,31 @@ export function MainVideo({
             }
         }
         return null;
-    }, [playingState, isPlaying, isMuted]);
+    }, [playingState, isPlaying, isMuted, isGoalTimeInBounds]);
     // If there is a warning, show the controls so the user can deal with it
     useEffect(() => {
         movieRef.current!.controls = !!videoHint;
     }, [videoHint]);
 
+    // If our goal time is invalid, pause
+    // (goal time may become valid, eg if it is set to the future and then
+    // we wait for the the future to arrive)
     useEffect(() => {
         const movie = movieRef.current!;
-
-        // Figure out the goal time, whether we're goal-paused or goal-playing.
-        // If our goal time is invalid, then pause at the start
-        // (goal time may become valid, eg if it is set to the future and then
-        // we wait for the the future to arrive)
-        let goalTime = playingState.paused || now - (playingState.playing || 0);
-        if (goalTime < 0 || goalTime > (movie.duration || 9999)) {
+        if (!isGoalTimeInBounds) {
             if(!movie.paused) {
                 console.log("Goal time is outside of [0..duration], pausing");
                 movie.pause();
             }
+        }
+    }, [isGoalTimeInBounds]);
+
+    // Try to keep the video element in-sync with our goal time and playing state
+    useEffect(() => {
+        const movie = movieRef.current!;
+
+        // Don't do anything if our goal time is invalid
+        if (!isGoalTimeInBounds) {
             return;
         }
 
@@ -117,7 +127,7 @@ export function MainVideo({
                         });
                 });
         }
-    }, [now, playingState]);
+    }, [now, playingState, isGoalTimeInBounds]);
 
     useEffect(() => {
         const movie = movieRef.current!;
