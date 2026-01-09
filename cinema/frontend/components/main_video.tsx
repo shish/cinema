@@ -61,7 +61,7 @@ export function MainVideo({
         const movie = movieRef.current!;
 
         // Sanity-check the goal state
-        let goalTime = playingState.paused || now - (playingState.playing || 0);
+        let goalTime = playingState.paused ?? now - (playingState.playing || 0);
         let goalPaused = playingState.paused !== undefined;
         if (goalTime < 0) {
             goalTime = 0;
