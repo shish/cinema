@@ -10,12 +10,6 @@ dependencies = [
     "typed-argument-parser>=1.10.1",
 ]
 
-[project.scripts]
-encoder = "encoder.__main__:main"
-
-[tool.uv]
-package = true
-
 [dependency-groups]
 dev = [
     "mypy>=1.19.1",
@@ -23,3 +17,13 @@ dev = [
     "ruff>=0.14.10",
     "types-tqdm>=4.67.0.20250809",
 ]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project.scripts]
+encoder = "encoder.__main__:main"
+
+[tool.mypy]
+disable_error_code = ["import-untyped"]

@@ -10,6 +10,16 @@ SUBTITLE_EXTS = {".srt", ".vtt"}
 log = logging.getLogger(__name__)
 
 
+def write_if_changed(path: Path, data: str) -> None:
+    try:
+        old_data = path.read_text()
+    except Exception:
+        old_data = None
+    if data != old_data:
+        with path.open("w", encoding="utf-8") as f:
+            f.write(data)
+
+
 def get_lang(video: Path, subtitle: Path) -> str:
     """
     Get language code from subtitle filename.

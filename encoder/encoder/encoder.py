@@ -44,10 +44,12 @@ class Encoder(ABC):
         self.processed = processed
         self.sources = self.find_relevant_sources(sources)
         # combine the hashes of all relevant sources
-        combined_hash = hashlib.md5()
-        for h in sorted([s.hash for s in self.sources]):
-            combined_hash.update(h.encode())
-        self.hash = combined_hash.hexdigest()
+        if len(self.sources) == 0:
+            raise ValueError("No relevant sources found for encoder")
+        elif len(self.sources) == 1:
+            self.hash = self.sources[0].hash
+        else:
+            self.hash = hashlib.md5("".join(sorted(s.hash for s in self.sources)).encode()).hexdigest()
 
     @abstractmethod
     def find_relevant_sources(self, sources: list[Source]) -> list[Source]: ...
