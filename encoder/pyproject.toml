@@ -18,9 +18,8 @@ dev = [
     "types-tqdm>=4.67.0.20250809",
 ]
 
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+[tool.ul]
+package = true
 
 [project.scripts]
 encoder = "encoder.__main__:main"
