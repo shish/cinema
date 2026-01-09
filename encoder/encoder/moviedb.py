@@ -64,7 +64,7 @@ class MovieDB:
                 status = OK if tgt.is_encoded() else FAIL
                 line += f"{name}={status} "
             line += f"id={m.id}"
-            log.info(line)
+            print(line)
 
     def cleanup(self, delete: bool) -> None:
         # get a list of output files for each movie
