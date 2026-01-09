@@ -15,10 +15,10 @@ class Cache:
 
         if self.path.exists():
             try:
-                self.cache = json.loads(self.path.read_text())
+                self.storage = json.loads(self.path.read_text())
             except Exception:
                 log.warning("Failed to load cache, starting fresh")
-                self.cache = {}
+                self.storage = {}
 
     def save(self) -> None:
         try:
@@ -35,6 +35,7 @@ class Cache:
         if key in self.storage:
             return self.storage[key]
         else:
+            log.debug(f"Cache miss for key: {key}, computing value")
             value = func()
             self.storage[key] = value
             return value
