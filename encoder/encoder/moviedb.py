@@ -71,7 +71,7 @@ class MovieDB:
         # get a list of each file in the processed dir
         # remove any files in the processed dir that aren't associated with a track
         # ignoring any special files (eg movies.json)
-        special_files = ["movies.*", "cache.*"]
+        special_files = ["movies.*", "cache.*", ".stfolder"]
         valid_files = set()
         for m in self.movies:
             for t in m.targets.values():
