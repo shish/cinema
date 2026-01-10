@@ -1,35 +1,16 @@
-import Hls from 'hls.js';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { faPause, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { FAIcon } from '@shish2k/react-faicon';
 
 import { RoomContext } from '../providers/room';
 import { SettingsContext } from '../providers/settings';
+import { HLSVideoElement } from './hls_video';
 
-class HLSVideoElement extends HTMLVideoElement {
-    static observedAttributes = ['src'];
-    hls: Hls | null = null;
-
-    attributeChangedCallback(name: string, oldValue: string, newValue: string) {
-        if (name === 'src' && oldValue !== newValue) {
-            if (this.hls && newValue.endsWith('.m3u8')) {
-                this.hls.loadSource(newValue);
-            }
-        }
-    }
-
-    connectedCallback() {
-        if (Hls.isSupported()) {
-            this.hls = new Hls({});
-            this.hls.loadSource(this.src);
-            this.hls.attachMedia(this);
-        }
-    }
+// Apparently we need to define the custom element here, it doesn't
+// work when done in hls_video.tsx o_O
+if (!window.customElements.get('hls-video')) {
+    window.customElements.define('hls-video', HLSVideoElement);
 }
-
-window.customElements.define('hls-video', HLSVideoElement, {
-    extends: 'video',
-});
 
 function ts2hms(ts: number): string {
     return new Date(ts * 1000).toISOString().substring(11, 19);
@@ -44,21 +25,36 @@ export function MainVideo({
     playingState: PlayingState;
     send: (data: any) => void;
 }) {
-    const videoRef = useRef<HTMLVideoElement>(null);
+    const hlsRef = useRef<HLSVideoElement>(null);
     const { now } = useContext(RoomContext);
     const { showSubs } = useContext(SettingsContext);
     const [currentTime, setCurrentTime] = useState<number>(0);
     const [duration, setDuration] = useState<number>(0);
     const [videoHint, setVideoHint] = useState<string | null>(null);
 
-    // If there is a warning, show the controls so the user can deal with it
+    // Get the actual video element from the custom element
     useEffect(() => {
-        videoRef.current!.controls = !!videoHint;
-    }, [videoHint]);
+        if (hlsRef.current) {
+            const video = hlsRef.current.getVideoElement();
+
+            function updateDuration() {
+                setCurrentTime(video.currentTime);
+                setDuration(video.duration || 0);
+            }
+
+            video.addEventListener('timeupdate', updateDuration);
+            video.addEventListener('canplay', updateDuration);
+
+            return () => {
+                video.removeEventListener('timeupdate', updateDuration);
+                video.removeEventListener('canplay', updateDuration);
+            };
+        }
+    }, [hlsRef.current]);
 
     // Try to keep the video element in-sync with our goal time and playing state
     useEffect(() => {
-        const video = videoRef.current!;
+        const video = hlsRef.current!.getVideoElement();
 
         // Sanity-check the goal state
         let goalTime = playingState.paused ?? now - (playingState.playing || 0);
@@ -82,7 +78,7 @@ export function MainVideo({
         // If we're supposed to be paused
         if (goalPaused) {
             // Make sure we're paused
-            if(!video.paused) video.pause();
+            if (!video.paused) video.pause();
             setVideoHint(null);
         }
         // If we're supposed to be playing
@@ -101,11 +97,15 @@ export function MainVideo({
                         video
                             .play()
                             .then((_) => {
-                                setVideoHint('Auto-play failed, you will need to tap the video and then un-mute it manually');
-                                console.log("Muted auto-play succeeded");
+                                setVideoHint(
+                                    'Auto-play failed, you will need to tap the video and then un-mute it manually',
+                                );
+                                console.log('Muted auto-play succeeded');
                             })
                             .catch((error) => {
-                                setVideoHint('Auto-play failed, you will need to tap the video and then push the play button manually');
+                                setVideoHint(
+                                    'Auto-play failed, you will need to tap the video and then push the play button manually',
+                                );
                                 console.log('Auto-play while muted also failed.', error);
                                 video.muted = false;
                             });
@@ -118,16 +118,12 @@ export function MainVideo({
     }, [now, playingState]);
 
     useEffect(() => {
-        const video = videoRef.current!;
+        const video = hlsRef.current!.getVideoElement();
         if (video.textTracks.length > 0) {
             video.textTracks[0].mode = showSubs ? 'showing' : 'hidden';
         }
     }, [showSubs]);
 
-    function updateDuration(video: HTMLVideoElement) {
-        setCurrentTime(video.currentTime);
-        setDuration(video.duration || 0);
-    }
     function pause() {
         send({ pause: [movie.id, currentTime] });
     }
@@ -141,28 +137,19 @@ export function MainVideo({
     return (
         <div className="video">
             <div className="videoScaler">
-                <video
-                    // NOTE: The HLS custom element is kinda funky and doesn't respond
-                    // when attributes are updated, so we only use constant-ish values
-                    // here and use key={...} to force re-creation when needed. For any
-                    // dynamic values (eg currentTime, controls, subtitle visibility),
-                    // we have to set them manually via videoRef.
-                    ref={videoRef}
-                    id="movie"
+                <hls-video
+                    ref={hlsRef}
+                    // use key to force reloading the video element when movie
+                    // changes so that subtitle tracks are reloaded properly
                     key={movie.id}
                     src={`/files/${movie.video}`}
                     poster={`/files/${movie.thumbnail}`}
-                    playsInline={true}
-                    // Keep the progress bar in the controls section in-sync with
-                    // the playing movie.
-                    onTimeUpdate={(e) => updateDuration(e.currentTarget)}
-                    // load metadata and update duration ASAP
+                    plays-inline="true"
                     preload="metadata"
-                    onCanPlay={(e) => updateDuration(e.currentTarget)}
-                    is="hls-video"
+                    controls={"" + !!videoHint}
                 >
                     <track kind="captions" src={`/files/${movie.subtitles}`} default />
-                </video>
+                </hls-video>
             </div>
             {videoHint && <div className="video_hint">{videoHint}</div>}
             <form className="controls">

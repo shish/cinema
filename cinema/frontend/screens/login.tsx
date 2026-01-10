@@ -71,7 +71,9 @@ export function LoginScreen({ setConnData }: { setConnData: (connData: ConnData)
                             required={true}
                         />
                     )}
-                    <button type="submit" disabled={loading}>{loading ? "Loading..." : "Join"}</button>
+                    <button type="submit" disabled={loading}>
+                        {loading ? 'Loading...' : 'Join'}
+                    </button>
                 </form>
             </article>
             {showInfo && <InfoMenu setShowInfo={setShowInfo} />}
