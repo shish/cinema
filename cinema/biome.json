@@ -2,10 +2,8 @@
     "$schema": "https://biomejs.dev/schemas/2.3.5/schema.json",
     "assist": { "actions": { "source": { "organizeImports": "on" } } },
 
-    "vcs": {
-        "enabled": true,
-        "clientKind": "git",
-        "useIgnoreFile": true
+    "files": {
+        "includes": ["frontend/**"]
     },
     "formatter": {
         "indentStyle": "space",
