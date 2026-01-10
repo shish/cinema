@@ -97,19 +97,19 @@ MAIN {
         display: flex;
         align-items: center;
         background: var(--header);
-        height: 4em;
+        height: 2em;
         padding: 0 1rem;
 
         A, svg {
             color: inherit;
             flex: 0 0 auto;
             width: 4rem;
-            font-size: 2rem;
+            font-size: 1rem;
         }
 
         H1 {
             flex: 1 1 auto;
-            font-size: 1.5rem;
+            font-size: 1.25rem;
         }
 
         INPUT {
