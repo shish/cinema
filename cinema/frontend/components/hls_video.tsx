@@ -17,7 +17,7 @@ export class HLSVideoElement extends HTMLElement {
         // console.log(name, oldValue, newValue);
 
         if (name === 'src') {
-            if(this.hls) {
+            if (this.hls) {
                 this.hls.destroy();
                 this.hls = null;
             }
@@ -31,15 +31,15 @@ export class HLSVideoElement extends HTMLElement {
                     for (const eventName of Object.values(Hls.Events)) {
                         this.hls.on(eventName, function (event: any, data: any) {
                             if (
-                                event == Hls.Events.FRAG_LOADING
-                                || event == Hls.Events.BUFFER_APPENDING
-                                || event == Hls.Events.BUFFER_APPENDED
-                                || event == Hls.Events.FRAG_BUFFERED
-                                || event == Hls.Events.FRAG_PARSED
-                                || event == Hls.Events.FRAG_LOADED
-                                || event == Hls.Events.FRAG_CHANGED
-                                || event == Hls.Events.LEVEL_PTS_UPDATED
-                                || event == Hls.Events.BUFFER_EOS
+                                event == Hls.Events.FRAG_LOADING ||
+                                event == Hls.Events.BUFFER_APPENDING ||
+                                event == Hls.Events.BUFFER_APPENDED ||
+                                event == Hls.Events.FRAG_BUFFERED ||
+                                event == Hls.Events.FRAG_PARSED ||
+                                event == Hls.Events.FRAG_LOADED ||
+                                event == Hls.Events.FRAG_CHANGED ||
+                                event == Hls.Events.LEVEL_PTS_UPDATED ||
+                                event == Hls.Events.BUFFER_EOS
                             ) {
                                 return;
                             }
@@ -90,10 +90,10 @@ declare global {
         interface IntrinsicElements {
             'hls-video': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & {
                 src: string;
-                poster: string,
-                "plays-inline": string,
-                preload: string,
-                controls: string,
+                poster: string;
+                'plays-inline': string;
+                preload: string;
+                controls: string;
             };
         }
     }

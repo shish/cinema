@@ -35,7 +35,7 @@ export function SettingsMenu({
     return (
         <div className={'settings'}>
             <div>
-                <h2>
+                <h2 className="buttons">
                     {onLeaveRoom ? (
                         <FAIcon
                             icon={faRightFromBracket}
@@ -44,7 +44,7 @@ export function SettingsMenu({
                                 setShowSettings(false);
                             }}
                             style={{
-                                height: "1em",
+                                height: '1em',
                                 color: '#c44',
                                 cursor: 'pointer',
                             }}
@@ -52,7 +52,7 @@ export function SettingsMenu({
                     ) : (
                         <div style={{ width: '1.5em' }} />
                     )}
-                    <div style={{ padding: "0 1em"}}>Settings</div>
+                    <div style={{ padding: '0 1em' }}>Settings</div>
                     <FAIcon
                         icon={faXmark}
                         onClick={() => setShowSettings(false)}

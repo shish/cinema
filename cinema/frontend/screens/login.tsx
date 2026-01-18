@@ -53,16 +53,13 @@ export function LoginScreen() {
                         required={true}
                     />
                     {room ? (
-                        <input
-                            type="text"
-                            id="room"
-                            value={room}
-                            disabled={true}
-                        />
+                        <input type="text" id="room" value={room} disabled={true} />
                     ) : Object.entries(rooms).length > 0 && !manualEntry ? (
                         <select
                             id="room"
-                            onChange={(e) => (e.target.value === '' ? setManualEntry(true) : setRoomInput(e.target.value))}
+                            onChange={(e) =>
+                                e.target.value === '' ? setManualEntry(true) : setRoomInput(e.target.value)
+                            }
                         >
                             {Object.entries(rooms).map((k) => (
                                 <option key={k[0]} value={k[0]}>

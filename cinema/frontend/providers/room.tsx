@@ -31,7 +31,7 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
     const [errors, setErrors] = useState(0);
     const socketName = roomCode && user && sess ? getSocketName(roomCode, user, sess, errors) : '';
     const { now } = useServerTime({ url: '/api/time' });
-    
+
     if (!roomCode || !user || !sess) {
         return (
             <main className="login">

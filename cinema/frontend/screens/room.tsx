@@ -58,7 +58,15 @@ export function RoomScreen() {
             )}
             <Chat log={room.chat} send={send} />
             <ViewerList viewers={room.viewers} admins={room.admins} send={send} />
-            {showSettings && <SettingsMenu room={room} admin={isAdmin} send={send} setShowSettings={setShowSettings} onLeaveRoom={handleLeaveRoom} />}
+            {showSettings && (
+                <SettingsMenu
+                    room={room}
+                    admin={isAdmin}
+                    send={send}
+                    setShowSettings={setShowSettings}
+                    onLeaveRoom={handleLeaveRoom}
+                />
+            )}
             {showInfo && <InfoMenu setShowInfo={setShowInfo} />}
         </main>
     );

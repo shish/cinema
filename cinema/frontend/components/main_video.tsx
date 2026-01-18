@@ -146,7 +146,7 @@ export function MainVideo({
                     poster={`/files/${movie.thumbnail}`}
                     plays-inline="true"
                     preload="metadata"
-                    controls={"" + !!videoHint}
+                    controls={'' + !!videoHint}
                 >
                     <track kind="captions" src={`/files/${movie.subtitles}`} default />
                 </hls-video>
