@@ -1,4 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
+import { faXmark, faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
+import { FAIcon } from '@shish2k/react-faicon';
 
 import { SettingsContext } from '../providers/settings';
 
@@ -33,7 +35,33 @@ export function SettingsMenu({
     return (
         <div className={'settings'}>
             <div>
-                <h2>Settings</h2>
+                <h2>
+                    {onLeaveRoom ? (
+                        <FAIcon
+                            icon={faRightFromBracket}
+                            onClick={() => {
+                                onLeaveRoom();
+                                setShowSettings(false);
+                            }}
+                            style={{
+                                height: "1em",
+                                color: '#c44',
+                                cursor: 'pointer',
+                            }}
+                        />
+                    ) : (
+                        <div style={{ width: '1.5em' }} />
+                    )}
+                    <div style={{ padding: "0 1em"}}>Settings</div>
+                    <FAIcon
+                        icon={faXmark}
+                        onClick={() => setShowSettings(false)}
+                        style={{
+                            cursor: 'pointer',
+                            height: '1em',
+                        }}
+                    />
+                </h2>
                 <form
                     onSubmit={(e) => {
                         e.preventDefault();
@@ -138,27 +166,6 @@ export function SettingsMenu({
                                     />
                                 </td>
                             </tr>
-                            <tr>
-                                <td colSpan={2}>
-                                    <button type="submit">Close</button>
-                                </td>
-                            </tr>
-                            {onLeaveRoom && (
-                                <tr>
-                                    <td colSpan={2}>
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                onLeaveRoom();
-                                                setShowSettings(false);
-                                            }}
-                                            style={{ background: '#c44' }}
-                                        >
-                                            Leave Room
-                                        </button>
-                                    </td>
-                                </tr>
-                            )}
                         </tbody>
                     </table>
                 </form>
