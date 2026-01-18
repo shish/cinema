@@ -62,7 +62,7 @@ class MovieDB:
             line = ""
             for name, tgt in m.targets.items():
                 status = OK if tgt.is_encoded() else FAIL
-                line += f"{name}={status} "
+                line += f"{name[:3]}={status} "
             line += f"id={m.id}"
             print(line)
 
