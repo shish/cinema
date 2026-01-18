@@ -20,22 +20,23 @@ class MovieDB:
 
     def scan(self, match: str | None) -> None:
         movies: list[Movie] = []
-        for ext in VIDEO_EXTS:
-            pattern = f"*{match}*{ext}" if match else f"*{ext}"
-            for video in self.source.rglob(pattern):
-                log.debug(f"Found video file: {video.relative_to(self.source)}")
-                id = str(video.relative_to(self.source).with_suffix(""))
-                subtitles = [
-                    Source(s, cache=self.cache)
-                    for s in video.parent.glob(f"{video.stem}*.srt")
-                ]
-                movie = Movie(
-                    id,
-                    [Source(video, cache=self.cache), *subtitles],
-                    self.source,
-                    self.processed,
-                )
-                movies.append(movie)
+        pattern = f"*{match}*" if match else "*"
+        for video in self.source.rglob(pattern):
+            if video.suffix not in VIDEO_EXTS:
+                continue
+            log.debug(f"Found video file: {video.relative_to(self.source)}")
+            id = str(video.relative_to(self.source).with_suffix(""))
+            subtitles = [
+                Source(s, cache=self.cache)
+                for s in video.parent.glob(f"{video.stem}*.srt")
+            ]
+            movie = Movie(
+                id,
+                [Source(video, cache=self.cache), *subtitles],
+                self.source,
+                self.processed,
+            )
+            movies.append(movie)
         self.movies = movies
 
     def encode(self) -> None:
