@@ -7,24 +7,30 @@ import { InfoMenu } from '../components/info';
 import { SettingsContext } from '../providers/settings';
 import { ServerContext } from '../providers/server';
 
-export function LoginScreen({ setConnData }: { setConnData: (connData: ConnData) => void }) {
+export function LoginScreen() {
     const { loading, rooms } = useContext(ServerContext);
-    const { sess, user, setUser } = useContext(SettingsContext);
+    const { user, setUser, room, setRoom } = useContext(SettingsContext);
     const [showInfo, setShowInfo] = useState(false);
     const [manualEntry, setManualEntry] = useState(false);
-    const [room, setRoom] = useState<string>('');
+    const [roomInput, setRoomInput] = useState<string>('');
+    const [userInput, setUserInput] = useState<string>(user);
 
+    // Set room input from context if present
     useEffect(() => {
-        if (!room && Object.keys(rooms).length > 0) {
-            setRoom(Object.keys(rooms)[0]);
+        if (room) {
+            setRoomInput(room);
+            setManualEntry(true);
+        } else if (!roomInput && Object.keys(rooms).length > 0) {
+            setRoomInput(Object.keys(rooms)[0]);
         }
-    }, [rooms, room]);
+    }, [rooms, roomInput, room]);
 
     function login(event: any) {
         event.preventDefault();
-        if (!user || !room) return null;
-        // console.log('Logging in as', user, 'to', room);
-        setConnData({ sess, room, user });
+        if (!userInput || !roomInput) return null;
+        // Save user to context and set room which will update the URL
+        setUser(userInput);
+        setRoom(roomInput.toUpperCase());
     }
 
     return (
@@ -40,16 +46,23 @@ export function LoginScreen({ setConnData }: { setConnData: (connData: ConnData)
                         type="text"
                         id="user"
                         placeholder="Enter Your Name"
-                        onChange={(e) => setUser(e.target.value)}
-                        defaultValue={user}
+                        onChange={(e) => setUserInput(e.target.value)}
+                        value={userInput}
                         autoComplete="off"
-                        autoFocus={user.length === 0}
+                        autoFocus={userInput.length === 0}
                         required={true}
                     />
-                    {Object.entries(rooms).length > 0 && !manualEntry ? (
+                    {room ? (
+                        <input
+                            type="text"
+                            id="room"
+                            value={room}
+                            disabled={true}
+                        />
+                    ) : Object.entries(rooms).length > 0 && !manualEntry ? (
                         <select
                             id="room"
-                            onChange={(e) => (e.target.value === '' ? setManualEntry(true) : setRoom(e.target.value))}
+                            onChange={(e) => (e.target.value === '' ? setManualEntry(true) : setRoomInput(e.target.value))}
                         >
                             {Object.entries(rooms).map((k) => (
                                 <option key={k[0]} value={k[0]}>
@@ -65,7 +78,7 @@ export function LoginScreen({ setConnData }: { setConnData: (connData: ConnData)
                             type="text"
                             id="room"
                             maxLength={4}
-                            onChange={(e) => setRoom(e.target.value)}
+                            onChange={(e) => setRoomInput(e.target.value)}
                             placeholder="Enter Room Code"
                             autoComplete="off"
                             required={true}

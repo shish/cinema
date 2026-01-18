@@ -1,6 +1,8 @@
 import { useServerTime } from '@shish2k/react-use-servertime';
 import * as jsonpatch from 'jsonpatch';
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
+import type { SettingsContextType } from './settings';
+import { SettingsContext } from './settings';
 
 export type RoomContextType = {
     conn: WebSocket;
@@ -11,23 +13,35 @@ export type RoomContextType = {
 
 export const RoomContext = createContext<RoomContextType>({} as RoomContextType);
 
-export function getSocketName(connData: ConnData, errors: number): string {
+export function getSocketName(room: string, user: string, sess: string, errors: number): string {
     const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const params = new URLSearchParams({
-        room: connData.room,
-        user: connData.user,
-        sess: connData.sess,
+        room,
+        user,
+        sess,
         errors: errors.toString(),
     });
     return `${proto}//${window.location.host}/api/room?${params.toString()}`;
 }
 
-export function RoomProvider({ connData, children }: { connData: ConnData; children: React.ReactNode }) {
+export function RoomProvider({ children }: { children: React.ReactNode }) {
+    const { user, sess, room: roomCode } = useContext(SettingsContext);
     const [conn, setConn] = useState<WebSocket | null>(null);
     const [room, setRoom] = useState<RoomData | null>(null);
     const [errors, setErrors] = useState(0);
-    const socketName = getSocketName(connData, errors);
+    const socketName = roomCode && user && sess ? getSocketName(roomCode, user, sess, errors) : '';
     const { now } = useServerTime({ url: '/api/time' });
+    
+    if (!roomCode || !user || !sess) {
+        return (
+            <main className="login">
+                <header>
+                    <h1>Error</h1>
+                </header>
+                <article>Missing connection information</article>
+            </main>
+        );
+    }
 
     // console.log('Socket name:', socketName);
     useEffect(() => {
@@ -59,6 +73,13 @@ export function RoomProvider({ connData, children }: { connData: ConnData; child
             lastResp = resp;
             // console.log('Room:', resp);
             setRoom(resp);
+        };
+
+        // Cleanup: close WebSocket when component unmounts or socketName changes
+        return () => {
+            if (conn.readyState === WebSocket.OPEN || conn.readyState === WebSocket.CONNECTING) {
+                conn.close();
+            }
         };
     }, [socketName, errors]);
 

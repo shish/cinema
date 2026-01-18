@@ -31,13 +31,17 @@ function Header({
     );
 }
 
-export function RoomScreen({ connData }: { connData: ConnData }) {
+export function RoomScreen() {
     const { movies } = useContext(ServerContext);
     const { room, send } = useContext(RoomContext);
-    const { showChat } = useContext(SettingsContext);
+    const { showChat, user, setRoom } = useContext(SettingsContext);
     const [showInfo, setShowInfo] = useState<boolean>(false);
     const [showSettings, setShowSettings] = useState<boolean>(false);
-    const isAdmin = room.admins.includes(connData.user);
+    const isAdmin = room.admins.includes(user);
+
+    const handleLeaveRoom = () => {
+        setRoom(null);
+    };
 
     return (
         <main className={`room ${isAdmin ? 'admin' : 'user'} ${showChat ? 'chat' : 'nochat'}`}>
@@ -54,7 +58,7 @@ export function RoomScreen({ connData }: { connData: ConnData }) {
             )}
             <Chat log={room.chat} send={send} />
             <ViewerList viewers={room.viewers} admins={room.admins} send={send} />
-            {showSettings && <SettingsMenu room={room} admin={isAdmin} send={send} setShowSettings={setShowSettings} />}
+            {showSettings && <SettingsMenu room={room} admin={isAdmin} send={send} setShowSettings={setShowSettings} onLeaveRoom={handleLeaveRoom} />}
             {showInfo && <InfoMenu setShowInfo={setShowInfo} />}
         </main>
     );

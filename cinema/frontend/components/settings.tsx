@@ -7,11 +7,13 @@ export function SettingsMenu({
     admin,
     send,
     setShowSettings,
+    onLeaveRoom,
 }: {
     room: RoomData;
     admin: boolean;
     send: (s: any) => void;
     setShowSettings: (b: boolean) => void;
+    onLeaveRoom?: () => void;
 }) {
     const { showChat, setShowChat, showSystem, setShowSystem, showSubs, setShowSubs } = useContext(SettingsContext);
     const [title, setTitle] = useState(room.title);
@@ -141,6 +143,22 @@ export function SettingsMenu({
                                     <button type="submit">Close</button>
                                 </td>
                             </tr>
+                            {onLeaveRoom && (
+                                <tr>
+                                    <td colSpan={2}>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                onLeaveRoom();
+                                                setShowSettings(false);
+                                            }}
+                                            style={{ background: '#c44' }}
+                                        >
+                                            Leave Room
+                                        </button>
+                                    </td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </form>
