@@ -55,8 +55,6 @@ BODY {
 
         H2 {
             margin: 0;
-        }
-        H2.buttons {
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -65,6 +63,9 @@ BODY {
 
         TABLE {
             margin: auto;
+        }
+        P {
+            margin-bottom: 0;
         }
 
         INPUT[type="text"],

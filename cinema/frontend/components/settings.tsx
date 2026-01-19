@@ -15,7 +15,7 @@ export function SettingsMenu({
     admin: boolean;
     send: (s: any) => void;
     setShowSettings: (b: boolean) => void;
-    onLeaveRoom?: () => void;
+    onLeaveRoom: () => void;
 }) {
     const { showChat, setShowChat, showSystem, setShowSystem, showSubs, setShowSubs } = useContext(SettingsContext);
     const [title, setTitle] = useState(room.title);
@@ -35,23 +35,19 @@ export function SettingsMenu({
     return (
         <div className={'settings'}>
             <div>
-                <h2 className="buttons">
-                    {onLeaveRoom ? (
-                        <FAIcon
-                            icon={faRightFromBracket}
-                            onClick={() => {
-                                onLeaveRoom();
-                                setShowSettings(false);
-                            }}
-                            style={{
-                                height: '1em',
-                                color: '#c44',
-                                cursor: 'pointer',
-                            }}
-                        />
-                    ) : (
-                        <div style={{ width: '1.5em' }} />
-                    )}
+                <h2>
+                    <FAIcon
+                        icon={faRightFromBracket}
+                        onClick={() => {
+                            onLeaveRoom();
+                            setShowSettings(false);
+                        }}
+                        style={{
+                            height: '1em',
+                            color: '#c44',
+                            cursor: 'pointer',
+                        }}
+                    />
                     <div style={{ padding: '0 1em' }}>Settings</div>
                     <FAIcon
                         icon={faXmark}
