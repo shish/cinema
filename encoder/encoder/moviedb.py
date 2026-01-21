@@ -1,6 +1,7 @@
 import json
 import logging
 import shutil
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 from .cache import Cache
@@ -39,10 +40,31 @@ class MovieDB:
             movies.append(movie)
         self.movies = movies
 
-    def encode(self) -> None:
+    def encode(self, threads: int = 1) -> None:
+        # Collect all encode targets
+        targets = []
         for m in self.movies:
             for t in m.targets.values():
-                t.encode_if_needed()
+                targets.append(t)
+
+        if threads == 1:
+            # Sequential execution
+            for target in targets:
+                target.encode_if_needed()
+        else:
+            # Parallel execution
+            log.info(f"Encoding with {threads} threads")
+            with ThreadPoolExecutor(max_workers=threads) as executor:
+                futures = {
+                    executor.submit(target.encode_if_needed): target
+                    for target in targets
+                }
+                for future in as_completed(futures):
+                    target = futures[future]
+                    try:
+                        future.result()
+                    except Exception as e:
+                        log.error(f"Error encoding {target}: {e}")
 
     def export(self) -> None:
         data = {}

@@ -20,6 +20,7 @@ class Args(Tap):
     loop: int = 0  # Check for new files every N seconds
     debug: bool = False  # Enable debug logging
     delete: bool = False  # Actually delete files during cleanup
+    threads: int = 1  # Number of parallel encode jobs
     cmd: t.Literal["all", "encode", "export", "status", "cleanup"]  # Run one step of the process
     match: str | None  # Only encode files matching this pattern
     # fmt: on
@@ -44,7 +45,7 @@ def main():
         for _ in wait_for_changes(args.source, args.loop):
             db.scan(args.match)
             if args.cmd in {"all", "encode"}:
-                db.encode()
+                db.encode(args.threads)
             if args.cmd in {"all", "export"} and not args.match:
                 db.export()
             if args.cmd in {"status"}:
