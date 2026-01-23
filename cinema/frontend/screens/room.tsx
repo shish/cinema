@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react';
-import { faCircleInfo, faGears } from '@fortawesome/free-solid-svg-icons';
+import { faCircleInfo, faGears, faShareFromSquare } from '@fortawesome/free-solid-svg-icons';
 import { FAIcon } from '@shish2k/react-faicon';
 
 import { RoomContext } from '../providers/room';
@@ -21,11 +21,29 @@ function Header({
     setShowSettings: (show: boolean) => void;
 }) {
     const { room } = useContext(RoomContext);
+    const [showCopiedNotification, setShowCopiedNotification] = useState<boolean>(false);
+
+    const handleTitleClick = async () => {
+        try {
+            await navigator.clipboard.writeText(window.location.href);
+            setShowCopiedNotification(true);
+            setTimeout(() => setShowCopiedNotification(false), 2000);
+        } catch (err) {
+            console.error('Failed to copy URL:', err);
+        }
+    };
 
     return (
         <header>
             <FAIcon icon={faCircleInfo} onClick={() => setShowInfo(true)} />
-            <h1>{room.title}</h1>
+            <h1 onClick={handleTitleClick} style={{ cursor: 'pointer' }}>
+                <FAIcon icon={faShareFromSquare} /> {room.title}
+            </h1>
+            {showCopiedNotification && (
+                <div className="notification">
+                    Room link copied to clipboard!
+                </div>
+            )}
             <FAIcon icon={faGears} onClick={() => setShowSettings(true)} />
         </header>
     );
