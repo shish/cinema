@@ -18,7 +18,6 @@ pub enum Command {
     Chat(String),
     Admin(String),
     Unadmin(String),
-    Title(String),
 }
 
 #[derive(PartialEq, Serialize, Deserialize, Clone, Debug)]
@@ -50,7 +49,6 @@ pub struct ChatMessage {
 #[derive(Serialize, Clone, Debug)]
 pub struct Room {
     pub name: String,
-    pub title: String,
     pub video_state: VideoState,
     pub admins: Vec<String>,
     pub viewers: Vec<Viewer>,
@@ -67,7 +65,6 @@ impl Room {
         let (tx, _rx) = broadcast::channel(100);
         Room {
             name,
-            title: format!("{}'s Room", user),
             video_state: VideoState::NoVideo(()),
             admins: vec![user],
             viewers: vec![],
@@ -110,13 +107,6 @@ impl Room {
                     tracing::info!("Dethroning {}", user);
                     self.chat_sys(&format!("{} removed {} from admins", login.user, user))?;
                     self.admins.retain(|x| x != user);
-                }
-            }
-            (true, Command::Title(title)) => {
-                if title != &self.title {
-                    tracing::info!("Renaming room {}", title);
-                    self.chat_sys(&format!("{} renamed room to '{}'", login.user, title))?;
-                    self.title = title.clone();
                 }
             }
             (false, _) => {

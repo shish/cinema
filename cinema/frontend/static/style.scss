@@ -110,6 +110,7 @@ MAIN {
         background: var(--header);
         height: 2rem;
         padding: 0 1rem;
+        gap: 1rem;
 
         A, svg {
             color: inherit;
@@ -121,6 +122,10 @@ MAIN {
         H1 {
             flex: 1 1 auto;
             font-size: 1.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-width: 0;
         }
     }
 

@@ -36,9 +36,8 @@ function Header({
     return (
         <header>
             <FAIcon icon={faCircleInfo} onClick={() => setShowInfo(true)} />
-            <h1 onClick={handleTitleClick} style={{ cursor: 'pointer' }}>
-                <FAIcon icon={faShareFromSquare} /> {room.title}
-            </h1>
+            <FAIcon icon={faShareFromSquare} onClick={handleTitleClick} />
+            <h1>{room.video_state.video?.[0].split("/").pop() || '(no movie selected)'}</h1>
             {showCopiedNotification && (
                 <div className="notification">
                     Room link copied to clipboard!

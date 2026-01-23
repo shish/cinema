@@ -18,7 +18,6 @@ export function SettingsMenu({
     onLeaveRoom: () => void;
 }) {
     const { showChat, setShowChat, showSystem, setShowSystem, showSubs, setShowSubs } = useContext(SettingsContext);
-    const [title, setTitle] = useState(room.title);
     const [isFullscreen, setIsFullscreen] = useState(document.fullscreenElement !== null);
 
     useEffect(() => {
@@ -60,43 +59,11 @@ export function SettingsMenu({
                 <form
                     onSubmit={(e) => {
                         e.preventDefault();
-                        if (admin) {
-                            send({ title: title.trim() });
-                        }
                         setShowSettings(false);
                     }}
                 >
                     <table>
-                        {admin && (
-                            <tbody>
-                                <tr>
-                                    <th colSpan={2}>Room</th>
-                                </tr>
-                                <tr>
-                                    <td>Code</td>
-                                    <td>
-                                        <input value={room.name} disabled={true} type={'text'} />
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Title</td>
-                                    <td>
-                                        <input
-                                            value={title}
-                                            type={'text'}
-                                            onChange={(e) => setTitle(e.target.value)}
-                                            disabled={!admin}
-                                        />
-                                    </td>
-                                </tr>
-                            </tbody>
-                        )}
                         <tbody>
-                            {admin && (
-                                <tr>
-                                    <th colSpan={2}>Viewer</th>
-                                </tr>
-                            )}
                             <tr>
                                 <td>Show Chat</td>
                                 <td>

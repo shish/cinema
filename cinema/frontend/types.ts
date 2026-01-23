@@ -20,7 +20,6 @@ type ChatMessage = {
 
 type RoomData = {
     name: string;
-    title: string;
     video_state: VideoState;
     admins: Array<string>;
     viewers: Array<Viewer>;
