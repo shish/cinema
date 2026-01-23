@@ -21,7 +21,6 @@ The frontend serves on http://localhost:2002/ with API requests proxied to the b
 
 ## Protocol
 
-* User checks `/api/rooms` to get a list of existing public rooms
 * User checks `/files/movies.json` to get a list of movies
 * User connects to `/api/room?room=...&user=...&sess=...` to get a websocket connection
   * `room` -- room code, a new room will be created if one doesn't exist

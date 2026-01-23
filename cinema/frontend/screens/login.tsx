@@ -8,10 +8,9 @@ import { SettingsContext } from '../providers/settings';
 import { ServerContext } from '../providers/server';
 
 export function LoginScreen() {
-    const { loading, rooms } = useContext(ServerContext);
+    const { loading } = useContext(ServerContext);
     const { user, setUser, room, setRoom } = useContext(SettingsContext);
     const [showInfo, setShowInfo] = useState(false);
-    const [manualEntry, setManualEntry] = useState(false);
     const [roomInput, setRoomInput] = useState<string>('');
     const [userInput, setUserInput] = useState<string>(user);
 
@@ -19,17 +18,14 @@ export function LoginScreen() {
     useEffect(() => {
         if (room) {
             setRoomInput(room);
-            setManualEntry(true);
-        } else if (!roomInput && Object.keys(rooms).length > 0) {
-            setRoomInput(Object.keys(rooms)[0]);
         }
-    }, [rooms, roomInput, room]);
+    }, [room]);
 
     function login(event: any) {
         event.preventDefault();
         if (!userInput || !roomInput) return null;
         // Save user to context and set room which will update the URL
-        setUser(userInput);
+        setUser(userInput.trim());
         setRoom(roomInput.toUpperCase());
     }
 
@@ -45,6 +41,7 @@ export function LoginScreen() {
                     <input
                         type="text"
                         id="user"
+                        maxLength={16}
                         placeholder="Enter Your Name"
                         onChange={(e) => setUserInput(e.target.value)}
                         value={userInput}
@@ -52,35 +49,18 @@ export function LoginScreen() {
                         autoFocus={userInput.length === 0}
                         required={true}
                     />
-                    {room ? (
-                        <input type="text" id="room" value={room} disabled={true} />
-                    ) : Object.entries(rooms).length > 0 && !manualEntry ? (
-                        <select
-                            id="room"
-                            onChange={(e) =>
-                                e.target.value === '' ? setManualEntry(true) : setRoomInput(e.target.value)
-                            }
-                        >
-                            {Object.entries(rooms).map((k) => (
-                                <option key={k[0]} value={k[0]}>
-                                    {k[1]}
-                                </option>
-                            ))}
-                            <option key={''} value="">
-                                Enter a code
-                            </option>
-                        </select>
-                    ) : (
-                        <input
-                            type="text"
-                            id="room"
-                            maxLength={4}
-                            onChange={(e) => setRoomInput(e.target.value)}
-                            placeholder="Enter Room Code"
-                            autoComplete="off"
-                            required={true}
-                        />
-                    )}
+                    <input
+                        type="text"
+                        id="room"
+                        maxLength={4}
+                        onChange={(e) => setRoomInput(e.target.value)}
+                        value={roomInput}
+                        placeholder="Enter Room Code"
+                        autoComplete="off"
+                        disabled={room !== null}
+                        pattern="[A-Za-z0-9]{4}"
+                        required={true}
+                    />
                     <button type="submit" disabled={loading}>
                         {loading ? 'Loading...' : 'Join'}
                     </button>

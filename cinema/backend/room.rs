@@ -19,7 +19,6 @@ pub enum Command {
     Admin(String),
     Unadmin(String),
     Title(String),
-    Public(bool),
 }
 
 #[derive(PartialEq, Serialize, Deserialize, Clone, Debug)]
@@ -50,7 +49,6 @@ pub struct ChatMessage {
 
 #[derive(Serialize, Clone, Debug)]
 pub struct Room {
-    pub public: bool,
     pub name: String,
     pub title: String,
     pub video_state: VideoState,
@@ -68,7 +66,6 @@ impl Room {
         tracing::info!("Creating room");
         let (tx, _rx) = broadcast::channel(100);
         Room {
-            public: true,
             name,
             title: format!("{}'s Room", user),
             video_state: VideoState::NoVideo(()),
@@ -120,17 +117,6 @@ impl Room {
                     tracing::info!("Renaming room {}", title);
                     self.chat_sys(&format!("{} renamed room to '{}'", login.user, title))?;
                     self.title = title.clone();
-                }
-            }
-            (true, Command::Public(public)) => {
-                if *public != self.public {
-                    tracing::info!("Setting public = {}", public);
-                    self.chat_sys(&format!(
-                        "{} made room {}",
-                        login.user,
-                        if *public { "public" } else { "hidden" }
-                    ))?;
-                    self.public = *public;
                 }
             }
             (false, _) => {

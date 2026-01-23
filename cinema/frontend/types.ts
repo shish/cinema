@@ -26,7 +26,6 @@ type RoomData = {
     viewers: Array<Viewer>;
     chat: Array<ChatMessage>;
     movie: string | null;
-    public: boolean;
 };
 
 type ConnData = {

@@ -64,7 +64,6 @@ async fn main() -> anyhow::Result<()> {
         .route("/robots.txt", get(handle_robots))
         .route("/api/time", get(handle_time))
         .route("/api/room", get(handle_room))
-        .route("/api/rooms", get(handle_rooms))
         .nest_service("/files/", ServeDir::new(&app_state.movies))
         .fallback_service(
             ServeDir::new("./dist/").not_found_service(ServeFile::new("./dist/index.html")),
@@ -87,19 +86,6 @@ async fn handle_robots() -> axum::response::Result<impl IntoResponse, errs::Cust
 async fn handle_time() -> axum::response::Result<impl IntoResponse, errs::CustomError> {
     let duration = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH)?;
     Ok(Json(duration.as_secs_f64()))
-}
-
-async fn handle_rooms(
-    State(state): State<Arc<AppState>>,
-) -> axum::response::Result<impl IntoResponse, errs::CustomError> {
-    let mut rooms = HashMap::new();
-    for (name, locked_room) in state.rooms.read().await.iter() {
-        let room = locked_room.read().await;
-        if room.public {
-            rooms.insert(name.clone(), room.title.clone());
-        }
-    }
-    Ok(Json(rooms))
 }
 
 async fn handle_room(

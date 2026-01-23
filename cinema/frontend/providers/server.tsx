@@ -2,7 +2,6 @@ import { createContext, useEffect, useState } from 'react';
 
 export type ServerContextType = {
     movies: { [key: string]: Movie };
-    rooms: { [key: string]: string };
     loading: boolean;
 };
 
@@ -10,17 +9,7 @@ export const ServerContext = createContext<ServerContextType>({} as ServerContex
 
 export function ServerProvider({ children }: { children: React.ReactNode }) {
     const [movies, setMovies] = useState<{ [name: string]: Movie }>({});
-    const [rooms, setRooms] = useState<{ [name: string]: string }>({});
     const loading = Object.keys(movies).length === 0;
-
-    useEffect(() => {
-        fetch('/api/rooms')
-            .then((response) => response.json())
-            .then((rooms) => setRooms(rooms))
-            .catch((error) => {
-                console.error('Error loading rooms:', error);
-            });
-    }, []);
 
     useEffect(() => {
         fetch('/files/movies.json')
@@ -49,7 +38,6 @@ export function ServerProvider({ children }: { children: React.ReactNode }) {
         <ServerContext.Provider
             value={{
                 movies,
-                rooms,
                 loading,
             }}
         >

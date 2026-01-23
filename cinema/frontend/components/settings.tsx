@@ -19,7 +19,6 @@ export function SettingsMenu({
 }) {
     const { showChat, setShowChat, showSystem, setShowSystem, showSubs, setShowSubs } = useContext(SettingsContext);
     const [title, setTitle] = useState(room.title);
-    const [isPublic, setIsPublic] = useState(room.public);
     const [isFullscreen, setIsFullscreen] = useState(document.fullscreenElement !== null);
 
     useEffect(() => {
@@ -63,7 +62,6 @@ export function SettingsMenu({
                         e.preventDefault();
                         if (admin) {
                             send({ title: title.trim() });
-                            send({ public: isPublic });
                         }
                         setShowSettings(false);
                     }}
@@ -87,17 +85,6 @@ export function SettingsMenu({
                                             value={title}
                                             type={'text'}
                                             onChange={(e) => setTitle(e.target.value)}
-                                            disabled={!admin}
-                                        />
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Public</td>
-                                    <td>
-                                        <input
-                                            checked={isPublic}
-                                            type={'checkbox'}
-                                            onChange={(e) => setIsPublic(e.target.checked)}
                                             disabled={!admin}
                                         />
                                     </td>
