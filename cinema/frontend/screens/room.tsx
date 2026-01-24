@@ -73,6 +73,9 @@ export function RoomScreen() {
             />
             {room.video_state.video && movies[room.video_state.video[0]] ? (
                 <MainVideo
+                    // Change key to force remount when changing movies
+                    // so that no metadata from the previous video lingers
+                    key={room.video_state.video[0]}
                     movie={movies[room.video_state.video[0]]}
                     playingState={room.video_state.video[1]}
                     send={send}
