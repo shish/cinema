@@ -1,7 +1,6 @@
 import { useServerTime } from '@shish2k/react-use-servertime';
 import * as jsonpatch from 'jsonpatch';
 import { createContext, useContext, useEffect, useState } from 'react';
-import type { SettingsContextType } from './settings';
 import { SettingsContext } from './settings';
 
 export type RoomContextType = {
@@ -31,17 +30,6 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
     const [errors, setErrors] = useState(0);
     const socketName = roomCode && user && sess ? getSocketName(roomCode, user, sess, errors) : '';
     const { now } = useServerTime({ url: '/api/time' });
-
-    if (!roomCode || !user || !sess) {
-        return (
-            <main className="login">
-                <header>
-                    <h1>Error</h1>
-                </header>
-                <article>Missing connection information</article>
-            </main>
-        );
-    }
 
     // console.log('Socket name:', socketName);
     useEffect(() => {

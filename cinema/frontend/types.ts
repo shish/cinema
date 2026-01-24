@@ -1,24 +1,24 @@
-type PlayingState = {
+export type PlayingState = {
     paused?: number;
     playing?: number;
 };
 
-type VideoState = {
+export type VideoState = {
     novideo?: null;
     video?: [string, PlayingState];
 };
 
-type Viewer = {
+export type Viewer = {
     name: string;
 };
 
-type ChatMessage = {
+export type ChatMessage = {
     absolute_timestamp: number;
     user: string;
     message: string;
 };
 
-type RoomData = {
+export type RoomData = {
     name: string;
     video_state: VideoState;
     admins: Array<string>;
@@ -27,13 +27,13 @@ type RoomData = {
     movie: string | null;
 };
 
-type ConnData = {
+export type ConnData = {
     sess: string;
     room: string;
     user: string;
 };
 
-type Movie = {
+export type Movie = {
     id: string;
     title: string;
     video: string;

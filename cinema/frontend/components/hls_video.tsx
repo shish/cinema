@@ -24,22 +24,22 @@ export class HLSVideoElement extends HTMLElement {
 
             if (Hls.isSupported() && newValue.endsWith('.m3u8')) {
                 this.hls = new Hls({});
-                this.hls.on(Hls.Events.ERROR, function (event, data) {
+                this.hls.on(Hls.Events.ERROR, (_event, data) => {
                     console.error('[hls] error: ', data);
                 });
                 if (DEBUG) {
                     for (const eventName of Object.values(Hls.Events)) {
-                        this.hls.on(eventName, function (event: any, data: any) {
+                        this.hls.on(eventName, (event: any, data: any) => {
                             if (
-                                event == Hls.Events.FRAG_LOADING ||
-                                event == Hls.Events.BUFFER_APPENDING ||
-                                event == Hls.Events.BUFFER_APPENDED ||
-                                event == Hls.Events.FRAG_BUFFERED ||
-                                event == Hls.Events.FRAG_PARSED ||
-                                event == Hls.Events.FRAG_LOADED ||
-                                event == Hls.Events.FRAG_CHANGED ||
-                                event == Hls.Events.LEVEL_PTS_UPDATED ||
-                                event == Hls.Events.BUFFER_EOS
+                                event === Hls.Events.FRAG_LOADING ||
+                                event === Hls.Events.BUFFER_APPENDING ||
+                                event === Hls.Events.BUFFER_APPENDED ||
+                                event === Hls.Events.FRAG_BUFFERED ||
+                                event === Hls.Events.FRAG_PARSED ||
+                                event === Hls.Events.FRAG_LOADED ||
+                                event === Hls.Events.FRAG_CHANGED ||
+                                event === Hls.Events.LEVEL_PTS_UPDATED ||
+                                event === Hls.Events.BUFFER_EOS
                             ) {
                                 return;
                             }

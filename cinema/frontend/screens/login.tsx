@@ -1,11 +1,10 @@
-import { useContext, useEffect, useState } from 'react';
 import { faCircleInfo, faCircleXmark } from '@fortawesome/free-solid-svg-icons';
 import { FAIcon } from '@shish2k/react-faicon';
+import { useContext, useEffect, useState } from 'react';
 
 import { InfoMenu } from '../components/info';
-
-import { SettingsContext } from '../providers/settings';
 import { ServerContext } from '../providers/server';
+import { SettingsContext } from '../providers/settings';
 
 export function LoginScreen() {
     const { loading } = useContext(ServerContext);

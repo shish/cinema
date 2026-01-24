@@ -49,21 +49,21 @@ function CustomSpoiler({ children }: { children: any }) {
     );
 }
 
-// @ts-ignore - I'm not sure what type this is supposed to be,
+// @ts-expect-error - I'm not sure what type this is supposed to be,
 // some combination of ParserRules and OutputRules<ReactRule> ?
 const rules: ReactRules = {
     ...SimpleMarkdown.defaultRules,
     user: {
         order: 1, // ???
-        match: (source, state, lookbehind) => /^(@[a-zA-Z0-9]+)/.exec(source),
-        parse: (capture, recurseParse, state) => ({ content: capture[1] }),
-        react: (node, recurseOutput) => (
+        match: (source, _state, _lookbehind) => /^(@[a-zA-Z0-9]+)/.exec(source),
+        parse: (capture, _recurseParse, _state) => ({ content: capture[1] }),
+        react: (node, _recurseOutput) => (
             <span style={{ color: name2color(node.content.substring(1)) }}>{node.content}</span>
         ),
     },
     spoiler: {
         order: 1, // ???
-        match: (source, state, lookbehind) => /^\|\|([^|]+)\|\|/.exec(source),
+        match: (source, _state, _lookbehind) => /^\|\|([^|]+)\|\|/.exec(source),
         parse: (capture, recurseParse, state) => ({ content: recurseParse(capture[1], state) }),
         react: (node, recurseOutput) => <CustomSpoiler>{recurseOutput(node.content)}</CustomSpoiler>,
     },
@@ -82,7 +82,7 @@ export function Chat({ log, send }: { log: Array<ChatMessage>; send: (data: any)
     // we really do want to run this every time the chat changes, even though
     // the code "doesn't depend on log" (chat_log.scrollHeight does depend on
     // log)
-    // biome-ignore lint/correctness/useExhaustiveDependencies:
+    // biome-ignore lint/correctness/useExhaustiveDependencies: see above
     useEffect(() => {
         const chat_log = document.getElementById('chat_log');
         if (chat_log) {
@@ -129,11 +129,11 @@ export function Chat({ log, send }: { log: Array<ChatMessage>; send: (data: any)
  *   * `onSend` is a callback that is called when the user hits enter.
  *   * `users` is a list of usernames to use for autocompletion.
  *
+ * biome-ignore lint/correctness/noUnusedFunctionParameters: users will be used later
  */
 export function ChatInput({ onSend, users = [] }: { onSend: (text: string) => void; users: string[] }) {
     const chatInput = useRef<HTMLInputElement>(null);
     const pickerButton = useRef<HTMLButtonElement>(null);
-    const [cursorPos, setCursorPos] = useState(0);
     const [input, setInput] = useState<string>('');
     const [showPicker, setShowPicker] = useState(false);
     const [mouses, setMouses] = useState(0);

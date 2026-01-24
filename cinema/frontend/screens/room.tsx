@@ -1,18 +1,15 @@
-import { useContext, useState } from 'react';
-import { faCircleInfo, faGears, faShareFromSquare, faFilm } from '@fortawesome/free-solid-svg-icons';
+import { faCircleInfo, faFilm, faGears, faShareFromSquare } from '@fortawesome/free-solid-svg-icons';
 import { FAIcon } from '@shish2k/react-faicon';
-
-import { RoomContext } from '../providers/room';
-
+import { useContext, useState } from 'react';
 import { Chat } from '../components/chat';
 import { InfoMenu } from '../components/info';
 import { MainVideo } from '../components/main_video';
-
 import { MovieSelectDialog } from '../components/movie_select_dialog';
 import { SettingsMenu } from '../components/settings';
 import { ViewerList } from '../components/viewer_list';
-import { SettingsContext } from '../providers/settings';
+import { RoomContext } from '../providers/room';
 import { ServerContext } from '../providers/server';
+import { SettingsContext } from '../providers/settings';
 
 function Header({
     setShowInfo,
@@ -85,15 +82,7 @@ export function RoomScreen() {
             )}
             <Chat log={room.chat} send={send} />
             <ViewerList viewers={room.viewers} admins={room.admins} send={send} />
-            {showSettings && (
-                <SettingsMenu
-                    room={room}
-                    admin={isAdmin}
-                    send={send}
-                    setShowSettings={setShowSettings}
-                    onLeaveRoom={handleLeaveRoom}
-                />
-            )}
+            {showSettings && <SettingsMenu setShowSettings={setShowSettings} onLeaveRoom={handleLeaveRoom} />}
             {showInfo && <InfoMenu setShowInfo={setShowInfo} />}
             {showMovieSelect && (
                 <MovieSelectDialog

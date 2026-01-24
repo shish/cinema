@@ -1,8 +1,9 @@
-import { useContext, useState } from 'react';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FAIcon } from '@shish2k/react-faicon';
-import { ServerContext } from '../providers/server';
+import { useContext } from 'react';
 import { useSessionStorage } from 'usehooks-ts';
+import { ServerContext } from '../providers/server';
+import { minititle } from '../utils';
 
 export function MovieSelectDialog({
     selectedMovieId,
@@ -63,8 +64,11 @@ export function MovieSelectDialog({
                 <div className="movie-scroll">
                     <div className="movie-grid">
                         {filteredMovies
-                            .map((movieId) => { return {movieId, movie: movies[movieId]}})
-                            .map(({movieId, movie}) => <div
+                            .map((movieId) => {
+                                return { movieId, movie: movies[movieId] };
+                            })
+                            .map(({ movieId, movie }) => (
+                                <div
                                     key={movieId}
                                     className={`movie-item ${movieId === selectedMovieId ? 'selected' : ''}`}
                                     onClick={() => handleMovieSelect(movieId)}
@@ -72,7 +76,7 @@ export function MovieSelectDialog({
                                     <img src={`/files/${movie.thumbnail}`} alt={movie.title} />
                                     <div className="movie-title">{minititle(folder, movie.title)}</div>
                                 </div>
-                        )}
+                            ))}
                     </div>
                 </div>
             </div>

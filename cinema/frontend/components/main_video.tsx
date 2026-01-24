@@ -1,9 +1,10 @@
-import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { faPause, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { FAIcon } from '@shish2k/react-faicon';
+import { useContext, useEffect, useRef, useState } from 'react';
 
 import { RoomContext } from '../providers/room';
 import { SettingsContext } from '../providers/settings';
+import type { Movie, PlayingState } from '../types';
 import { HLSVideoElement } from './hls_video';
 
 // Apparently we need to define the custom element here, it doesn't
@@ -33,6 +34,8 @@ export function MainVideo({
     const [videoHint, setVideoHint] = useState<string | null>(null);
 
     // Get the actual video element from the custom element
+    // We want this to run when the ref changes (TODO: *does* it run when the ref changes?)
+    // biome-ignore lint/correctness/useExhaustiveDependencies: see above
     useEffect(() => {
         if (hlsRef.current) {
             const video = hlsRef.current.getVideoElement();
@@ -146,7 +149,7 @@ export function MainVideo({
                     poster={`/files/${movie.thumbnail}`}
                     plays-inline="true"
                     preload="metadata"
-                    controls={'' + !!videoHint}
+                    controls={`${!!videoHint}`}
                 >
                     <track kind="captions" src={`/files/${movie.subtitles}`} default />
                 </hls-video>

@@ -1,19 +1,13 @@
-import { useContext, useEffect, useState } from 'react';
-import { faXmark, faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
+import { faRightFromBracket, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FAIcon } from '@shish2k/react-faicon';
+import { useContext, useEffect, useState } from 'react';
 
 import { SettingsContext } from '../providers/settings';
 
 export function SettingsMenu({
-    room,
-    admin,
-    send,
     setShowSettings,
     onLeaveRoom,
 }: {
-    room: RoomData;
-    admin: boolean;
-    send: (s: any) => void;
     setShowSettings: (b: boolean) => void;
     onLeaveRoom: () => void;
 }) {
@@ -81,7 +75,7 @@ export function SettingsMenu({
                                         <input
                                             checked={isFullscreen}
                                             type={'checkbox'}
-                                            onChange={(e) => {
+                                            onChange={(_e) => {
                                                 if (isFullscreen) {
                                                     document.exitFullscreen();
                                                 } else {

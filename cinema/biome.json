@@ -1,5 +1,5 @@
 {
-    "$schema": "https://biomejs.dev/schemas/2.3.5/schema.json",
+    "$schema": "https://biomejs.dev/schemas/2.3.10/schema.json",
     "assist": { "actions": { "source": { "organizeImports": "on" } } },
 
     "files": {
@@ -26,7 +26,9 @@
                 "noNonNullAssertion": "off"
             },
             "a11y": {
-                "noAutofocus": "off"
+                "noAutofocus": "off",
+                "useKeyWithClickEvents": "off",
+                "noStaticElementInteractions": "off"
             }
         }
     }
