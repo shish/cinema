@@ -70,7 +70,7 @@ export function MovieSelectDialog({
                                     onClick={() => handleMovieSelect(movieId)}
                                 >
                                     <img src={`/files/${movie.thumbnail}`} alt={movie.title} />
-                                    <div className="movie-title">{movie.title}</div>
+                                    <div className="movie-title">{minititle(folder, movie.title)}</div>
                                 </div>
                         )}
                     </div>
