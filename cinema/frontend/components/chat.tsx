@@ -1,6 +1,7 @@
 import SimpleMarkdown, { type ReactRules } from '@khanacademy/simple-markdown';
 import Picker from 'emoji-picker-react';
 import { useContext, useEffect, useRef, useState } from 'react';
+import type { ChatMessage } from '../types';
 
 import { SettingsContext } from '../providers/settings';
 

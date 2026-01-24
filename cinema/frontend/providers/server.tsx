@@ -1,4 +1,5 @@
 import { createContext, useEffect, useState } from 'react';
+import type { Movie } from '../types';
 
 export type ServerContextType = {
     movies: { [key: string]: Movie };

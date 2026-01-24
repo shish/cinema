@@ -58,7 +58,9 @@ export class HLSVideoElement extends HTMLElement {
         } else if (name === 'plays-inline') {
             this.video.playsInline = newValue === 'true';
         } else if (name === 'preload') {
-            this.video.preload = newValue;
+            if (newValue === 'none' || newValue === 'metadata' || newValue === 'auto') {
+                this.video.preload = newValue;
+            }
         } else if (name === 'controls') {
             this.video.controls = newValue === 'true';
         }
