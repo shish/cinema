@@ -31,8 +31,8 @@ export function SettingsMenu({
     }, []);
 
     return (
-        <div className={'settings'}>
-            <div>
+        <div className={'dialog-overlay'}>
+            <div className={'dialog settings-dialog'}>
                 <h2>
                     <FAIcon
                         icon={faRightFromBracket}
@@ -46,7 +46,7 @@ export function SettingsMenu({
                             cursor: 'pointer',
                         }}
                     />
-                    <div style={{ padding: '0 1em' }}>Settings</div>
+                    <div>Settings</div>
                     <FAIcon
                         icon={faXmark}
                         onClick={() => setShowSettings(false)}

@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react';
-import { faCircleInfo, faGears, faShareFromSquare } from '@fortawesome/free-solid-svg-icons';
+import { faCircleInfo, faGears, faShareFromSquare, faFilm } from '@fortawesome/free-solid-svg-icons';
 import { FAIcon } from '@shish2k/react-faicon';
 
 import { RoomContext } from '../providers/room';
@@ -7,7 +7,8 @@ import { RoomContext } from '../providers/room';
 import { Chat } from '../components/chat';
 import { InfoMenu } from '../components/info';
 import { MainVideo } from '../components/main_video';
-import { MovieList } from '../components/movie_list';
+
+import { MovieSelectDialog } from '../components/movie_select_dialog';
 import { SettingsMenu } from '../components/settings';
 import { ViewerList } from '../components/viewer_list';
 import { SettingsContext } from '../providers/settings';
@@ -16,9 +17,13 @@ import { ServerContext } from '../providers/server';
 function Header({
     setShowInfo,
     setShowSettings,
+    setShowMovieSelect,
+    isAdmin,
 }: {
     setShowInfo: (show: boolean) => void;
     setShowSettings: (show: boolean) => void;
+    setShowMovieSelect: (show: boolean) => void;
+    isAdmin: boolean;
 }) {
     const { room } = useContext(RoomContext);
     const [showCopiedNotification, setShowCopiedNotification] = useState<boolean>(false);
@@ -36,13 +41,10 @@ function Header({
     return (
         <header>
             <FAIcon icon={faCircleInfo} onClick={() => setShowInfo(true)} />
-            <FAIcon icon={faShareFromSquare} onClick={handleTitleClick} />
-            <h1>{room.video_state.video?.[0].split("/").pop() || '(no movie selected)'}</h1>
-            {showCopiedNotification && (
-                <div className="notification">
-                    Room link copied to clipboard!
-                </div>
-            )}
+            {isAdmin && <FAIcon icon={faShareFromSquare} onClick={handleTitleClick} />}
+            <h1>{room.video_state.video?.[0].split('/').pop() || '(no movie selected)'}</h1>
+            {showCopiedNotification && <div className="notification">Room link copied to clipboard!</div>}
+            {isAdmin && <FAIcon icon={faFilm} onClick={() => setShowMovieSelect(true)} />}
             <FAIcon icon={faGears} onClick={() => setShowSettings(true)} />
         </header>
     );
@@ -54,6 +56,7 @@ export function RoomScreen() {
     const { showChat, user, setRoom } = useContext(SettingsContext);
     const [showInfo, setShowInfo] = useState<boolean>(false);
     const [showSettings, setShowSettings] = useState<boolean>(false);
+    const [showMovieSelect, setShowMovieSelect] = useState<boolean>(false);
     const isAdmin = room.admins.includes(user);
 
     const handleLeaveRoom = () => {
@@ -62,8 +65,12 @@ export function RoomScreen() {
 
     return (
         <main className={`room ${isAdmin ? 'admin' : 'user'} ${showChat ? 'chat' : 'nochat'}`}>
-            <Header setShowInfo={setShowInfo} setShowSettings={setShowSettings} />
-            {isAdmin && <MovieList selectedMovieId={room.video_state.video?.[0] || null} send={send} />}
+            <Header
+                setShowInfo={setShowInfo}
+                setShowSettings={setShowSettings}
+                setShowMovieSelect={setShowMovieSelect}
+                isAdmin={isAdmin}
+            />
             {room.video_state.video && movies[room.video_state.video[0]] ? (
                 <MainVideo
                     movie={movies[room.video_state.video[0]]}
@@ -85,6 +92,13 @@ export function RoomScreen() {
                 />
             )}
             {showInfo && <InfoMenu setShowInfo={setShowInfo} />}
+            {showMovieSelect && (
+                <MovieSelectDialog
+                    selectedMovieId={room.video_state.video?.[0] || null}
+                    send={send}
+                    setShowMovieSelect={setShowMovieSelect}
+                />
+            )}
         </main>
     );
 }

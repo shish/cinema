@@ -3,11 +3,15 @@ import { FAIcon } from '@shish2k/react-faicon';
 
 export function InfoMenu({ setShowInfo }: { setShowInfo: (show: boolean) => void }) {
     return (
-        <div className={'settings'}>
-            <div>
+        <div className={'dialog-overlay'}>
+            <div className={'dialog info-dialog'}>
                 <h2>
                     <div style={{ width: '1em' }} />
-                    <div style={{ padding: '0 1em' }}>About</div>
+                    <div>
+                        <a href={'https://github.com/shish/cinema'}>Cinema</a>
+                        &nbsp;by&nbsp;
+                        <a href={'mailto:s@shish.io'}>Shish</a>
+                    </div>
                     <FAIcon
                         icon={faXmark}
                         onClick={() => setShowInfo(false)}
@@ -17,15 +21,11 @@ export function InfoMenu({ setShowInfo }: { setShowInfo: (show: boolean) => void
                         }}
                     />
                 </h2>
-                <p>
-                    <a href={'https://github.com/shish/cinema'}>Cinema</a>
-                    &nbsp;by&nbsp;
-                    <a href={'mailto:s@shish.io'}>Shish</a>
-                </p>
                 <p className={'donate'}>
-                    If you like this app and find it fun,
+                    If you like this app and find it fun, feel
                     <br />
-                    feel free to donate via <a href={'https://paypal.me/shish2k'}>PayPal</a>
+                    free to donate via <a href="https://ko-fi.com/shish2k">KoFi</a> or{' '}
+                    <a href={'https://paypal.me/shish2k'}>PayPal</a>
                 </p>
             </div>
         </div>

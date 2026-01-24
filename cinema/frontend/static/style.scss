@@ -2,14 +2,14 @@
  * Common layout
  */
 
- :root {
+:root {
     color-scheme: dark;
     --background: #222;
     --blackout: #111;
     --header: #444;
     --admin: #664;
-    --text: #DDD;
-    --link: #BBF;
+    --text: #ddd;
+    --link: #bbf;
     --grid: #999;
     --chat-timestamp: #666;
     --chat-system: #888;
@@ -33,55 +33,136 @@ BODY {
     background-color: var(--background);
 }
 
-.settings {
+.dialog-overlay {
     position: absolute;
     display: flex;
     justify-content: center;
     align-items: center;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
 
-    &>DIV {
+    .dialog {
         flex: 0 0 auto;
         text-align: center;
         z-index: 9999;
         background: var(--header);
-        border: 2px solid var(--grid);
+        border: 1px solid var(--grid);
         border-radius: 1rem;
-        box-shadow: var(--grid) 0 0 1em;
         padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
 
         H2 {
+            flex: 0 0 auto;
             margin: 0;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: .5rem;
-        }
-
-        TABLE {
-            margin: auto;
-        }
-        P {
-            margin-bottom: 0;
-        }
-
-        INPUT[type="text"],
-        BUTTON {
-            width: 100%;
+            gap: 1rem;
         }
     }
 
-    TABLE {
-        TD:first-child {
-            text-align: right;
-            padding-right: .25rem;
+    .info-dialog {
+        P {
+            margin: 0;
+        }
+    }
+
+    .settings-dialog {
+        TABLE {
+            margin: auto;
+
+            TD:first-child {
+                text-align: right;
+                padding-right: 0.25rem;
+            }
+
+            TD:nth-child(2) {
+                text-align: left;
+            }
+        }
+    }
+
+    .movie-select-dialog {
+        width: 90vw;
+        height: 90vh;
+
+        H2 {
+            SELECT {
+                flex: 1 1 auto;
+                padding: 0.5rem;
+                font-size: 1rem;
+                border-radius: 0.5rem;
+                background: var(--background);
+                color: var(--text);
+                border: 1px solid var(--grid);
+            }
+
+            BUTTON {
+                flex: 0 0 auto;
+                width: auto;
+                padding: 0.5rem 1rem;
+                font-size: 1rem;
+                border-radius: 0.5rem;
+                background: #c44;
+                color: white;
+                border: none;
+                cursor: pointer;
+
+                &:hover {
+                    background: #d55;
+                }
+            }
         }
 
-        TD:nth-child(2) {
-            text-align: left;
+        .movie-scroll {
+            flex: 1 1 auto;
+            overflow-y: auto;
+        }
+        .movie-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            overflow-y: auto;
+
+            .movie-item {
+                cursor: pointer;
+                border: 2px solid var(--grid);
+                border-radius: 0.5rem;
+                transition: border-color 0.2s;
+                aspect-ratio: 16/9;
+                position: relative;
+
+                &:hover {
+                    border-color: var(--link);
+                }
+
+                &.selected {
+                    border-color: #4a4;
+                    box-shadow: 0 0 10px #4a4;
+                }
+
+                IMG {
+                    border-radius: 0.5rem 0.5rem 0 0;
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                }
+
+                .movie-title {
+                    background: rgba(0, 0, 0, 0.7);
+                    padding: 0.5rem;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    position: absolute;
+                    bottom: 0;
+                    width: 100%;
+                    border-radius: 0 0 0.5rem 0.5rem;
+                    color: var(--text);
+                }
+            }
         }
     }
 }
@@ -100,6 +181,7 @@ MAIN {
 
     A {
         color: var(--link);
+        text-decoration: none;
     }
 
     HEADER {
@@ -112,7 +194,8 @@ MAIN {
         padding: 0 1rem;
         gap: 1rem;
 
-        A, svg {
+        A,
+        svg {
             color: inherit;
             flex: 0 0 auto;
             width: 4rem;
@@ -173,7 +256,7 @@ MAIN.login {
             padding: 0.5rem;
             width: 100%;
             border-radius: 0.5rem;
-            margin: .5rem auto;
+            margin: 0.5rem auto;
         }
     }
 }
@@ -188,10 +271,6 @@ MAIN.room.nochat {
     }
 }
 MAIN.room.user {
-    .movie_list {
-        display: none;
-    }
-
     .video {
         .controls {
             display: none;
@@ -203,35 +282,18 @@ MAIN.room {
     @media (orientation: landscape) {
         grid-template:
             "header   header" min-content
-            "movies   chat  " min-content
             "video    chat  " 1fr
             "viewers  chat  " min-content
-            / 1fr     min-content;
+            / 1fr min-content;
     }
 
     @media (orientation: portrait) {
         grid-template:
             "header " min-content
-            "movies " min-content
             "video  " min-content
             "chat   " 1fr
             "viewers" min-content
             / 1fr;
-    }
-
-    .movie_list {
-        grid-area: movies;
-        display: flex;
-        min-height: 2em;
-
-        SELECT {
-            flex: 1 1 auto;
-            width: 10px;
-        }
-
-        BUTTON {
-            flex: 0 0 auto;
-        }
     }
 
     .video {
@@ -275,7 +337,7 @@ MAIN.room {
 
         .video_hint {
             color: black;
-            background: #D44;
+            background: #d44;
             padding: 0.2em;
             flex: 1 1 auto;
         }
@@ -296,7 +358,7 @@ MAIN.room {
             SPAN {
                 flex: 0 0 auto;
                 align-self: center;
-                padding: 0 .5rem;
+                padding: 0 0.5rem;
             }
         }
     }
@@ -320,8 +382,8 @@ MAIN.room {
             overflow-y: scroll;
             text-align: left;
 
-            display:flex;
-            flex-direction:column-reverse;
+            display: flex;
+            flex-direction: column-reverse;
 
             UL {
                 margin: 0;
