@@ -254,10 +254,15 @@ class EncodeThumb(Encoder):
     def encode(self) -> None:
         source_path = self.sources[0].path
         output_path = self.get_output_path()
+
+        ffprobe_json = ffprobe(source_path)
+        input_duration = float(ffprobe_json["format"]["duration"])
+        start_time = input_duration * 0.1
+
         # fmt: off
         cmd = self.FFMPEG_BASE + [
+            "-ss", f"{start_time:.3f}",
             "-i", source_path,
-            # "-ss", "00:02:00",
             "-filter:v", "thumbnail",
             "-frames:v", "1",
             "-update", "true",
