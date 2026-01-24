@@ -2,6 +2,7 @@ import { useContext, useState } from 'react';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FAIcon } from '@shish2k/react-faicon';
 import { ServerContext } from '../providers/server';
+import { useSessionStorage } from 'usehooks-ts';
 
 export function MovieSelectDialog({
     selectedMovieId,
@@ -14,7 +15,7 @@ export function MovieSelectDialog({
 }) {
     const { movies } = useContext(ServerContext);
     const movieList = Object.keys(movies);
-    const [folder, setFolder] = useState<string>('');
+    const [folder, setFolder] = useSessionStorage<string>('movieSelectFolder', '');
 
     const folders = [...new Set(movieList.map((p) => p.split('/')[0]))];
     const filteredMovies = movieList.filter((p) => !folder || p.startsWith(`${folder}/`));
