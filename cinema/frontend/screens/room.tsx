@@ -11,18 +11,12 @@ import { RoomContext } from '../providers/room';
 import { ServerContext } from '../providers/server';
 import { SettingsContext } from '../providers/settings';
 
-function Header({
-    setShowInfo,
-    setShowSettings,
-    setShowMovieSelect,
-    isAdmin,
-}: {
-    setShowInfo: (show: boolean) => void;
-    setShowSettings: (show: boolean) => void;
-    setShowMovieSelect: (show: boolean) => void;
-    isAdmin: boolean;
-}) {
-    const { room } = useContext(RoomContext);
+function Header({ isAdmin }: { isAdmin: boolean }) {
+    const { room, send } = useContext(RoomContext);
+    const { movies } = useContext(ServerContext);
+    const [showInfo, setShowInfo] = useState<boolean>(false);
+    const [showSettings, setShowSettings] = useState<boolean>(false);
+    const [showMovieSelect, setShowMovieSelect] = useState<boolean>(false);
     const [showCopiedNotification, setShowCopiedNotification] = useState<boolean>(false);
 
     const handleTitleClick = async () => {
@@ -36,38 +30,47 @@ function Header({
     };
 
     return (
-        <header>
-            <FAIcon icon={faCircleInfo} onClick={() => setShowInfo(true)} />
-            {isAdmin && <FAIcon icon={faShareFromSquare} onClick={handleTitleClick} />}
-            <h1>{room.video_state.video?.[0].split('/').pop() || '(no movie selected)'}</h1>
+        <>
+            <header>
+                <FAIcon icon={faCircleInfo} onClick={() => setShowInfo(true)} />
+                {isAdmin && <FAIcon icon={faShareFromSquare} onClick={handleTitleClick} />}
+                <h1>{room.video_state.video?.[0].split('/').pop() || '(no movie selected)'}</h1>
+                {isAdmin && <FAIcon icon={faFilm} onClick={() => setShowMovieSelect(true)} />}
+                <FAIcon icon={faGears} onClick={() => setShowSettings(true)} />
+            </header>
             {showCopiedNotification && <div className="notification">Room link copied to clipboard!</div>}
-            {isAdmin && <FAIcon icon={faFilm} onClick={() => setShowMovieSelect(true)} />}
-            <FAIcon icon={faGears} onClick={() => setShowSettings(true)} />
-        </header>
+            {showSettings && <SettingsMenu setShowSettings={setShowSettings} />}
+            {showInfo && <InfoMenu setShowInfo={setShowInfo} />}
+            {showMovieSelect && (
+                <MovieSelectDialog
+                    selectedMovieId={room.video_state.video?.[0] || null}
+                    movies={movies}
+                    setMovie={(movieId) => {
+                        if (movieId) {
+                            send({ pause: [movieId, 0] });
+                        } else {
+                            send({ stop: null });
+                        }
+                    }}
+                    setShowMovieSelect={setShowMovieSelect}
+                />
+            )}
+        </>
     );
 }
 
 export function RoomScreen() {
     const { movies } = useContext(ServerContext);
     const { room, send } = useContext(RoomContext);
-    const { showChat, user, setRoom } = useContext(SettingsContext);
-    const [showInfo, setShowInfo] = useState<boolean>(false);
-    const [showSettings, setShowSettings] = useState<boolean>(false);
-    const [showMovieSelect, setShowMovieSelect] = useState<boolean>(false);
+    const { showChat, user } = useContext(SettingsContext);
     const isAdmin = room.admins.includes(user);
+    const { showSystem } = useContext(SettingsContext);
 
-    const handleLeaveRoom = () => {
-        setRoom(null);
-    };
+    const chatLog = showSystem ? room.chat : room.chat.filter((msg) => msg.user !== 'system');
 
     return (
         <main className={`room ${isAdmin ? 'admin' : 'user'} ${showChat ? 'chat' : 'nochat'}`}>
-            <Header
-                setShowInfo={setShowInfo}
-                setShowSettings={setShowSettings}
-                setShowMovieSelect={setShowMovieSelect}
-                isAdmin={isAdmin}
-            />
+            <Header isAdmin={isAdmin} />
             {room.video_state.video && movies[room.video_state.video[0]] ? (
                 <MainVideo
                     // Change key to force remount when changing movies
@@ -80,17 +83,8 @@ export function RoomScreen() {
             ) : (
                 <div className="blackout" />
             )}
-            <Chat log={room.chat} send={send} />
+            <Chat log={chatLog} onSend={(text) => send({ chat: text })} />
             <ViewerList viewers={room.viewers} admins={room.admins} send={send} />
-            {showSettings && <SettingsMenu setShowSettings={setShowSettings} onLeaveRoom={handleLeaveRoom} />}
-            {showInfo && <InfoMenu setShowInfo={setShowInfo} />}
-            {showMovieSelect && (
-                <MovieSelectDialog
-                    selectedMovieId={room.video_state.video?.[0] || null}
-                    send={send}
-                    setShowMovieSelect={setShowMovieSelect}
-                />
-            )}
         </main>
     );
 }

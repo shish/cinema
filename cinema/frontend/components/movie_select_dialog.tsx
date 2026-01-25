@@ -1,20 +1,20 @@
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FAIcon } from '@shish2k/react-faicon';
-import { useContext } from 'react';
 import { useSessionStorage } from 'usehooks-ts';
-import { ServerContext } from '../providers/server';
+import type { Movie } from '../types';
 import { minititle } from '../utils';
 
 export function MovieSelectDialog({
+    movies,
     selectedMovieId,
-    send,
+    setMovie,
     setShowMovieSelect,
 }: {
+    movies: { [key: string]: Movie };
     selectedMovieId: string | null;
-    send: (data: any) => void;
+    setMovie: (movieId: string | null) => void;
     setShowMovieSelect: (show: boolean) => void;
 }) {
-    const { movies } = useContext(ServerContext);
     const movieList = Object.keys(movies);
     const [folder, setFolder] = useSessionStorage<string>('movieSelectFolder', '');
 
@@ -22,12 +22,12 @@ export function MovieSelectDialog({
     const filteredMovies = movieList.filter((p) => !folder || p.startsWith(`${folder}/`));
 
     const handleMovieSelect = (movieId: string) => {
-        send({ pause: [movieId, 0] });
+        setMovie(movieId);
         setShowMovieSelect(false);
     };
 
     const handleClearMovie = () => {
-        send({ stop: null });
+        setMovie(null);
         setShowMovieSelect(false);
     };
 

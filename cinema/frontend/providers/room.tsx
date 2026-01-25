@@ -1,8 +1,8 @@
 import { useServerTime } from '@shish2k/react-use-servertime';
 import * as jsonpatch from 'jsonpatch';
 import { createContext, useContext, useEffect, useState } from 'react';
-import { SettingsContext } from './settings';
 import type { RoomData } from '../types';
+import { SettingsContext } from './settings';
 
 export type RoomContextType = {
     conn: WebSocket;

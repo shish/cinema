@@ -4,14 +4,9 @@ import { useContext, useEffect, useState } from 'react';
 
 import { SettingsContext } from '../providers/settings';
 
-export function SettingsMenu({
-    setShowSettings,
-    onLeaveRoom,
-}: {
-    setShowSettings: (b: boolean) => void;
-    onLeaveRoom: () => void;
-}) {
-    const { showChat, setShowChat, showSystem, setShowSystem, showSubs, setShowSubs } = useContext(SettingsContext);
+export function SettingsMenu({ setShowSettings }: { setShowSettings: (b: boolean) => void }) {
+    const { showChat, setShowChat, showSystem, setShowSystem, showSubs, setShowSubs, setRoom } =
+        useContext(SettingsContext);
     const [isFullscreen, setIsFullscreen] = useState(document.fullscreenElement !== null);
 
     useEffect(() => {
@@ -31,7 +26,7 @@ export function SettingsMenu({
                     <FAIcon
                         icon={faRightFromBracket}
                         onClick={() => {
-                            onLeaveRoom();
+                            setRoom(null);
                             setShowSettings(false);
                         }}
                         style={{

@@ -1,9 +1,7 @@
 import SimpleMarkdown, { type ReactRules } from '@khanacademy/simple-markdown';
 import Picker from 'emoji-picker-react';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ChatMessage } from '../types';
-
-import { SettingsContext } from '../providers/settings';
 
 function absolute_timestamp(ts: number): string {
     function convertUTCDateToLocalDate(date: Date) {
@@ -77,43 +75,40 @@ function md(source: string) {
     return outputResult;
 }
 
-export function Chat({ log, send }: { log: Array<ChatMessage>; send: (data: any) => void }) {
-    const { showSystem } = useContext(SettingsContext);
+export function Chat({ log, onSend }: { log: Array<ChatMessage>; onSend: (text: string) => void }) {
+    return (
+        <div className="chat">
+            <ChatLog log={log} />
+            <ChatInput onSend={onSend} users={[]} />
+        </div>
+    );
+}
 
-    // we really do want to run this every time the chat changes, even though
-    // the code "doesn't depend on log" (chat_log.scrollHeight does depend on
+export function ChatLog({ log }: { log: Array<ChatMessage> }) {
+    const logBox = useRef<HTMLDivElement>(null);
+
+    // we really *do* want to run this every time `log` changes, even though
+    // the code "doesn't depend on log" (logBox.scrollHeight *does* depend on
     // log)
     // biome-ignore lint/correctness/useExhaustiveDependencies: see above
     useEffect(() => {
-        const chat_log = document.getElementById('chat_log');
-        if (chat_log) {
-            chat_log.scrollTop = chat_log.scrollHeight;
-        }
+        if (logBox.current === null) return;
+        logBox.current.scrollTop = logBox.current.scrollHeight;
     }, [log]);
 
     return (
-        <div className="chat">
-            <div className="chat_log" id="chat_log">
-                <ul>
-                    {log
-                        .filter((p) => showSystem || p.user !== 'system')
-                        .map((p) => (
-                            <li key={p.absolute_timestamp} className={p.user === 'system' ? 'system' : 'user'}>
-                                <span className="absolute_timestamp">{absolute_timestamp(p.absolute_timestamp)}</span>
-                                <span className="user" style={{ color: name2color(p.user) }}>
-                                    {p.user}
-                                </span>
-                                <span className="message">{md(p.message)}</span>
-                            </li>
-                        ))}
-                </ul>
-            </div>
-            <ChatInput
-                onSend={(text) => {
-                    send({ chat: text });
-                }}
-                users={[]}
-            />
+        <div className="chat_log" ref={logBox}>
+            <ul>
+                {log.map((p) => (
+                    <li key={p.absolute_timestamp} className={p.user === 'system' ? 'system' : 'user'}>
+                        <span className="absolute_timestamp">{absolute_timestamp(p.absolute_timestamp)}</span>
+                        <span className="user" style={{ color: name2color(p.user) }}>
+                            {p.user}
+                        </span>
+                        <span className="message">{md(p.message)}</span>
+                    </li>
+                ))}
+            </ul>
         </div>
     );
 }

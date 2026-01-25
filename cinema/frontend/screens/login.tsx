@@ -22,7 +22,7 @@ export function LoginScreen() {
 
     function login(event: any) {
         event.preventDefault();
-        if (!userInput || !roomInput) return null;
+        if (!userInput.trim() || !roomInput) return null;
         // Save user to context and set room which will update the URL
         setUser(userInput.trim());
         setRoom(roomInput.toUpperCase());
