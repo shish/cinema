@@ -13,7 +13,7 @@ export function ServerProvider({ children }: { children: React.ReactNode }) {
     const loading = Object.keys(movies).length === 0;
 
     useEffect(() => {
-        fetch('/files/movies.json')
+        fetch(`/files/movies.json?_=${Date.now()}`)
             .then((res) => res.json())
             .then((data) => setMovies(data))
             .catch((error) => {
