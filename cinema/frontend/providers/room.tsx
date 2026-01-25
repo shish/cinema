@@ -5,7 +5,7 @@ import type { RoomData } from '../types';
 import { SettingsContext } from './settings';
 
 export type RoomContextType = {
-    conn: WebSocket;
+    conn: WebSocket | null;
     room: RoomData;
     send: (data: any) => void;
     now: number;
@@ -42,7 +42,6 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         conn.onerror = (err) => {
             console.error('WebSocket error:', err);
             setErrors(errors + 1);
-            setRoom(null);
             setConn(null);
         };
         conn.onclose = () => {
@@ -52,7 +51,6 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
             // as an error
             setErrors(errors + 1);
             setConn(null);
-            setRoom(null);
         };
         conn.onmessage = (msg) => {
             let resp = JSON.parse(msg.data);
@@ -72,18 +70,6 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         };
     }, [socketName, errors]);
 
-    // FIXME: allow the user to keep watching while the connection
-    // is down, but disable sending messages
-    if (conn === null) {
-        return (
-            <main className="login">
-                <header>
-                    <h1>Connecting...</h1>
-                </header>
-                <article>Connecting...</article>
-            </main>
-        );
-    }
     if (room === null) {
         return (
             <main className="login">
@@ -97,7 +83,7 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
 
     function send(data: any) {
         if (conn === null) {
-            console.error('No connection to send data to');
+            alert('Failed to send command: not connected to server');
             return;
         }
         conn.send(JSON.stringify(data));
