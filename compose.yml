@@ -12,13 +12,12 @@ services:
       - ./media/processed:/media/processed:ro
 
   mqtt:
-    image: eclipse-mosquitto
+    build: ./mqtt
     ports:
       - "1883:1883"
       - "9001:9001"
     volumes:
-      - ${PWD}/data/mqtt/:/mosquitto/data/:rw
-      - ${PWD}/mqtt/:/mosquitto/config/:ro
+      - mqtt-data:/mosquitto/data:rw
 
   encoder:
     build: ./encoder
@@ -26,3 +25,6 @@ services:
     volumes:
       - ./media/source:/media/source:ro
       - ./media/processed:/media/processed:rw
+
+volumes:
+  mqtt-data:
