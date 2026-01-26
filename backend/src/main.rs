@@ -9,6 +9,7 @@ use futures::SinkExt;
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::net::SocketAddr;
+use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::{Duration, SystemTime};
 use tokio::net::TcpListener;
@@ -28,7 +29,7 @@ pub struct LoginArgs {
 
 struct AppState {
     rooms: RwLock<HashMap<String, Arc<RwLock<room::Room>>>>,
-    movies: String,
+    movie_dir: PathBuf,
 }
 
 // A website for watching movies together (backend)
@@ -37,7 +38,7 @@ struct AppState {
 pub struct Args {
     /// Where the source videos are
     #[clap(short = 'm', default_value = "/media/processed")]
-    pub movies: String,
+    pub movies: PathBuf,
 }
 
 #[tokio::main]
@@ -55,13 +56,13 @@ async fn main() -> anyhow::Result<()> {
 
     let app_state = Arc::new(AppState {
         rooms: RwLock::new(rooms),
-        movies: args.movies,
+        movie_dir: args.movies,
     });
     let app = Router::new()
         .route("/robots.txt", get(handle_robots))
         .route("/api/time", get(handle_time))
         .route("/api/room", get(handle_room))
-        .nest_service("/files/", ServeDir::new(&app_state.movies))
+        .nest_service("/files/", ServeDir::new(&app_state.movie_dir))
         .layer(TraceLayer::new_for_http())
         .with_state(app_state);
 
