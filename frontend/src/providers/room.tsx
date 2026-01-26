@@ -37,15 +37,16 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         const conn = new WebSocket(socketName);
         let lastResp: any = null;
         conn.onopen = () => {
+            console.log("[room] socket open");
             setConn(conn);
         };
         conn.onerror = (err) => {
-            console.error('WebSocket error:', err);
+            console.error('[room] socket error:', err);
             setErrors(errors + 1);
             setConn(null);
         };
         conn.onclose = () => {
-            console.log('WebSocket closed');
+            console.log('[room] socket closed');
             // "closed" indicates intentional closing, but we never intentionally close,
             // so let's treat "something in the middle of the stack closed the connection"
             // as an error
@@ -64,8 +65,13 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
 
         // Cleanup: close WebSocket when component unmounts or socketName changes
         return () => {
-            if (conn.readyState === WebSocket.OPEN || conn.readyState === WebSocket.CONNECTING) {
-                conn.close();
+            console.log("[room] closing socket due to unmount")
+            if (conn.readyState === WebSocket.OPEN) conn.close();
+            // Firefox gives errors if you call close() while the connection is still opening
+            if (conn.readyState === WebSocket.CONNECTING) {
+                setTimeout(() => {
+                    conn.close();
+                }, 100);
             }
         };
     }, [socketName, errors]);
