@@ -1,6 +1,11 @@
 services:
-  cinema:
-    build: ./cinema
+  frontend:
+    build: ./frontend
+    ports:
+      - "2002:3000"
+
+  backend:
+    build: ./backend
     ports:
       - "2001:2001"
     volumes:

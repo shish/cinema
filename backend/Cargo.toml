@@ -1,11 +1,7 @@
 [package]
-name = "cinema_be"
+name = "cinema"
 version = "0.1.0"
 edition = "2021"
-
-[[bin]]
-name = "cinema"
-path = "backend/main.rs"
 
 [dependencies]
 axum = { version = "0.8", features = ["ws"] }

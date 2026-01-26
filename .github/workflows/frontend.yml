@@ -1,4 +1,4 @@
-name: Cinema
+name: Frontend
 
 on:
   push:
@@ -6,31 +6,34 @@ on:
       - main
     paths:
       - "cinema/**"
-      - ".github/workflows/cinema.yml"
+      - ".github/workflows/frontend.yml"
   pull_request:
     paths:
       - "cinema/**"
-      - ".github/workflows/cinema.yml"
+      - ".github/workflows/frontend.yml"
 
 jobs:
   build:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+
       - name: Login to Docker Hub
         if: github.ref == 'refs/heads/main'
         uses: docker/login-action@v3
         with:
           username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-      - name: Build and push Docker image
+
+      - name: Build and push Docker image (frontend)
         uses: docker/build-push-action@v5
         with:
-          context: ./cinema
+          context: ./frontend
           push: ${{ github.ref == 'refs/heads/main' }}
-          tags: shish2k/cinema:latest
+          tags: shish2k/cinema-frontend:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -44,4 +47,4 @@ jobs:
         with:
           url: https://watchtower.shish.io/v1/update
           api_token: ${{ secrets.WATCHTOWER_TOKEN }}
-          images: shish2k/cinema
+          images: shish2k/cinema-frontend

@@ -1,0 +1,6 @@
+# js
+node_modules
+dist
+
+# ide files
+.ropeproject

@@ -13,10 +13,7 @@ use std::sync::Arc;
 use std::time::{Duration, SystemTime};
 use tokio::net::TcpListener;
 use tokio::sync::RwLock;
-use tower_http::{
-    services::{ServeDir, ServeFile},
-    trace::TraceLayer,
-};
+use tower_http::{services::ServeDir, trace::TraceLayer};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 mod errs;
@@ -65,9 +62,6 @@ async fn main() -> anyhow::Result<()> {
         .route("/api/time", get(handle_time))
         .route("/api/room", get(handle_room))
         .nest_service("/files/", ServeDir::new(&app_state.movies))
-        .fallback_service(
-            ServeDir::new("./dist/").not_found_service(ServeFile::new("./dist/index.html")),
-        )
         .layer(TraceLayer::new_for_http())
         .with_state(app_state);
 

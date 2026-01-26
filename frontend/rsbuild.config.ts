@@ -2,22 +2,25 @@ import { defineConfig } from "@rsbuild/core";
 import { pluginReact } from "@rsbuild/plugin-react";
 import { pluginSass } from "@rsbuild/plugin-sass";
 
-const backend = process.env.BACKEND ?? "http://127.0.0.1:2001";
+const backend = process.env.CINEMA_BACKEND ?? "http://127.0.0.1:2001";
+const mqtt = process.env.CINEMA_MQTT ?? "http://127.0.0.1:9001";
 
 export default defineConfig({
     plugins: [pluginReact(), pluginSass()],
     source: {
-        entry: { index: "./frontend/index.tsx" },
+        entry: { index: "./src/index.tsx" },
     },
     html: {
         title: "Cinema",
-        favicon: "frontend/static/favicon.svg",
-        template: "frontend/static/index.html",
+        favicon: "src/static/favicon.svg",
+        template: "src/static/index.html",
     },
     server: {
         proxy: {
+            "/robots.txt": { target: backend },
             "/files": { target: backend },
             "/api": { target: backend, ws: true },
+            "/mqtt": { target: mqtt, ws: true },
         },
     },
 });
