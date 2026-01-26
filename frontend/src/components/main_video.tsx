@@ -3,6 +3,7 @@ import { FAIcon } from '@shish2k/react-faicon';
 import { useContext, useEffect, useRef, useState } from 'react';
 
 import { RoomContext } from '../providers/room';
+import { ServerContext } from '../providers/server';
 import { SettingsContext } from '../providers/settings';
 import type { Movie, PlayingState } from '../types';
 import { HLSVideoElement } from './hls_video';
@@ -27,7 +28,7 @@ export function MainVideo({
     send: (data: any) => void;
 }) {
     const hlsRef = useRef<HLSVideoElement>(null);
-    const { now } = useContext(RoomContext);
+    const { now } = useContext(ServerContext);
     const { showSubs } = useContext(SettingsContext);
     const [currentTime, setCurrentTime] = useState<number>(0);
     const [duration, setDuration] = useState<number>(0);
