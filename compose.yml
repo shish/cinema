@@ -23,6 +23,3 @@ services:
     volumes:
       - ./media/source:/media/source:ro
       - ./media/processed:/media/processed:rw
-
-volumes:
-  mqtt-data:
