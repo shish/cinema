@@ -6,6 +6,15 @@ services:
     volumes:
       - ./media/processed:/media/processed:ro
 
+  mqtt:
+    image: eclipse-mosquitto
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ${PWD}/data/mqtt/:/mosquitto/data/:rw
+      - ${PWD}/mqtt/:/mosquitto/config/:ro
+
   encoder:
     build: ./encoder
     user: "1000"
