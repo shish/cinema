@@ -59,7 +59,6 @@ async fn main() -> anyhow::Result<()> {
         movie_dir: args.movies,
     });
     let app = Router::new()
-        .route("/robots.txt", get(handle_robots))
         .route("/api/time", get(handle_time))
         .route("/api/room", get(handle_room))
         .nest_service("/files/", ServeDir::new(&app_state.movie_dir))
@@ -72,10 +71,6 @@ async fn main() -> anyhow::Result<()> {
     axum::serve(listener, app).await?;
 
     Ok(())
-}
-
-async fn handle_robots() -> axum::response::Result<impl IntoResponse, errs::CustomError> {
-    Ok("User-agent: *\nDisallow: /\n")
 }
 
 async fn handle_time() -> axum::response::Result<impl IntoResponse, errs::CustomError> {

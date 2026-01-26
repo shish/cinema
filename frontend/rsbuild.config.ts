@@ -6,9 +6,6 @@ const backend = process.env.CINEMA_BACKEND ?? "http://127.0.0.1:2001";
 
 export default defineConfig({
     plugins: [pluginReact(), pluginSass()],
-    source: {
-        entry: { index: "./src/index.tsx" },
-    },
     html: {
         title: "Cinema",
         favicon: "src/static/favicon.svg",
@@ -16,7 +13,6 @@ export default defineConfig({
     },
     server: {
         proxy: {
-            "/robots.txt": { target: backend },
             "/files": { target: backend },
             "/api": { target: backend, ws: true },
         },
