@@ -20,13 +20,13 @@ export function Root() {
 }
 
 function RootInner() {
-    const { user, room } = useContext(SettingsContext);
+    const { user, room, sess } = useContext(SettingsContext);
 
     // Show room if we have both a user and a room code
-    const shouldShowRoom = room && user;
+    const shouldShowRoom = room && user && sess;
 
     return shouldShowRoom ? (
-        <RoomProvider>
+        <RoomProvider user={user} sess={sess} roomCode={room}>
             <RoomScreen />
         </RoomProvider>
     ) : (

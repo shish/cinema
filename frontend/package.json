@@ -22,16 +22,17 @@
         "jsonpatch": "^3.1.0",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
+        "react-use-websocket": "^4.13.0",
         "usehooks-ts": "^3.1.1"
     },
     "devDependencies": {
-        "vitest": "^1.0.0",
         "@biomejs/biome": "^2.3.10",
         "@rsbuild/core": "^1.7.1",
         "@rsbuild/plugin-react": "^1.4.0",
         "@rsbuild/plugin-sass": "^1.4.0",
         "@types/react": "^18.3.3",
         "@types/react-dom": "^18.3.0",
-        "typescript": "^5.9.2"
+        "typescript": "^5.9.2",
+        "vitest": "^1.0.0"
     }
 }

@@ -2,7 +2,6 @@ import { faPause, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { FAIcon } from '@shish2k/react-faicon';
 import { useContext, useEffect, useRef, useState } from 'react';
 
-import { RoomContext } from '../providers/room';
 import { ServerContext } from '../providers/server';
 import { SettingsContext } from '../providers/settings';
 import type { Movie, PlayingState } from '../types';

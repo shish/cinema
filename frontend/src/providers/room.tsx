@@ -1,77 +1,59 @@
 import * as jsonpatch from 'jsonpatch';
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useRef, useState } from 'react';
+import useWebSocket from 'react-use-websocket';
 import type { RoomData } from '../types';
 import { SettingsContext } from './settings';
 
 export type RoomContextType = {
-    conn: WebSocket | null;
     room: RoomData;
     send: (data: any) => void;
 };
 
 export const RoomContext = createContext<RoomContextType>({} as RoomContextType);
 
-export function getSocketName(room: string, user: string, sess: string, errors: number): string {
+export function getSocketName(room: string, user: string, sess: string): string {
     const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const params = new URLSearchParams({
         room,
         user,
         sess,
-        errors: errors.toString(),
     });
     return `${proto}//${window.location.host}/api/room?${params.toString()}`;
 }
 
-export function RoomProvider({ children }: { children: React.ReactNode }) {
-    const { user, sess, room: roomCode } = useContext(SettingsContext);
-    const [conn, setConn] = useState<WebSocket | null>(null);
+export function RoomProvider({
+    user,
+    sess,
+    roomCode,
+    children,
+}: {
+    user: string;
+    sess: string;
+    roomCode: string;
+    children: React.ReactNode;
+}) {
     const [room, setRoom] = useState<RoomData | null>(null);
-    const [errors, setErrors] = useState(0);
-    const socketName = roomCode && user && sess ? getSocketName(roomCode, user, sess, errors) : '';
+    const lastRespRef = useRef<any>(null);
 
-    // console.log('Socket name:', socketName);
-    useEffect(() => {
-        const conn = new WebSocket(socketName);
-        let lastResp: any = null;
-        conn.onopen = () => {
-            console.log("[room] socket open");
-            setConn(conn);
-        };
-        conn.onerror = (err) => {
-            console.error('[room] socket error:', err);
-            setErrors(errors + 1);
-            setConn(null);
-        };
-        conn.onclose = () => {
-            console.log('[room] socket closed');
-            // "closed" indicates intentional closing, but we never intentionally close,
-            // so let's treat "something in the middle of the stack closed the connection"
-            // as an error
-            setErrors(errors + 1);
-            setConn(null);
-        };
-        conn.onmessage = (msg) => {
-            let resp = JSON.parse(msg.data);
-            if (lastResp) {
-                resp = jsonpatch.apply_patch(lastResp, resp);
-            }
-            lastResp = resp;
-            // console.log('Room:', resp);
-            setRoom(resp);
-        };
-
-        // Cleanup: close WebSocket when component unmounts or socketName changes
-        return () => {
-            console.log("[room] closing socket due to unmount")
-            if (conn.readyState === WebSocket.OPEN) conn.close();
-            // Firefox gives errors if you call close() while the connection is still opening
-            if (conn.readyState === WebSocket.CONNECTING) {
-                setTimeout(() => {
-                    conn.close();
-                }, 100);
-            }
-        };
-    }, [socketName, errors]);
+    const { sendJsonMessage, readyState } = useWebSocket(
+        getSocketName(roomCode, user, sess),
+        {
+            onOpen: () => {
+                lastRespRef.current = null;
+            },
+            onMessage: (msg) => {
+                let resp = JSON.parse(msg.data);
+                if (lastRespRef.current) {
+                    resp = jsonpatch.apply_patch(lastRespRef.current, resp);
+                }
+                lastRespRef.current = resp;
+                // console.log('Room:', resp);
+                setRoom(resp);
+            },
+            shouldReconnect: () => true,
+            retryOnError: true,
+        },
+    );
 
     if (room === null) {
         return (
@@ -85,12 +67,12 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
     }
 
     function send(data: any) {
-        if (conn === null) {
+        if (readyState !== WebSocket.OPEN) {
             alert('Failed to send command: not connected to server');
             return;
         }
-        conn.send(JSON.stringify(data));
+        sendJsonMessage(data);
     }
 
-    return <RoomContext.Provider value={{ room, conn, send }}>{children}</RoomContext.Provider>;
+    return <RoomContext.Provider value={{ room, send }}>{children}</RoomContext.Provider>;
 }
