@@ -3,7 +3,7 @@
     "assist": { "actions": { "source": { "organizeImports": "on" } } },
 
     "files": {
-        "includes": ["frontend/**"]
+        "includes": ["src/**"]
     },
     "formatter": {
         "indentStyle": "space",
