@@ -5,11 +5,11 @@ on:
     branches:
       - main
     paths:
-      - "cinema/**"
+      - "frontend/**"
       - ".github/workflows/frontend.yml"
   pull_request:
     paths:
-      - "cinema/**"
+      - "frontend/**"
       - ".github/workflows/frontend.yml"
 
 jobs:

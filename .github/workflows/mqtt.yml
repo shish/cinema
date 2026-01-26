@@ -5,11 +5,11 @@ on:
     branches:
       - main
     paths:
-      - "cinema/**"
+      - "mqtt/**"
       - ".github/workflows/mqtt.yml"
   pull_request:
     paths:
-      - "cinema/**"
+      - "mqtt/**"
       - ".github/workflows/mqtt.yml"
 
 jobs:
