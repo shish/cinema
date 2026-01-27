@@ -84,17 +84,17 @@ async fn handle_room(
     State(state): State<Arc<AppState>>,
 ) -> axum::response::Result<impl IntoResponse, errs::CustomError> {
     login.room = login.room.to_uppercase();
-    Ok(ws.on_upgrade(|socket| websocket(socket, login, state)))
+    Ok(ws.on_upgrade(|socket| room_websocket(socket, login, state)))
 }
 
 #[tracing::instrument(name="", skip_all, fields(room=?login.room, user=?login.user))]
-async fn websocket(socket: WebSocket, login: LoginArgs, state: Arc<AppState>) {
-    _websocket(socket, login, state)
+async fn room_websocket(socket: WebSocket, login: LoginArgs, state: Arc<AppState>) {
+    _room_websocket(socket, login, state)
         .await
         .unwrap_or_else(|e| tracing::error!("Error: {}", e));
 }
 
-async fn _websocket(
+async fn _room_websocket(
     socket: WebSocket,
     login: LoginArgs,
     state: Arc<AppState>,
@@ -127,7 +127,7 @@ async fn _websocket(
 
     // Catch any errors from the websocket loop and log them, but don't
     // propagate them, because we still want to clean up the room.
-    match _websocket_loop(rx, socket, &locked_room, &login).await {
+    match _room_websocket_loop(rx, socket, &locked_room, &login).await {
         Ok(_) => {}
         Err(e) => {
             tracing::error!("Error: {}", e);
@@ -160,7 +160,7 @@ async fn _websocket(
     Ok(())
 }
 
-async fn _websocket_loop(
+async fn _room_websocket_loop(
     mut rx: tokio::sync::broadcast::Receiver<room::Room>,
     socket: WebSocket,
     locked_room: &Arc<RwLock<room::Room>>,
