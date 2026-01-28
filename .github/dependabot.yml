@@ -1,7 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: "cargo"
-    directory: "/cinema/"
+    directory: "/backend/"
     schedule:
       interval: "monthly"
     groups:
@@ -13,7 +13,7 @@ updates:
           - "minor"
           - "patch"
   - package-ecosystem: "npm"
-    directory: "/cinema/"
+    directory: "/frontend/"
     schedule:
       interval: "monthly"
     groups:
@@ -25,7 +25,7 @@ updates:
           - "minor"
           - "patch"
   - package-ecosystem: "pip"
-    directory: "/encode/"
+    directory: "/encoder/"
     schedule:
       interval: "monthly"
     groups:
