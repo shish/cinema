@@ -17,7 +17,7 @@
         "@khanacademy/simple-markdown": "^2",
         "@shish2k/react-faicon": "^0.0.1",
         "@shish2k/react-use-servertime": "^0.0.6",
-        "emoji-picker-react": "^4.16.1",
+        "emoji-picker-react": "^4.17.2",
         "hls.js": "^1.6.15",
         "jsonpatch": "^3.1.0",
         "react": "^18.3.1",
@@ -26,10 +26,10 @@
         "usehooks-ts": "^3.1.1"
     },
     "devDependencies": {
-        "@biomejs/biome": "^2.3.10",
-        "@rsbuild/core": "^1.7.1",
-        "@rsbuild/plugin-react": "^1.4.0",
-        "@rsbuild/plugin-sass": "^1.4.0",
+        "@biomejs/biome": "^2.3.13",
+        "@rsbuild/core": "^1.7.2",
+        "@rsbuild/plugin-react": "^1.4.3",
+        "@rsbuild/plugin-sass": "^1.5.0",
         "@types/react": "^18.3.3",
         "@types/react-dom": "^18.3.0",
         "typescript": "^5.9.2",
