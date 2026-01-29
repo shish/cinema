@@ -16,6 +16,7 @@ pub enum Command {
     Pause(String, f64),
     Play(String, f64),
     Chat(String),
+    Act(String),
     Admin(String),
     Unadmin(String),
 }
@@ -39,11 +40,21 @@ impl Default for VideoState {
     }
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "lowercase")]
+pub enum MessageType {
+    Chat,
+    Action,
+    System,
+}
+
 #[derive(Serialize, Clone, Debug)]
 pub struct ChatMessage {
     pub absolute_timestamp: f64,
     pub user: String,
     pub message: String,
+    #[serde(rename = "type")]
+    pub r#type: MessageType,
 }
 
 #[derive(Serialize, Clone, Debug)]
@@ -79,6 +90,9 @@ impl Room {
         match (is_admin, cmd) {
             (_, Command::Chat(message)) => {
                 self.chat(&login.user, message)?;
+            }
+            (_, Command::Act(message)) => {
+                self.chat_action(&login.user, message)?;
             }
             (true, Command::Stop(())) => {
                 tracing::info!("Stopping");
@@ -146,12 +160,33 @@ impl Room {
             absolute_timestamp: since_the_epoch.as_secs_f64(),
             user: user.clone(),
             message: message.clone(),
+            r#type: MessageType::Chat,
+        });
+        Ok(())
+    }
+
+    pub fn chat_action(&mut self, user: &String, message: &String) -> anyhow::Result<()> {
+        tracing::info!("* {} {}", user, message);
+        let since_the_epoch = SystemTime::now().duration_since(UNIX_EPOCH)?;
+        self.chat.push(ChatMessage {
+            absolute_timestamp: since_the_epoch.as_secs_f64(),
+            user: user.clone(),
+            message: message.clone(),
+            r#type: MessageType::Action,
         });
         Ok(())
     }
 
     pub fn chat_sys(&mut self, message: &String) -> anyhow::Result<()> {
-        self.chat(&"system".to_string(), message)
+        tracing::info!("System: {}", message);
+        let since_the_epoch = SystemTime::now().duration_since(UNIX_EPOCH)?;
+        self.chat.push(ChatMessage {
+            absolute_timestamp: since_the_epoch.as_secs_f64(),
+            user: "system".to_string(),
+            message: message.clone(),
+            r#type: MessageType::System,
+        });
+        Ok(())
     }
 
     pub fn sync(&mut self) -> anyhow::Result<()> {

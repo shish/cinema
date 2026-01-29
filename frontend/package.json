@@ -17,7 +17,7 @@
         "@khanacademy/simple-markdown": "^2",
         "@shish2k/react-faicon": "^0.0.1",
         "@shish2k/react-use-servertime": "^0.0.6",
-        "emoji-picker-react": "^4.16.1",
+        "emojilib": "^4.0.2",
         "hls.js": "^1.6.15",
         "jsonpatch": "^3.1.0",
         "react": "^18.3.1",

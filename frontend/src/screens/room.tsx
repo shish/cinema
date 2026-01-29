@@ -1,7 +1,7 @@
 import { faCircleInfo, faFilm, faGears, faShareFromSquare } from '@fortawesome/free-solid-svg-icons';
 import { FAIcon } from '@shish2k/react-faicon';
 import { useContext, useState } from 'react';
-import { Chat } from '../components/chat';
+import { Chat, type Command } from '../components/chat';
 import { InfoMenu } from '../components/info';
 import { MainVideo } from '../components/main_video';
 import { MovieSelectDialog } from '../components/movie_select_dialog';
@@ -10,6 +10,14 @@ import { ViewerList } from '../components/viewer_list';
 import { RoomContext } from '../providers/room';
 import { ServerContext } from '../providers/server';
 import { SettingsContext } from '../providers/settings';
+
+// Chat commands
+const COMMANDS: Command[] = [
+//    { name: '/help', description: 'Show available commands' },
+//    { name: '/clear', description: 'Clear chat history' },
+    { name: '/me', description: 'Send an action message' },
+//    { name: '/shrug', description: 'Append ¯\\_(ツ)_/¯ to your message' },
+];
 
 function Header({ isAdmin }: { isAdmin: boolean }) {
     const { room, send } = useContext(RoomContext);
@@ -66,7 +74,7 @@ export function RoomScreen() {
     const isAdmin = room.admins.includes(user);
     const { showSystem } = useContext(SettingsContext);
 
-    const chatLog = showSystem ? room.chat : room.chat.filter((msg) => msg.user !== 'system');
+    const chatLog = showSystem ? room.chat : room.chat.filter((msg) => msg.type !== 'system');
 
     return (
         <main className={`room ${isAdmin ? 'admin' : 'user'} ${showChat ? 'chat' : 'nochat'}`}>
@@ -83,7 +91,18 @@ export function RoomScreen() {
             ) : (
                 <div className="blackout" />
             )}
-            <Chat log={chatLog} onSend={(text) => send({ chat: text })} />
+            <Chat
+                log={chatLog}
+                onSend={(text) => {
+                    if (text.startsWith('/me ')) {
+                        send({ act: text.substring(4) });
+                    } else {
+                        send({ chat: text });
+                    }
+                }}
+                users={[...new Set(room.viewers.map((v) => v.name))]}
+                commands={COMMANDS}
+            />
             <ViewerList viewers={room.viewers} admins={room.admins} send={send} />
         </main>
     );

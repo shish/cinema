@@ -12,10 +12,13 @@ export type Viewer = {
     name: string;
 };
 
+export type MessageType = "chat" | "action" | "system";
+
 export type ChatMessage = {
     absolute_timestamp: number;
     user: string;
     message: string;
+    type: MessageType;
 };
 
 export type RoomData = {

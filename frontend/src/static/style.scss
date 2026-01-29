@@ -262,7 +262,7 @@ MAIN.login {
 }
 
 MAIN.room.nochat {
-    .chat {
+    .chat_component {
         display: none;
     }
 
@@ -368,86 +368,9 @@ MAIN.room {
         background: var(--blackout);
     }
 
-    .chat {
-        background: var(--background);
+    .chat_component {
         grid-area: chat;
-        display: flex;
-        flex-direction: column;
         min-width: min(20em, 50vw);
-
-        .chat_log {
-            flex: 1 1 auto;
-            height: 2em;
-            overflow-wrap: break-word;
-            overflow-y: scroll;
-            text-align: left;
-
-            display: flex;
-            flex-direction: column-reverse;
-
-            UL {
-                margin: 0;
-                padding: 1em;
-
-                LI {
-                    display: block;
-
-                    .absolute_timestamp {
-                        color: var(--chat-timestamp);
-                    }
-
-                    .absolute_timestamp::after {
-                        content: " ";
-                    }
-                    .message {
-                        .spoiler {
-                            color: var(--blackout);
-                            background: var(--blackout);
-                            //border: 1px solid var(--grid);
-                            cursor: pointer;
-                            //padding: 0.1em;
-                            //border-radius: 0.2em;
-                        }
-                        .spoiler:hover,
-                        .spoiler.show {
-                            color: var(--text);
-                            background: var(--background);
-                        }
-                    }
-                }
-
-                LI.system {
-                    color: var(--chat-system);
-
-                    .user {
-                        display: none;
-                    }
-                }
-
-                LI.user {
-                    .user::before {
-                        color: var(--chat-system);
-                        content: "<";
-                    }
-
-                    .user::after {
-                        color: var(--chat-system);
-                        content: "> ";
-                    }
-                }
-            }
-        }
-
-        .chat_input {
-            flex: 0 0 auto;
-            display: flex;
-
-            INPUT {
-                flex: 1 1 auto;
-                font-size: 1.5rem;
-                width: 100%;
-            }
-        }
     }
 
     .viewers {
