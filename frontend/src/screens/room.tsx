@@ -92,7 +92,7 @@ export function RoomScreen() {
             },
         },
         '/deop': {
-            description: 'Remove admin privileges from a user',
+            description: 'Remove admin privs from a user',
             handler: (text) => {
                 const username = text.trim().replace(/^@/, '');
                 if (username) {
