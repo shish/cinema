@@ -35,25 +35,22 @@ export function RoomProvider({
     const [room, setRoom] = useState<RoomData | null>(null);
     const lastRespRef = useRef<any>(null);
 
-    const { sendJsonMessage, readyState } = useWebSocket(
-        getSocketName(roomCode, user, sess),
-        {
-            onOpen: () => {
-                lastRespRef.current = null;
-            },
-            onMessage: (msg) => {
-                let resp = JSON.parse(msg.data);
-                if (lastRespRef.current) {
-                    resp = jsonpatch.apply_patch(lastRespRef.current, resp);
-                }
-                lastRespRef.current = resp;
-                // console.log('Room:', resp);
-                setRoom(resp);
-            },
-            shouldReconnect: () => true,
-            retryOnError: true,
+    const { sendJsonMessage, readyState } = useWebSocket(getSocketName(roomCode, user, sess), {
+        onOpen: () => {
+            lastRespRef.current = null;
         },
-    );
+        onMessage: (msg) => {
+            let resp = JSON.parse(msg.data);
+            if (lastRespRef.current) {
+                resp = jsonpatch.apply_patch(lastRespRef.current, resp);
+            }
+            lastRespRef.current = resp;
+            // console.log('Room:', resp);
+            setRoom(resp);
+        },
+        shouldReconnect: () => true,
+        retryOnError: true,
+    });
 
     if (room === null) {
         return (

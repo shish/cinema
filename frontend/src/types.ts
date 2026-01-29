@@ -12,7 +12,7 @@ export type Viewer = {
     name: string;
 };
 
-export type MessageType = "chat" | "action" | "system";
+export type MessageType = 'chat' | 'action' | 'system';
 
 export type ChatMessage = {
     absolute_timestamp: number;

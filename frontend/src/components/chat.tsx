@@ -25,20 +25,17 @@ interface AutocompleteItem {
     description?: string;
 }
 
-export interface Command {
-    name: string;
+export interface CommandDef {
     description: string;
+    handler: (text: string) => void;
 }
+
+export type Commands = Record<string, CommandDef>;
 
 /**
  * Filter items by query, prioritizing items that start with the query over items that contain it.
  */
-function filterWithPriority<T>(
-    items: T[],
-    query: string,
-    getText: (item: T) => string,
-    limit: number = 5,
-): T[] {
+function filterWithPriority<T>(items: T[], query: string, getText: (item: T) => string, limit: number = 5): T[] {
     if (query) {
         const lowerQuery = query.toLowerCase();
         const startsWithMatches: T[] = [];
@@ -120,7 +117,9 @@ const rules: ReactRules = {
         match: (source, _state, _lookbehind) => /^(@[a-zA-Z0-9]+)/.exec(source),
         parse: (capture, _recurseParse, _state) => ({ content: capture[1] }),
         react: (node, _recurseOutput) => (
-            <span key={node.content} style={{ color: name2color(node.content.substring(1)) }}>{node.content}</span>
+            <span key={node.content} style={{ color: name2color(node.content.substring(1)) }}>
+                {node.content}
+            </span>
         ),
     },
     spoiler: {
@@ -138,21 +137,11 @@ function Markdown({ source }: { source: string }) {
     return reactOutput(parseTree);
 }
 
-export function Chat({
-    log,
-    onSend,
-    users,
-    commands,
-}: {
-    log: Array<ChatMessage>;
-    onSend: (text: string) => void,
-    users?: string[];
-    commands?: Command[];
-}) {
+export function Chat({ log, users, commands }: { log: Array<ChatMessage>; users?: string[]; commands: Commands }) {
     return (
         <div className="chat_component">
             <ChatLog log={log} />
-            <ChatInput onSend={onSend} users={users ?? []} commands={commands ?? []} />
+            <ChatInput users={users ?? []} commands={commands} />
         </div>
     );
 }
@@ -178,7 +167,9 @@ export function ChatLog({ log }: { log: Array<ChatMessage> }) {
                         <span className="user" style={{ color: name2color(p.user) }}>
                             {p.user}
                         </span>
-                        <span className="message"><Markdown source={p.message} /></span>
+                        <span className="message">
+                            <Markdown source={p.message} />
+                        </span>
                     </li>
                 ))}
             </ul>
@@ -196,7 +187,7 @@ export function ChatLog({ log }: { log: Array<ChatMessage> }) {
  *   * `onSend` is a callback that is called when the user hits enter.
  *   * `users` is a list of usernames to use for autocompletion.
  */
-export function ChatInput({ onSend, users = [], commands = [] }: { onSend: (text: string) => void; users: string[]; commands: Command[] }) {
+export function ChatInput({ users = [], commands }: { users: string[]; commands: Commands }) {
     const chatInput = useRef<HTMLTextAreaElement>(null);
     const [input, setInput] = useState<string>('');
 
@@ -253,25 +244,25 @@ export function ChatInput({ onSend, users = [], commands = [] }: { onSend: (text
         // Check for command autocomplete (/ at start of message)
         if (textBeforeCursor.startsWith('/') && !textBeforeCursor.includes(' ')) {
             const query = textBeforeCursor.substring(1);
-            const filtered = filterWithPriority(
-                commands,
-                query,
-                cmd => cmd.name.substring(1)
-            );
-            const matches = filtered.map(cmd => ({
+            // Filter out the default command (empty string key) from autocomplete
+            const commandEntries = Object.entries(commands)
+                .filter(([name]) => name !== '')
+                .map(([name, def]) => ({ name, ...def }));
+            const filtered = filterWithPriority(commandEntries, query, (cmd) => cmd.name.substring(1));
+            const matches = filtered.map((cmd) => ({
                 text: cmd.name,
                 display: cmd.name,
                 description: cmd.description,
             }));
 
-            setAutocomplete(prev => {
+            setAutocomplete((prev) => {
                 // Only reset selectedIndex if the type changed or items changed
                 const itemsChanged = JSON.stringify(prev.items) !== JSON.stringify(matches);
                 const typeChanged = prev.type !== 'command';
                 return {
                     show: matches.length > 0,
                     items: matches,
-                    selectedIndex: (itemsChanged || typeChanged) ? 0 : Math.min(prev.selectedIndex, matches.length - 1),
+                    selectedIndex: itemsChanged || typeChanged ? 0 : Math.min(prev.selectedIndex, matches.length - 1),
                     type: 'command',
                     startPos: 0,
                     query,
@@ -285,25 +276,21 @@ export function ChatInput({ onSend, users = [], commands = [] }: { onSend: (text
         if (emojiMatch) {
             const query = emojiMatch[2];
             const startPos = emojiMatch.index! + emojiMatch[1].length;
-            const filtered = filterWithPriority(
-                Object.entries(EMOJI_MAP),
-                query,
-                ([name]) => name
-            );
+            const filtered = filterWithPriority(Object.entries(EMOJI_MAP), query, ([name]) => name);
             const matches = filtered.map(([name, emoji]) => ({
                 text: emoji,
                 display: name,
                 description: emoji,
             }));
 
-            setAutocomplete(prev => {
+            setAutocomplete((prev) => {
                 // Only reset selectedIndex if the type changed or items changed
                 const itemsChanged = JSON.stringify(prev.items) !== JSON.stringify(matches);
                 const typeChanged = prev.type !== 'emoji';
                 return {
                     show: matches.length > 0,
                     items: matches,
-                    selectedIndex: (itemsChanged || typeChanged) ? 0 : Math.min(prev.selectedIndex, matches.length - 1),
+                    selectedIndex: itemsChanged || typeChanged ? 0 : Math.min(prev.selectedIndex, matches.length - 1),
                     type: 'emoji',
                     startPos,
                     query,
@@ -317,25 +304,21 @@ export function ChatInput({ onSend, users = [], commands = [] }: { onSend: (text
         if (userMatch && users.length > 0) {
             const query = userMatch[2];
             const startPos = userMatch.index! + userMatch[1].length;
-            const filtered = filterWithPriority(
-                users,
-                query,
-                user => user
-            );
-            const matches = filtered.map(user => ({
+            const filtered = filterWithPriority(users, query, (user) => user);
+            const matches = filtered.map((user) => ({
                 text: `@${user}`,
                 display: `@${user}`,
                 description: undefined,
             }));
 
-            setAutocomplete(prev => {
+            setAutocomplete((prev) => {
                 // Only reset selectedIndex if the type changed or items changed
                 const itemsChanged = JSON.stringify(prev.items) !== JSON.stringify(matches);
                 const typeChanged = prev.type !== 'user';
                 return {
                     show: matches.length > 0,
                     items: matches,
-                    selectedIndex: (itemsChanged || typeChanged) ? 0 : Math.min(prev.selectedIndex, matches.length - 1),
+                    selectedIndex: itemsChanged || typeChanged ? 0 : Math.min(prev.selectedIndex, matches.length - 1),
                     type: 'user',
                     startPos,
                     query,
@@ -365,7 +348,7 @@ export function ChatInput({ onSend, users = [], commands = [] }: { onSend: (text
         // Use insertTextAtCursor to replace from startPos to cursor with the selected item
         insertTextAtCursor(selectedItem.text, {
             startPos: autocomplete.startPos,
-            addSpaceAfter: true
+            addSpaceAfter: true,
         });
 
         // Reset autocomplete
@@ -382,6 +365,26 @@ export function ChatInput({ onSend, users = [], commands = [] }: { onSend: (text
     };
 
     // Handle keyboard navigation
+    const handleSend = (text: string) => {
+        text = text.trim();
+
+        if (!text) return;
+
+        // Check if text matches a command
+        const firstWord = text.split(/\s+/)[0];
+        if (firstWord in commands) {
+            // Command found, extract the remainder and call its handler
+            const remainder = text.substring(firstWord.length).trimStart();
+            commands[firstWord].handler(remainder);
+            return;
+        }
+
+        // No command matched, use default command (empty string key)
+        if ('' in commands) {
+            commands[''].handler(text);
+        }
+    };
+
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         // Handle Enter key for sending (unless Shift is held or autocomplete is showing)
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -394,7 +397,7 @@ export function ChatInput({ onSend, users = [], commands = [] }: { onSend: (text
             // Send the message
             e.preventDefault();
             if (input.trim()) {
-                onSend(input);
+                handleSend(input);
                 setInput('');
             }
             return;
@@ -404,13 +407,13 @@ export function ChatInput({ onSend, users = [], commands = [] }: { onSend: (text
 
         if (e.key === 'ArrowDown') {
             e.preventDefault();
-            setAutocomplete(prev => ({
+            setAutocomplete((prev) => ({
                 ...prev,
                 selectedIndex: (prev.selectedIndex + 1) % prev.items.length,
             }));
         } else if (e.key === 'ArrowUp') {
             e.preventDefault();
-            setAutocomplete(prev => ({
+            setAutocomplete((prev) => ({
                 ...prev,
                 selectedIndex: prev.selectedIndex === 0 ? prev.items.length - 1 : prev.selectedIndex - 1,
             }));
@@ -419,7 +422,7 @@ export function ChatInput({ onSend, users = [], commands = [] }: { onSend: (text
                 e.preventDefault();
             }
         } else if (e.key === 'Escape') {
-            setAutocomplete(prev => ({ ...prev, show: false }));
+            setAutocomplete((prev) => ({ ...prev, show: false }));
         }
     };
 
@@ -429,7 +432,7 @@ export function ChatInput({ onSend, users = [], commands = [] }: { onSend: (text
             onSubmit={(e) => {
                 e.preventDefault();
                 if (input.trim()) {
-                    onSend(input);
+                    handleSend(input);
                     setInput('');
                 }
             }}
@@ -441,17 +444,19 @@ export function ChatInput({ onSend, users = [], commands = [] }: { onSend: (text
                             key={item.display}
                             className={`autocomplete-item ${index === autocomplete.selectedIndex ? 'selected' : ''}`}
                             onClick={() => completeAutocomplete(item)}
-                            onMouseEnter={() => setAutocomplete(prev => ({ ...prev, selectedIndex: index }))}
+                            onMouseEnter={() => setAutocomplete((prev) => ({ ...prev, selectedIndex: index }))}
                         >
                             <span
                                 className="autocomplete-text"
-                                style={autocomplete.type === 'user' ? { color: name2color(item.display.substring(1)) } : undefined}
+                                style={
+                                    autocomplete.type === 'user'
+                                        ? { color: name2color(item.display.substring(1)) }
+                                        : undefined
+                                }
                             >
                                 {item.display}
                             </span>
-                            {item.description && (
-                                <span className="autocomplete-description">{item.description}</span>
-                            )}
+                            {item.description && <span className="autocomplete-description">{item.description}</span>}
                         </div>
                     ))}
                 </div>
