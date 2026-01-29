@@ -60,7 +60,7 @@ function Header({ isAdmin }: { isAdmin: boolean }) {
 }
 
 export function RoomScreen() {
-    const { movies } = useContext(ServerContext);
+    const { movies, now } = useContext(ServerContext);
     const { room, send } = useContext(RoomContext);
     const { showChat, user } = useContext(SettingsContext);
     const isAdmin = room.admins.includes(user);
@@ -97,6 +97,26 @@ export function RoomScreen() {
                 const username = text.trim().replace(/^@/, '');
                 if (username) {
                     send({ unadmin: username });
+                }
+            },
+        },
+        '/pause': {
+            description: 'Pause the video',
+            handler: () => {
+                if (room.video_state.video) {
+                    const [movieId, playingState] = room.video_state.video;
+                    const currentTime = playingState.paused ?? now - (playingState.playing || 0);
+                    send({ pause: [movieId, currentTime] });
+                }
+            },
+        },
+        '/play': {
+            description: 'Play the video',
+            handler: () => {
+                if (room.video_state.video) {
+                    const [movieId, playingState] = room.video_state.video;
+                    const currentTime = playingState.paused ?? now - (playingState.playing || 0);
+                    send({ play: [movieId, now - currentTime] });
                 }
             },
         },
