@@ -91,7 +91,7 @@ function name2color(name: string): string {
     const spins = 0.61803 * 360;
     const hue = Math.abs(hash * spins) % 360;
 
-    return `hsl(${hue}, 60%, 65%)`;
+    return `oklch(var(--text-lightness) 0.15 ${hue})`;
 }
 
 function CustomSpoiler({ children }: { children: any }) {

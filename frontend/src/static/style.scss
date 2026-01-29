@@ -5,14 +5,15 @@
 :root {
     color-scheme: dark;
     --background: #222;
-    --blackout: #111;
-    --header: #444;
-    --admin: #664;
-    --text: #ddd;
-    --link: #bbf;
     --grid: #999;
-    --chat-timestamp: #666;
-    --chat-system: #888;
+    --header: #444;
+    --blackout: #111;
+
+    --admin: #664;
+
+    --text-lightness: 0.9;
+    --text: oklch(var(--text-lightness) 0 0);
+    --link: oklch(var(--text-lightness) 0.4 270);
 }
 // FIXME: use this
 MAIN.dimmed {
@@ -40,6 +41,7 @@ BODY {
     align-items: center;
     inset: 0;
     background: rgba(0, 0, 0, 0.75);
+    z-index: 1;
 
     .dialog {
         flex: 0 0 auto;
@@ -182,6 +184,10 @@ MAIN {
     A {
         color: var(--link);
         text-decoration: none;
+
+        &:hover {
+            text-decoration: underline;
+        }
     }
 
     HEADER {
