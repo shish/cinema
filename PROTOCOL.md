@@ -1,6 +1,6 @@
 ## Protocol
 
-* User checks `/files/movies.json` to get a list of movies
+* User subscribes to MQTT topic `global/movies` to get a list of movies
 * User connects to `/api/room?room=...&user=...&sess=...` to get a websocket connection
   * `room` -- room code, a new room will be created if one doesn't exist
   * `user` -- username, any arbitrary text

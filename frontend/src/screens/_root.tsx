@@ -7,7 +7,7 @@ import { LoginScreen } from './login';
 import { RoomScreen } from './room';
 
 import '../static/style.scss';
-import { ServerProvider } from '../providers/server';
+import { ServerContext, ServerProvider } from '../providers/server';
 
 export function Root() {
     return (
@@ -21,9 +21,10 @@ export function Root() {
 
 function RootInner() {
     const { user, room, sess } = useContext(SettingsContext);
+    const { loading } = useContext(ServerContext);
 
     // Show room if we have both a user and a room code
-    const shouldShowRoom = room && user && sess;
+    const shouldShowRoom = room && user && !loading;
 
     return shouldShowRoom ? (
         <RoomProvider user={user} sess={sess} roomCode={room}>

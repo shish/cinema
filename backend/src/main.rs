@@ -19,6 +19,7 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 mod errs;
 mod room;
+mod watcher;
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct LoginArgs {
@@ -30,6 +31,7 @@ pub struct LoginArgs {
 struct AppState {
     rooms: RwLock<HashMap<String, Arc<RwLock<room::Room>>>>,
     movie_dir: PathBuf,
+    mqtt_client: rumqttc::AsyncClient,
 }
 
 // A website for watching movies together (backend)
@@ -54,10 +56,57 @@ async fn main() -> anyhow::Result<()> {
         .init();
     let rooms = HashMap::new();
 
+    // Setup MQTT client
+    let (host, port) = {
+        let broker = std::env::var("CINEMA_MQTT").unwrap_or_else(|_| "127.0.0.1:1883".into());
+        if let Some((h, p)) = broker.split_once(':') {
+            (h.to_string(), p.parse::<u16>().unwrap_or(1883))
+        } else {
+            (broker.clone(), 1883u16)
+        }
+    };
+
+    let ts = SystemTime::now()
+        .duration_since(SystemTime::UNIX_EPOCH)
+        .unwrap_or_else(|_| Duration::from_millis(0))
+        .as_millis();
+    let client_id = format!("cinema-backend-rooms-{}", ts);
+    let mut mqttoptions = rumqttc::MqttOptions::new(client_id, host, port);
+    mqttoptions.set_keep_alive(Duration::from_secs(10));
+
+    let (mqtt_client, mut eventloop) = rumqttc::AsyncClient::new(mqttoptions, 10);
+
+    // Spawn the MQTT eventloop driver
+    tokio::spawn(async move {
+        loop {
+            match eventloop.poll().await {
+                Ok(_) => {
+                    // normal poll
+                }
+                Err(e) => {
+                    tracing::error!("mqtt eventloop error: {}; retrying after delay", e);
+                    tokio::time::sleep(Duration::from_secs(1)).await;
+                }
+            }
+        }
+    });
+
     let app_state = Arc::new(AppState {
         rooms: RwLock::new(rooms),
         movie_dir: args.movies,
+        mqtt_client,
     });
+
+    // Start watcher to publish movies.json changes to MQTT
+    {
+        let movie_dir = app_state.movie_dir.clone();
+        let mqtt_client = app_state.mqtt_client.clone();
+        tokio::spawn(async move {
+            if let Err(e) = watcher::start(movie_dir, mqtt_client).await {
+                tracing::error!("watcher error: {}", e);
+            }
+        });
+    }
     let app = Router::new()
         .route("/api/time", get(handle_time))
         .route("/api/room", get(handle_room))
