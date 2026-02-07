@@ -3,9 +3,11 @@ use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
 use axum::extract::Query;
 use axum::extract::State;
 use axum::{response::IntoResponse, routing::get, Json, Router};
+use bytes::BytesMut;
 use clap::Parser;
 use futures::stream::StreamExt;
 use futures::SinkExt;
+use mqttbytes::QoS;
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::net::SocketAddr;
@@ -61,6 +63,7 @@ async fn main() -> anyhow::Result<()> {
     let app = Router::new()
         .route("/api/time", get(handle_time))
         .route("/api/room", get(handle_room))
+        .route("/api/mqtt", get(handle_mqtt))
         .nest_service("/files/", ServeDir::new(&app_state.movie_dir))
         .layer(TraceLayer::new_for_http())
         .with_state(app_state);
@@ -197,6 +200,170 @@ async fn _room_websocket_loop(
                 maybe_last_state = Some(state);
                 sender.send(Message::Text(msg.into())).await?;
             },
+        }
+    }
+}
+
+async fn handle_mqtt(
+    ws: WebSocketUpgrade,
+) -> axum::response::Result<impl IntoResponse, errs::CustomError> {
+    Ok(ws.on_upgrade(mqtt_websocket))
+}
+
+#[tracing::instrument(name = "mqtt", skip_all)]
+async fn mqtt_websocket(socket: WebSocket) {
+    _mqtt_websocket(socket)
+        .await
+        .unwrap_or_else(|e| tracing::error!("MQTT WebSocket error: {}", e));
+}
+
+async fn _mqtt_websocket(socket: WebSocket) -> anyhow::Result<()> {
+    let (mut sender, mut receiver) = socket.split();
+
+    tracing::info!("MQTT WebSocket connection established");
+
+    loop {
+        tokio::select! {
+            // Keep the connection alive
+            _ = tokio::time::sleep(Duration::from_secs(30)) => {
+                sender.send(Message::Ping(Bytes::new())).await?;
+            },
+            // Receive messages from client
+            msg = receiver.next() => {
+                let Some(msg) = msg else {
+                    tracing::info!("MQTT WebSocket connection closed");
+                    return Ok(());
+                };
+
+                match msg? {
+                    Message::Binary(data) => {
+                        // Parse MQTT packet from binary data
+                        let mut buf = BytesMut::from(&data[..]);
+                        match mqttbytes::v5::read(&mut buf, 10000) {
+                            Ok(packet) => {
+                                tracing::info!("Received MQTT packet");
+
+                                // Handle different MQTT packet types
+                                match packet {
+                                    mqttbytes::v5::Packet::Connect(connect) => {
+                                        tracing::info!(
+                                            "MQTT CONNECT: client_id={}, keep_alive={}",
+                                            connect.client_id,
+                                            connect.keep_alive
+                                        );
+
+                                        // Send CONNACK response
+                                        let connack = mqttbytes::v5::ConnAck {
+                                            session_present: false,
+                                            code: mqttbytes::v5::ConnectReturnCode::Success,
+                                            properties: None,
+                                        };
+                                        let mut out_buf = BytesMut::new();
+                                        connack.write(&mut out_buf).map_err(|e| anyhow::anyhow!("MQTT write error: {:?}", e))?;
+                                        sender.send(Message::Binary(out_buf.to_vec().into())).await?;
+                                    }
+                                    mqttbytes::v5::Packet::Publish(publish) => {
+                                        tracing::info!(
+                                            "MQTT PUBLISH: topic={}, qos={:?}, payload_len={}",
+                                            publish.topic,
+                                            publish.qos,
+                                            publish.payload.len()
+                                        );
+
+                                        // Send PUBACK for QoS 1
+                                        if publish.qos == QoS::AtLeastOnce {
+                                            let puback = mqttbytes::v5::PubAck {
+                                                pkid: publish.pkid,
+                                                reason: mqttbytes::v5::PubAckReason::Success,
+                                                properties: None,
+                                            };
+                                            let mut out_buf = BytesMut::new();
+                                            puback.write(&mut out_buf).map_err(|e| anyhow::anyhow!("MQTT write error: {:?}", e))?;
+                                            sender.send(Message::Binary(out_buf.to_vec().into())).await?;
+                                        }
+                                    }
+                                    mqttbytes::v5::Packet::Subscribe(subscribe) => {
+                                        tracing::info!(
+                                            "MQTT SUBSCRIBE: pkid={}, filters={:?}",
+                                            subscribe.pkid,
+                                            subscribe.filters
+                                        );
+
+                                        // Send SUBACK response
+                                        let return_codes: Vec<_> = subscribe
+                                            .filters
+                                            .iter()
+                                            .map(|_| mqttbytes::v5::SubscribeReasonCode::QoS0)
+                                            .collect();
+                                        let suback = mqttbytes::v5::SubAck {
+                                            pkid: subscribe.pkid,
+                                            return_codes,
+                                            properties: None,
+                                        };
+                                        let mut out_buf = BytesMut::new();
+                                        suback.write(&mut out_buf).map_err(|e| anyhow::anyhow!("MQTT write error: {:?}", e))?;
+                                        sender.send(Message::Binary(out_buf.to_vec().into())).await?;
+                                    }
+                                    mqttbytes::v5::Packet::Unsubscribe(unsubscribe) => {
+                                        tracing::info!(
+                                            "MQTT UNSUBSCRIBE: pkid={}, filters={:?}",
+                                            unsubscribe.pkid,
+                                            unsubscribe.filters
+                                        );
+
+                                        // Send UNSUBACK response
+                                        let return_codes: Vec<_> = unsubscribe
+                                            .filters
+                                            .iter()
+                                            .map(|_| mqttbytes::v5::UnsubAckReason::Success)
+                                            .collect();
+                                        let unsuback = mqttbytes::v5::UnsubAck {
+                                            pkid: unsubscribe.pkid,
+                                            reasons: return_codes,
+                                            properties: None,
+                                        };
+                                        let mut out_buf = BytesMut::new();
+                                        unsuback.write(&mut out_buf).map_err(|e| anyhow::anyhow!("MQTT write error: {:?}", e))?;
+                                        sender.send(Message::Binary(out_buf.to_vec().into())).await?;
+                                    }
+                                    mqttbytes::v5::Packet::PingReq => {
+                                        tracing::debug!("MQTT PINGREQ");
+
+                                        // Send PINGRESP response
+                                        let pingresp = mqttbytes::v5::PingResp;
+                                        let mut out_buf = BytesMut::new();
+                                        pingresp.write(&mut out_buf).map_err(|e| anyhow::anyhow!("MQTT write error: {:?}", e))?;
+                                        sender.send(Message::Binary(out_buf.to_vec().into())).await?;
+                                    }
+                                    mqttbytes::v5::Packet::Disconnect(_) => {
+                                        tracing::info!("MQTT DISCONNECT received");
+                                        return Ok(());
+                                    }
+                                    _ => {
+                                        tracing::debug!("Received other MQTT packet type");
+                                    }
+                                }
+                            }
+                            Err(e) => {
+                                tracing::error!("Failed to parse MQTT packet: {:?}", e);
+                            }
+                        }
+                    }
+                    Message::Text(text) => {
+                        tracing::warn!("Received text message on MQTT WebSocket (expected binary): {}", text);
+                    }
+                    Message::Ping(_) => {
+                        // Axum handles pong automatically
+                    }
+                    Message::Pong(_) => {
+                        // Received pong response
+                    }
+                    Message::Close(_) => {
+                        tracing::info!("MQTT WebSocket close frame received");
+                        return Ok(());
+                    }
+                }
+            }
         }
     }
 }
