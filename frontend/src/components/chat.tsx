@@ -73,24 +73,32 @@ function absolute_timestamp(ts: number): string {
         .slice(-13, -8);
 }
 
-function name2color(name: string): string {
-    // Alphanumeric only so that eg @bob? and @bob! have same color
-    name = name.split(/[^a-zA-Z0-9]/)[0].toLowerCase();
+// Session-only user tracking - maps username to their color index
+const allSeenUsers = new Map<string, number>();
 
-    // Use a hash that distributes colors more evenly
-    // Multiply by prime and position to spread out similar names
-    let hash = 0;
-    for (let i = 0; i < name.length; i++) {
-        hash = ((hash << 5) - hash + name.charCodeAt(i)) | 0;
+function registerUser(cleanName: string): number {
+    if (!allSeenUsers.has(cleanName)) {
+        const nextIndex = allSeenUsers.size;
+        allSeenUsers.set(cleanName, nextIndex);
     }
-
-    // Rather than mapping hash to hue directly, map it to a number
-    // of spins around the colour wheel (for better distribution)
-    const spins = 0.61803 * 360;
-    const hue = Math.abs(hash * spins) % 360;
-
-    return `oklch(var(--text-lightness) 0.15 ${hue})`;
+    return allSeenUsers.get(cleanName)!;
 }
+
+function name2color(name: string, currentUsers: string[] = []): string {
+    // Alphanumeric only so that eg @bob? and @bob! have same color
+    const cleanName = name.split(/[^a-zA-Z0-9]/)[0].toLowerCase();
+    const colorIndex = registerUser(cleanName);
+    const isActive = currentUsers.some(user =>
+        user.split(/[^a-zA-Z0-9]/)[0].toLowerCase() === cleanName
+    );
+
+    const hue = (colorIndex * 0.618 * 360) % 360;
+    const chroma = isActive ? 0.25 : 0.05;
+    return `oklch(var(--text-lightness) ${chroma} ${hue})`;
+}
+
+// Module-level variable to store users for markdown parser
+let markdownUsers: string[] = [];
 
 function CustomSpoiler({ children }: { children: any }) {
     const [show, setShow] = useState(false);
@@ -118,7 +126,7 @@ const rules: ReactRules = {
         match: (source, _state, _lookbehind) => /^(@[a-zA-Z0-9]+)/.exec(source),
         parse: (capture, _recurseParse, _state) => ({ content: capture[1] }),
         react: (node, _recurseOutput) => (
-            <span key={node.content} style={{ color: name2color(node.content.substring(1)) }}>
+            <span key={node.content} style={{ color: name2color(node.content.substring(1), markdownUsers) }}>
                 {node.content}
             </span>
         ),
@@ -141,14 +149,19 @@ function Markdown({ source }: { source: string }) {
 export function Chat({ log, users, commands }: { log: Array<ChatMessage>; users?: string[]; commands: Commands }) {
     return (
         <div className="chat_component">
-            <ChatLog log={log} />
+            <ChatLog log={log} users={users ?? []} />
             <ChatInput users={users ?? []} commands={commands} />
         </div>
     );
 }
 
-export function ChatLog({ log }: { log: Array<ChatMessage> }) {
+export function ChatLog({ log, users }: { log: Array<ChatMessage>; users: string[] }) {
     const logBox = useRef<HTMLDivElement>(null);
+
+    // Update markdown users for color rendering
+    useEffect(() => {
+        markdownUsers = users;
+    }, [users]);
 
     // we really *do* want to run this every time `log` changes, even though
     // the code "doesn't depend on log" (logBox.scrollHeight *does* depend on
@@ -165,7 +178,7 @@ export function ChatLog({ log }: { log: Array<ChatMessage> }) {
                 {log.map((p, n) => (
                     <li key={n} className={p.type}>
                         <span className="absolute_timestamp">{absolute_timestamp(p.absolute_timestamp)}</span>
-                        <span className="user" style={{ color: name2color(p.user) }}>
+                        <span className="user" style={{ color: name2color(p.user, users) }}>
                             {p.user}
                         </span>
                         <span className="message">
@@ -476,7 +489,7 @@ export function ChatInput({ users = [], commands }: { users: string[]; commands:
                                 className="autocomplete-text"
                                 style={
                                     autocomplete.type === 'user'
-                                        ? { color: name2color(item.display.substring(1)) }
+                                        ? { color: name2color(item.display.substring(1), users) }
                                         : undefined
                                 }
                             >
