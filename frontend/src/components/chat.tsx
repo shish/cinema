@@ -3,6 +3,7 @@ import EmojiPicker, { type EmojiClickData, Theme } from 'emoji-picker-react';
 import emojilib from 'emojilib';
 import { useEffect, useRef, useState } from 'react';
 import type { ChatMessage } from '../types';
+import { Username, getUserColor } from './username';
 import './chat.scss';
 
 // Build emoji keyword-to-emoji mapping from emojilib
@@ -73,29 +74,7 @@ function absolute_timestamp(ts: number): string {
         .slice(-13, -8);
 }
 
-// Session-only user tracking - maps username to their color index
-const allSeenUsers = new Map<string, number>();
 
-function registerUser(cleanName: string): number {
-    if (!allSeenUsers.has(cleanName)) {
-        const nextIndex = allSeenUsers.size;
-        allSeenUsers.set(cleanName, nextIndex);
-    }
-    return allSeenUsers.get(cleanName)!;
-}
-
-function name2color(name: string, currentUsers: string[] = []): string {
-    // Alphanumeric only so that eg @bob? and @bob! have same color
-    const cleanName = name.split(/[^a-zA-Z0-9]/)[0].toLowerCase();
-    const colorIndex = registerUser(cleanName);
-    const isActive = currentUsers.some(user =>
-        user.split(/[^a-zA-Z0-9]/)[0].toLowerCase() === cleanName
-    );
-
-    const hue = (colorIndex * 0.618 * 360) % 360;
-    const chroma = isActive ? 0.25 : 0.05;
-    return `oklch(var(--text-lightness) ${chroma} ${hue})`;
-}
 
 // Module-level variable to store users for markdown parser
 let markdownUsers: string[] = [];
@@ -126,9 +105,7 @@ const rules: ReactRules = {
         match: (source, _state, _lookbehind) => /^(@[a-zA-Z0-9]+)/.exec(source),
         parse: (capture, _recurseParse, _state) => ({ content: capture[1] }),
         react: (node, _recurseOutput) => (
-            <span key={node.content} style={{ color: name2color(node.content.substring(1), markdownUsers) }}>
-                {node.content}
-            </span>
+            <Username key={node.content} name={node.content} currentUsers={markdownUsers} />
         ),
     },
     spoiler: {
@@ -178,8 +155,8 @@ export function ChatLog({ log, users }: { log: Array<ChatMessage>; users: string
                 {log.map((p, n) => (
                     <li key={n} className={p.type}>
                         <span className="absolute_timestamp">{absolute_timestamp(p.absolute_timestamp)}</span>
-                        <span className="user" style={{ color: name2color(p.user, users) }}>
-                            {p.user}
+                        <span className="user">
+                            <Username name={p.user} currentUsers={users} />
                         </span>
                         <span className="message">
                             <Markdown source={p.message} />
@@ -485,15 +462,12 @@ export function ChatInput({ users = [], commands }: { users: string[]; commands:
                             onClick={() => completeAutocomplete(item)}
                             onMouseEnter={() => setAutocomplete((prev) => ({ ...prev, selectedIndex: index }))}
                         >
-                            <span
-                                className="autocomplete-text"
-                                style={
-                                    autocomplete.type === 'user'
-                                        ? { color: name2color(item.display.substring(1), users) }
-                                        : undefined
-                                }
-                            >
-                                {item.display}
+                            <span className="autocomplete-text">
+                                {autocomplete.type === 'user' ? (
+                                    <Username name={item.display} currentUsers={users} />
+                                ) : (
+                                    item.display
+                                )}
                             </span>
                             {item.description && <span className="autocomplete-description">{item.description}</span>}
                         </div>
