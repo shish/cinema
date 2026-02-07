@@ -1,8 +1,7 @@
 import * as jsonpatch from 'jsonpatch';
-import { createContext, useContext, useRef, useState } from 'react';
+import { createContext, useRef, useState } from 'react';
 import useWebSocket from 'react-use-websocket';
 import type { RoomData } from '../types';
-import { SettingsContext } from './settings';
 
 export type RoomContextType = {
     room: RoomData;

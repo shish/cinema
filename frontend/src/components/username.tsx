@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 // Session-only user tracking - maps username to their color index
 const allSeenUsers = new Map<string, number>();
@@ -11,15 +11,14 @@ function registerUser(cleanName: string): number {
     return allSeenUsers.get(cleanName)!;
 }
 
-export function getUserColor(name: string, currentUsers: string[] = []): string {
+export function getUserColor(name: string, isActive: boolean = false): string {
     // We want all these to be treated the same:
-    //  - bob
-    //  - @bob
-    //  - @bob?
-    //  - @bob!
+    //  - Bob
+    //  - @Bob
+    //  - @Bob?
+    //  - @boB!
     const cleanName = name.replace(/^[^a-zA-Z0-9]*|[^a-zA-Z0-9]*$/g, '').toLowerCase();
     const colorIndex = registerUser(cleanName);
-    const isActive = currentUsers.some((user) => user.split(/[^a-zA-Z0-9]/)[0].toLowerCase() === cleanName);
 
     const hue = (colorIndex * 0.61803 * 360) % 360;
     const chroma = isActive ? 0.15 : 0.02;
@@ -32,8 +31,10 @@ interface UsernameProps {
     children?: ReactNode;
 }
 
-export function Username({ name, currentUsers = [], children }: UsernameProps) {
-    const color = getUserColor(name, currentUsers);
+export function Username({ name, currentUsers = [] }: UsernameProps) {
+    const cleanName = name.replace(/^[^a-zA-Z0-9]*|[^a-zA-Z0-9]*$/g, '').toLowerCase();
+    const isActive = currentUsers.some((user) => user.split(/[^a-zA-Z0-9]/)[0].toLowerCase() === cleanName);
+    const color = getUserColor(name, isActive);
 
-    return <span style={{ color }}>{children || name}</span>;
+    return <span style={{ color }}>{name}</span>;
 }

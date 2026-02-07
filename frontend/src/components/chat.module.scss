@@ -1,11 +1,14 @@
-.chat_component {
+.chat {
     --chat-timestamp: oklch(from var(--text) calc(l - 0.4) c h);
     --chat-system: oklch(from var(--text) calc(l - 0.3) c h);
     --chat-decoration: oklch(from var(--text) calc(l - 0.2) c h);
 
+    width: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
     gap: 1px;
+    background: var(--grid);
 
     .log {
         flex: 1 1 auto;
@@ -103,7 +106,7 @@
         }
         &>DIV {
             flex: 0 0 auto;
-            BUTTON {
+            &>BUTTON {
                 width: 100%;
                 height: 100%;
                 padding: 0 .5rem;

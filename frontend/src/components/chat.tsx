@@ -3,8 +3,8 @@ import EmojiPicker, { type EmojiClickData, Theme } from 'emoji-picker-react';
 import emojilib from 'emojilib';
 import { useEffect, useRef, useState } from 'react';
 import type { ChatMessage } from '../types';
-import { Username, getUserColor } from './username';
 import css from './chat.module.scss';
+import { Username } from './username';
 
 // Build emoji keyword-to-emoji mapping from emojilib
 // emojilib format: { "😀": ["keyword1", "keyword2", ...], ... }
@@ -123,7 +123,7 @@ function Markdown({ source }: { source: string }) {
 
 export function Chat({ log, users, commands }: { log: Array<ChatMessage>; users?: string[]; commands: Commands }) {
     return (
-        <div className={css.chat_component} id="chat">
+        <div className={css.chat} id="chat">
             <ChatLog log={log} users={users ?? []} />
             <ChatInput users={users ?? []} commands={commands} />
         </div>
@@ -151,6 +151,9 @@ export function ChatLog({ log, users }: { log: Array<ChatMessage>; users: string
         <div className={css.log} ref={logBox}>
             <ul>
                 {log.map((p, n) => (
+                    // Using index as key is usually bad, but here we assume log entries
+                    // are immutable and only ever appended to, so it should be fine
+                    // biome-ignore lint/suspicious/noArrayIndexKey: see above
                     <li key={n} className={p.type}>
                         <span className={css.timestamp}>{absolute_timestamp(p.absolute_timestamp)}</span>
                         <span className={css.user}>
@@ -200,6 +203,9 @@ export function ChatInput({ users = [], commands }: { users: string[]; commands:
     }, [showEmojiPicker]);
 
     // Auto-resize textarea based on content
+    // This doesn't use `input` itself, but chatInput.current.scrollHeight changes
+    // when `input` changes, so we need to run this effect whenever `input` changes
+    // biome-ignore lint/correctness/useExhaustiveDependencies: see above
     useEffect(() => {
         if (chatInput.current) {
             chatInput.current.style.height = 'auto';
@@ -232,7 +238,7 @@ export function ChatInput({ users = [], commands }: { users: string[]; commands:
 
         const before = input.substring(0, startPos);
         const after = input.substring(cursorPos);
-        const textToInsert = addSpaceAfter ? text + ' ' : text;
+        const textToInsert = addSpaceAfter ? `${text} ` : text;
         const newInput = before + textToInsert + after;
         setInput(newInput);
 
@@ -467,7 +473,9 @@ export function ChatInput({ users = [], commands }: { users: string[]; commands:
                                     item.display
                                 )}
                             </span>
-                            {item.description && <span className={css.autocomplete_description}>{item.description}</span>}
+                            {item.description && (
+                                <span className={css.autocomplete_description}>{item.description}</span>
+                            )}
                         </div>
                     ))}
                 </div>
