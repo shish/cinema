@@ -1,4 +1,5 @@
 import type { Viewer } from '../types';
+import { Username } from './username';
 
 export function ViewerList({ viewers, admins, send }: { viewers: Viewer[]; admins: string[]; send: (s: any) => void }) {
     const unique_viewers = Array.from(new Set(viewers.map((p) => p.name)));
@@ -19,7 +20,7 @@ export function ViewerList({ viewers, admins, send }: { viewers: Viewer[]; admin
                     onClick={() => toggle(name)}
                     onKeyDown={() => toggle(name)}
                 >
-                    {name}
+                    <Username name={name} currentUsers={unique_viewers} />
                 </li>
             ))}
         </ul>
