@@ -1,4 +1,5 @@
 import SimpleMarkdown, { type ReactRules } from '@khanacademy/simple-markdown';
+import EmojiPicker, { type EmojiClickData, Theme } from 'emoji-picker-react';
 import emojilib from 'emojilib';
 import { useEffect, useRef, useState } from 'react';
 import type { ChatMessage } from '../types';
@@ -189,7 +190,26 @@ export function ChatLog({ log }: { log: Array<ChatMessage> }) {
  */
 export function ChatInput({ users = [], commands }: { users: string[]; commands: Commands }) {
     const chatInput = useRef<HTMLTextAreaElement>(null);
+    const emojiPickerRef = useRef<HTMLDivElement>(null);
     const [input, setInput] = useState<string>('');
+    const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
+
+    // Close emoji picker when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target as Node)) {
+                setShowEmojiPicker(false);
+            }
+        };
+
+        if (showEmojiPicker) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showEmojiPicker]);
 
     // Auto-resize textarea based on content
     useEffect(() => {
@@ -365,6 +385,12 @@ export function ChatInput({ users = [], commands }: { users: string[]; commands:
     };
 
     // Handle keyboard navigation
+    const onEmojiClick = (emojiData: EmojiClickData) => {
+        insertTextAtCursor(emojiData.emoji);
+        setShowEmojiPicker(false);
+        chatInput.current?.focus();
+    };
+
     const handleSend = (text: string) => {
         text = text.trim();
 
@@ -472,16 +498,19 @@ export function ChatInput({ users = [], commands }: { users: string[]; commands:
                 placeholder="Type to chat"
                 rows={1}
             />
-            <button
-                type="button"
-                onClick={() => {
-                    // Insert space and colon to trigger emoji autocomplete
-                    const needsSpace = input.length > 0 && !input.endsWith(' ');
-                    insertTextAtCursor(needsSpace ? ' :' : ':');
-                }}
-            >
-                😃
-            </button>
+            <div style={{ position: 'relative' }} ref={emojiPickerRef}>
+                {showEmojiPicker && (
+                    <div style={{ position: 'absolute', bottom: '100%', right: 0, zIndex: 1000 }}>
+                        <EmojiPicker onEmojiClick={onEmojiClick} theme={Theme.DARK} previewConfig={{ showPreview: false }}/>
+                    </div>
+                )}
+                <button
+                    type="button"
+                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                >
+                    😃
+                </button>
+            </div>
         </form>
     );
 }

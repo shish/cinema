@@ -132,7 +132,7 @@
             }
         }
 
-        TEXTAREA {
+        &>TEXTAREA {
             flex: 1 1 auto;
             font-size: 1rem;
             min-height: 2rem;
@@ -143,12 +143,15 @@
             font-family: inherit;
             resize: none;
         }
-        BUTTON {
+        &>DIV {
             flex: 0 0 auto;
-            width: auto;
-            padding: 0 .5rem;
-            font-size: 1rem;
-            border: none;
+            BUTTON {
+                width: 100%;
+                height: 100%;
+                padding: 0 .5rem;
+                font-size: 1rem;
+                border: none;
+            }
         }
     }
 }
