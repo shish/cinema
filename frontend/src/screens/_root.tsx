@@ -2,12 +2,12 @@ import { useContext } from 'react';
 
 import { RoomProvider } from '../providers/room';
 import { SettingsContext, SettingsProvider } from '../providers/settings';
+import { ServerContext, ServerProvider } from '../providers/server';
 
 import { LoginScreen } from './login';
 import { RoomScreen } from './room';
 
 import '../static/style.scss';
-import { ServerContext, ServerProvider } from '../providers/server';
 
 export function Root() {
     return (
