@@ -5,5 +5,5 @@ RUN npm install
 COPY src /app/src
 RUN npm run build
 EXPOSE 3000
-ENV CINEMA_BACKEND=http://backend:2001
+ENV CINEMA_BACKEND=http://backend:2001 CINEMA_MQTT=http://mqtt:9001
 CMD ["npm", "run", "preview"]
