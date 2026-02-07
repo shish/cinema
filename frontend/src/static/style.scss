@@ -9,17 +9,8 @@
     --header: #444;
     --blackout: #111;
 
-    --admin: #664;
-
-    --text-lightness: 0.9;
-    --text: oklch(var(--text-lightness) 0 0);
-    --link: oklch(var(--text-lightness) 0.4 270);
-}
-// FIXME: use this
-MAIN.dimmed {
-    --header: #111;
-    --text: #444;
-    --grid: #444;
+    --text: oklch(0.9 0 0);
+    --link: oklch(from var(--text) l 0.4 270);
 }
 
 * {

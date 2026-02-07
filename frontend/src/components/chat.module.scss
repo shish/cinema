@@ -1,7 +1,7 @@
 .chat_component {
-    --chat-timestamp: oklch(calc(var(--text-lightness) - 0.4) 0 0);
-    --chat-system: oklch(calc(var(--text-lightness) - 0.3) 0 0);
-    --chat-decoration: oklch(calc(var(--text-lightness) - 0.2) 0 0);
+    --chat-timestamp: oklch(from var(--text) calc(l - 0.4) c h);
+    --chat-system: oklch(from var(--text) calc(l - 0.3) c h);
+    --chat-decoration: oklch(from var(--text) calc(l - 0.2) c h);
 
     display: flex;
     flex-direction: column;

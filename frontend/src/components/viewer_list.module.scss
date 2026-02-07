@@ -20,6 +20,6 @@
     }
 
     LI.admin {
-        background: var(--admin);
+        background: oklch(from var(--header) l 0.05 90);
     }
 }

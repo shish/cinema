@@ -23,7 +23,7 @@ export function getUserColor(name: string, currentUsers: string[] = []): string 
 
     const hue = (colorIndex * 0.61803 * 360) % 360;
     const chroma = isActive ? 0.15 : 0.02;
-    return `oklch(var(--text-lightness) ${chroma} ${hue})`;
+    return `oklch(from var(--text) l ${chroma} ${hue})`;
 }
 
 interface UsernameProps {
