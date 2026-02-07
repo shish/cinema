@@ -292,7 +292,7 @@ export function ChatInput({ users = [], commands }: { users: string[]; commands:
         }
 
         // Check for emoji autocomplete (: after space or at start)
-        const emojiMatch = textBeforeCursor.match(/(^|[\s]):([a-z0-9]*)$/);
+        const emojiMatch = textBeforeCursor.match(/(^|[\s]):([a-z0-9]{2,})$/);
         if (emojiMatch) {
             const query = emojiMatch[2];
             const startPos = emojiMatch.index! + emojiMatch[1].length;
