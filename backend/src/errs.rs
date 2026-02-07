@@ -31,3 +31,11 @@ impl From<globwalk::GlobError> for CustomError {
         )
     }
 }
+impl From<std::io::Error> for CustomError {
+    fn from(err: std::io::Error) -> Self {
+        CustomError(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            format!("IO error: {:?}", err),
+        )
+    }
+}
