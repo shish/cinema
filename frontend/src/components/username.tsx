@@ -19,9 +19,7 @@ export function getUserColor(name: string, currentUsers: string[] = []): string 
     //  - @bob!
     const cleanName = name.replace(/^[^a-zA-Z0-9]*|[^a-zA-Z0-9]*$/g, '').toLowerCase();
     const colorIndex = registerUser(cleanName);
-    const isActive = currentUsers.some(user =>
-        user.split(/[^a-zA-Z0-9]/)[0].toLowerCase() === cleanName
-    );
+    const isActive = currentUsers.some((user) => user.split(/[^a-zA-Z0-9]/)[0].toLowerCase() === cleanName);
 
     const hue = (colorIndex * 0.61803 * 360) % 360;
     const chroma = isActive ? 0.15 : 0.02;
@@ -37,9 +35,5 @@ interface UsernameProps {
 export function Username({ name, currentUsers = [], children }: UsernameProps) {
     const color = getUserColor(name, currentUsers);
 
-    return (
-        <span style={{ color }}>
-            {children || name}
-        </span>
-    );
+    return <span style={{ color }}>{children || name}</span>;
 }

@@ -1,10 +1,12 @@
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FAIcon } from '@shish2k/react-faicon';
 
+import css from './info.module.scss';
+
 export function InfoMenu({ setShowInfo }: { setShowInfo: (show: boolean) => void }) {
     return (
-        <div className={'dialog-overlay'}>
-            <div className={'dialog info-dialog'}>
+        <div id="dialog_overlay">
+            <div id="dialog" className={css.infoDialog}>
                 <h2>
                     <div style={{ width: '1em' }} />
                     <div>

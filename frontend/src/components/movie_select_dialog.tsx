@@ -1,8 +1,10 @@
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FAIcon } from '@shish2k/react-faicon';
 import { useSessionStorage } from 'usehooks-ts';
+
 import type { Movie } from '../types';
 import { minititle } from '../utils';
+import css from './movie_select_dialog.module.scss';
 
 export function MovieSelectDialog({
     movies,
@@ -32,8 +34,8 @@ export function MovieSelectDialog({
     };
 
     return (
-        <div className={'dialog-overlay'}>
-            <div className={'dialog movie-select-dialog'}>
+        <div id="dialog_overlay">
+            <div id="dialog" className={css.movieSelectDialog}>
                 <h2>
                     {selectedMovieId && (
                         <button type="button" onClick={handleClearMovie} className="clear-button">
@@ -61,8 +63,8 @@ export function MovieSelectDialog({
                         }}
                     />
                 </h2>
-                <div className="movie-scroll">
-                    <div className="movie-grid">
+                <div className={css.movieScroll}>
+                    <div className={css.movieGrid}>
                         {filteredMovies
                             .map((movieId) => {
                                 return { movieId, movie: movies[movieId] };
@@ -70,11 +72,11 @@ export function MovieSelectDialog({
                             .map(({ movieId, movie }) => (
                                 <div
                                     key={movieId}
-                                    className={`movie-item ${movieId === selectedMovieId ? 'selected' : ''}`}
+                                    className={`${css.movieItem} ${movieId === selectedMovieId ? css.selected : ''}`}
                                     onClick={() => handleMovieSelect(movieId)}
                                 >
                                     <img src={`/files/${movie.thumbnail}`} alt={movie.title} />
-                                    <div className="movie-title" title={minititle(folder, movie.title)}>
+                                    <div className={css.movieTitle} title={minititle(folder, movie.title)}>
                                         {minititle(folder, movie.title)}
                                     </div>
                                 </div>

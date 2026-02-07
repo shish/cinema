@@ -135,7 +135,7 @@ export function RoomScreen() {
                     send={send}
                 />
             ) : (
-                <div className="blackout" />
+                <div id="blackout" />
             )}
             <Chat log={chatLog} users={[...new Set(room.viewers.map((v) => v.name))]} commands={commands} />
             <ViewerList viewers={room.viewers} admins={room.admins} send={send} />

@@ -4,7 +4,7 @@ import emojilib from 'emojilib';
 import { useEffect, useRef, useState } from 'react';
 import type { ChatMessage } from '../types';
 import { Username, getUserColor } from './username';
-import './chat.scss';
+import css from './chat.module.scss';
 
 // Build emoji keyword-to-emoji mapping from emojilib
 // emojilib format: { "😀": ["keyword1", "keyword2", ...], ... }
@@ -74,8 +74,6 @@ function absolute_timestamp(ts: number): string {
         .slice(-13, -8);
 }
 
-
-
 // Module-level variable to store users for markdown parser
 let markdownUsers: string[] = [];
 
@@ -83,7 +81,7 @@ function CustomSpoiler({ children }: { children: any }) {
     const [show, setShow] = useState(false);
     return (
         <span
-            className={`spoiler ${show ? 'show' : ''}`}
+            className={`${css.spoiler} ${show ? css.show : ''}`}
             onClick={() => setShow(!show)}
             onKeyDown={(e) => {
                 if (e.key === 'Space') {
@@ -125,7 +123,7 @@ function Markdown({ source }: { source: string }) {
 
 export function Chat({ log, users, commands }: { log: Array<ChatMessage>; users?: string[]; commands: Commands }) {
     return (
-        <div className="chat_component">
+        <div className={css.chat_component} id="chat">
             <ChatLog log={log} users={users ?? []} />
             <ChatInput users={users ?? []} commands={commands} />
         </div>
@@ -150,15 +148,15 @@ export function ChatLog({ log, users }: { log: Array<ChatMessage>; users: string
     }, [log]);
 
     return (
-        <div className="log" ref={logBox}>
+        <div className={css.log} ref={logBox}>
             <ul>
                 {log.map((p, n) => (
                     <li key={n} className={p.type}>
-                        <span className="absolute_timestamp">{absolute_timestamp(p.absolute_timestamp)}</span>
-                        <span className="user">
+                        <span className={css.timestamp}>{absolute_timestamp(p.absolute_timestamp)}</span>
+                        <span className={css.user}>
                             <Username name={p.user} currentUsers={users} />
                         </span>
-                        <span className="message">
+                        <span className={css.message}>
                             <Markdown source={p.message} />
                         </span>
                     </li>
@@ -444,7 +442,7 @@ export function ChatInput({ users = [], commands }: { users: string[]; commands:
 
     return (
         <form
-            className="input"
+            className={css.input}
             onSubmit={(e) => {
                 e.preventDefault();
                 if (input.trim()) {
@@ -454,22 +452,22 @@ export function ChatInput({ users = [], commands }: { users: string[]; commands:
             }}
         >
             {autocomplete.show && (
-                <div className="autocomplete-menu">
+                <div className={css.autocomplete_menu}>
                     {autocomplete.items.map((item, index) => (
                         <div
                             key={item.display}
-                            className={`autocomplete-item ${index === autocomplete.selectedIndex ? 'selected' : ''}`}
+                            className={`${css.autocomplete_item} ${index === autocomplete.selectedIndex ? css.selected : ''}`}
                             onClick={() => completeAutocomplete(item)}
                             onMouseEnter={() => setAutocomplete((prev) => ({ ...prev, selectedIndex: index }))}
                         >
-                            <span className="autocomplete-text">
+                            <span className={css.autocomplete_text}>
                                 {autocomplete.type === 'user' ? (
                                     <Username name={item.display} currentUsers={users} />
                                 ) : (
                                     item.display
                                 )}
                             </span>
-                            {item.description && <span className="autocomplete-description">{item.description}</span>}
+                            {item.description && <span className={css.autocomplete_description}>{item.description}</span>}
                         </div>
                     ))}
                 </div>
@@ -488,13 +486,14 @@ export function ChatInput({ users = [], commands }: { users: string[]; commands:
             <div style={{ position: 'relative' }} ref={emojiPickerRef}>
                 {showEmojiPicker && (
                     <div style={{ position: 'absolute', bottom: '100%', right: 0, zIndex: 1000 }}>
-                        <EmojiPicker onEmojiClick={onEmojiClick} theme={Theme.DARK} previewConfig={{ showPreview: false }}/>
+                        <EmojiPicker
+                            onEmojiClick={onEmojiClick}
+                            theme={Theme.DARK}
+                            previewConfig={{ showPreview: false }}
+                        />
                     </div>
                 )}
-                <button
-                    type="button"
-                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                >
+                <button type="button" onClick={() => setShowEmojiPicker(!showEmojiPicker)}>
                     😃
                 </button>
             </div>

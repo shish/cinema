@@ -25,13 +25,13 @@
             LI {
                 display: block;
 
-                .absolute_timestamp {
+                .timestamp {
                     color: var(--chat-timestamp);
                 }
-
-                .absolute_timestamp::after {
+                .timestamp::after {
                     content: " ";
                 }
+
                 .message {
                     .spoiler {
                         color: var(--blackout);
@@ -47,16 +47,14 @@
                         background: var(--background);
                     }
                 }
-            }
 
-            LI {
                 .user::before,
                 .user::after {
                     color: var(--chat-decoration);
                 }
             }
 
-            LI.system {
+            LI:global(.system) {
                 color: var(--chat-system);
 
                 .user {
@@ -64,7 +62,7 @@
                 }
             }
 
-            LI.chat {
+            LI:global(.chat) {
                 .user::before {
                     content: "<";
                 }
@@ -74,7 +72,7 @@
                 }
             }
 
-            LI.action {
+            LI:global(.action) {
                 .user::before {
                     content: "* ";
                 }
@@ -92,54 +90,14 @@
         position: relative;
         gap: 1px;
 
-        .autocomplete-menu {
-            position: absolute;
-            bottom: 100%;
-            left: 0;
-            right: 0;
-            background: var(--header);
-            border: 1px solid var(--grid);
-            border-bottom: none;
-            max-height: 300px;
-            overflow-y: auto;
-            z-index: 1000;
-
-            .autocomplete-item {
-                padding: 0.5rem 1rem;
-                cursor: pointer;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                border-bottom: 1px solid var(--grid);
-
-                &:hover,
-                &.selected {
-                    background: var(--background);
-                }
-
-                .autocomplete-text {
-                    flex: 1 1 auto;
-                    font-weight: bold;
-                    white-space: nowrap;
-                }
-
-                .autocomplete-description {
-                    flex: 0 0 auto;
-                    font-size: 0.9rem;
-                    color: var(--text);
-                    margin-left: 1rem;
-                }
-            }
-        }
-
         &>TEXTAREA {
             flex: 1 1 auto;
-            font-size: 1rem;
+            font-size: .9rem;
             min-height: 2rem;
             border: none;
             outline: none;
             margin: 0;
-            padding: .4rem .5rem;
+            padding: .5rem .5rem;
             font-family: inherit;
             resize: none;
         }
@@ -151,7 +109,48 @@
                 padding: 0 .5rem;
                 font-size: 1rem;
                 border: none;
+                background: var(--header);
             }
+        }
+    }
+}
+
+.autocomplete_menu {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    right: 0;
+    background: var(--header);
+    border: 1px solid var(--grid);
+    border-bottom: none;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+
+    .autocomplete_item {
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--grid);
+
+        &:hover,
+        &.selected {
+            background: var(--background);
+        }
+
+        .autocomplete_text {
+            flex: 1 1 auto;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .autocomplete_description {
+            flex: 0 0 auto;
+            font-size: 0.9rem;
+            color: var(--text);
+            margin-left: 1rem;
         }
     }
 }

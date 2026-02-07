@@ -1,6 +1,6 @@
 import type { Viewer } from '../types';
 import { Username } from './username';
-import './viewer_list.scss';
+import css from './viewer_list.module.scss';
 
 export function ViewerList({ viewers, admins, send }: { viewers: Viewer[]; admins: string[]; send: (s: any) => void }) {
     const unique_viewers = Array.from(new Set(viewers.map((p) => p.name)));
@@ -13,11 +13,11 @@ export function ViewerList({ viewers, admins, send }: { viewers: Viewer[]; admin
         }
     }
     return (
-        <ul className="viewers">
+        <ul className={css.viewers} id="viewer_list">
             {unique_viewers.map((name) => (
                 <li
                     key={name}
-                    className={admins.includes(name) ? 'admin' : ''}
+                    className={admins.includes(name) ? css.admin : ''}
                     onClick={() => toggle(name)}
                     onKeyDown={() => toggle(name)}
                 >

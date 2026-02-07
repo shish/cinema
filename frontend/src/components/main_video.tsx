@@ -6,6 +6,7 @@ import { ServerContext } from '../providers/server';
 import { SettingsContext } from '../providers/settings';
 import type { Movie, PlayingState } from '../types';
 import { HLSVideoElement } from './hls_video';
+import css from './main_video.module.scss';
 
 // Apparently we need to define the custom element here, it doesn't
 // work when done in hls_video.tsx o_O
@@ -138,8 +139,8 @@ export function MainVideo({
     }
 
     return (
-        <div className="video">
-            <div className="videoScaler">
+        <div id="main_video" className={css.video}>
+            <div className={css.videoScaler}>
                 <hls-video
                     ref={hlsRef}
                     // use key to force reloading the video element when movie
@@ -154,8 +155,8 @@ export function MainVideo({
                     <track kind="captions" src={`/files/${movie.subtitles}`} default />
                 </hls-video>
             </div>
-            {videoHint && <div className="video_hint">{videoHint}</div>}
-            <form className="controls">
+            {videoHint && <div className={css.videoHint}>{videoHint}</div>}
+            <form className={css.controls} data-role="controls">
                 {playingState.playing ? (
                     <button type="button" onClick={() => pause()}>
                         <FAIcon icon={faPause} />

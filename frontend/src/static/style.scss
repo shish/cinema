@@ -26,7 +26,6 @@ MAIN.dimmed {
     box-sizing: border-box;
 }
 
-/* svg wibbling */
 BODY {
     margin: 0;
     padding: 0;
@@ -34,7 +33,7 @@ BODY {
     background-color: var(--background);
 }
 
-.dialog-overlay {
+#dialog_overlay {
     position: absolute;
     display: flex;
     justify-content: center;
@@ -43,7 +42,7 @@ BODY {
     background: rgba(0, 0, 0, 0.75);
     z-index: 1;
 
-    .dialog {
+    #dialog {
         flex: 0 0 auto;
         text-align: center;
         z-index: 9999;
@@ -62,109 +61,6 @@ BODY {
             align-items: center;
             justify-content: space-between;
             gap: 1rem;
-        }
-    }
-
-    .info-dialog {
-        P {
-            margin: 0;
-        }
-    }
-
-    .settings-dialog {
-        TABLE {
-            margin: auto;
-
-            TD:first-child {
-                text-align: right;
-                padding-right: 0.25rem;
-            }
-
-            TD:nth-child(2) {
-                text-align: left;
-            }
-        }
-    }
-
-    .movie-select-dialog {
-        width: 90vw;
-        height: 90vh;
-
-        H2 {
-            SELECT {
-                flex: 1 1 auto;
-                padding: 0.5rem;
-                font-size: 1rem;
-                border-radius: 0.5rem;
-                background: var(--background);
-                color: var(--text);
-                border: 1px solid var(--grid);
-            }
-
-            BUTTON {
-                flex: 0 0 auto;
-                width: auto;
-                padding: 0.5rem 1rem;
-                font-size: 1rem;
-                border-radius: 0.5rem;
-                background: #c44;
-                color: white;
-                border: none;
-                cursor: pointer;
-
-                &:hover {
-                    background: #d55;
-                }
-            }
-        }
-
-        .movie-scroll {
-            flex: 1 1 auto;
-            overflow-y: auto;
-        }
-        .movie-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 1rem;
-            overflow-y: auto;
-
-            .movie-item {
-                cursor: pointer;
-                border: 2px solid var(--grid);
-                border-radius: 0.5rem;
-                transition: border-color 0.2s;
-                aspect-ratio: 16/9;
-                position: relative;
-
-                &:hover {
-                    border-color: var(--link);
-                }
-
-                &.selected {
-                    border-color: #4a4;
-                    box-shadow: 0 0 10px #4a4;
-                }
-
-                IMG {
-                    border-radius: 0.5rem 0.5rem 0 0;
-                    width: 100%;
-                    height: 100%;
-                    object-fit: cover;
-                }
-
-                .movie-title {
-                    background: rgba(0, 0, 0, 0.7);
-                    padding: 0.5rem;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    white-space: nowrap;
-                    position: absolute;
-                    bottom: 0;
-                    width: 100%;
-                    border-radius: 0 0 0.5rem 0.5rem;
-                    color: var(--text);
-                }
-            }
         }
     }
 }
@@ -268,17 +164,17 @@ MAIN.login {
 }
 
 MAIN.room.nochat {
-    .chat_component {
+    #chat {
         display: none;
     }
 
-    .viewers {
+    #viewer_list {
         display: none;
     }
 }
 MAIN.room.user {
-    .video {
-        .controls {
+    #main_video {
+        [data-role="controls"] {
             display: none;
         }
     }
@@ -302,84 +198,21 @@ MAIN.room {
             / 1fr;
     }
 
-    .video {
+    #main_video {
         grid-area: video;
-        background: var(--blackout);
-        display: flex;
-        flex-direction: column;
-
-        // in landscape mode, we want to fit in the box that is left
-        // over after we have the header on top, the chat on the right,
-        // and the viewer list below
-        @media (orientation: landscape) {
-            // scaling a video to 100% of its container doesn't work when
-            // the container is flex-y or grid-y, but scaling a div to 100%
-            // of container, and then setting the video to "position: absolute;"
-            // within the div, seems ok...
-            .videoScaler {
-                flex: 1 1 auto;
-                width: 100%;
-                height: 100%;
-                position: relative;
-
-                VIDEO {
-                    position: absolute;
-                    width: 100%;
-                    height: 100%;
-                }
-            }
-        }
-        // in portrait mode, we want the video to be the width of the
-        // screen and other things can fit around it
-        @media (orientation: portrait) {
-            .videoScaler {
-                flex: 1 1 auto;
-                width: 100%;
-                VIDEO {
-                    width: 100%;
-                }
-            }
-        }
-
-        .video_hint {
-            color: black;
-            background: #d44;
-            padding: 0.2em;
-            flex: 1 1 auto;
-        }
-
-        .controls {
-            flex: 1 1 auto;
-            display: flex;
-
-            INPUT {
-                flex: 1 1 auto;
-                min-width: 0px;
-            }
-
-            BUTTON {
-                flex: 0 0 auto;
-            }
-
-            SPAN {
-                flex: 0 0 auto;
-                align-self: center;
-                padding: 0 0.5rem;
-            }
-        }
     }
 
-    .blackout {
+    #blackout {
         grid-area: video;
         background: var(--blackout);
     }
 
-    .chat_component {
+    #chat {
         grid-area: chat;
         min-width: min(20em, 50vw);
     }
 
-    .viewers {
+    #viewer_list {
         grid-area: viewers;
     }
 }

@@ -3,6 +3,7 @@ import { FAIcon } from '@shish2k/react-faicon';
 import { useContext, useEffect, useState } from 'react';
 
 import { SettingsContext } from '../providers/settings';
+import css from './settings.module.scss';
 
 export function SettingsMenu({ setShowSettings }: { setShowSettings: (b: boolean) => void }) {
     const { showChat, setShowChat, showSystem, setShowSystem, showSubs, setShowSubs, setRoom } =
@@ -20,8 +21,8 @@ export function SettingsMenu({ setShowSettings }: { setShowSettings: (b: boolean
     }, []);
 
     return (
-        <div className={'dialog-overlay'}>
-            <div className={'dialog settings-dialog'}>
+        <div id="dialog_overlay">
+            <div id="dialog" className={css.settingsDialog}>
                 <h2>
                     <FAIcon
                         icon={faRightFromBracket}
