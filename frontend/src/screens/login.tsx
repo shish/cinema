@@ -29,7 +29,7 @@ export function LoginScreen() {
     return (
         <main className="login">
             <header>
-                <FAIcon icon={faCircleInfo} onClick={() => setShowInfo(true)} />
+                <FAIcon icon={faCircleInfo} data-title="info" onClick={() => setShowInfo(true)} />
                 <h1>Join a Room</h1>
                 <FAIcon icon={faCircleXmark} style={{ opacity: 0 }} />
             </header>
@@ -44,6 +44,7 @@ export function LoginScreen() {
                         value={userInput}
                         autoComplete="off"
                         autoFocus={userInput.length === 0}
+                        spellCheck={false}
                         required={true}
                     />
                     <input
@@ -54,6 +55,7 @@ export function LoginScreen() {
                         value={roomInput}
                         placeholder="Enter Room Code"
                         autoComplete="off"
+                        spellCheck={false}
                         disabled={room !== null}
                         pattern="[A-Za-z0-9]{4}"
                         required={true}
