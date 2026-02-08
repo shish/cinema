@@ -1,9 +1,9 @@
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FAIcon } from '@shish2k/react-faicon';
 
-import css from './info.module.scss';
+import css from './InfoDialog.module.scss';
 
-export function InfoMenu({ setShowInfo }: { setShowInfo: (show: boolean) => void }) {
+export function InfoDialog({ setShowInfo }: { setShowInfo: (show: boolean) => void }) {
     return (
         <div id="dialog_overlay">
             <div id="dialog" className={css.infoDialog}>

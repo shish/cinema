@@ -2,7 +2,7 @@ import { faCircleInfo, faCircleXmark } from '@fortawesome/free-solid-svg-icons';
 import { FAIcon } from '@shish2k/react-faicon';
 import { useContext, useEffect, useState } from 'react';
 
-import { InfoMenu } from '../components/info';
+import { InfoDialog } from '../components';
 import { SettingsContext } from '../providers/settings';
 
 export function LoginScreen() {
@@ -63,7 +63,7 @@ export function LoginScreen() {
                     <button type="submit">Join</button>
                 </form>
             </article>
-            {showInfo && <InfoMenu setShowInfo={setShowInfo} />}
+            {showInfo && <InfoDialog setShowInfo={setShowInfo} />}
         </main>
     );
 }

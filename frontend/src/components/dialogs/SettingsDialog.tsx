@@ -2,10 +2,10 @@ import { faRightFromBracket, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FAIcon } from '@shish2k/react-faicon';
 import { useContext, useEffect, useState } from 'react';
 
-import { SettingsContext } from '../providers/settings';
-import css from './settings.module.scss';
+import { SettingsContext } from '../../providers/settings';
+import css from './SettingsDialog.module.scss';
 
-export function SettingsMenu({ setShowSettings }: { setShowSettings: (b: boolean) => void }) {
+export function SettingsDialog({ setShowSettings }: { setShowSettings: (b: boolean) => void }) {
     const { showChat, setShowChat, showSystem, setShowSystem, showSubs, setShowSubs, setRoom } =
         useContext(SettingsContext);
     const [isFullscreen, setIsFullscreen] = useState(document.fullscreenElement !== null);

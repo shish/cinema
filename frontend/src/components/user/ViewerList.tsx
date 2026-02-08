@@ -1,6 +1,6 @@
-import type { Viewer } from '../types';
-import { Username } from './username';
-import css from './viewer_list.module.scss';
+import type { Viewer } from '../../types';
+import { Username } from './Username';
+import css from './ViewerList.module.scss';
 
 export function ViewerList({ viewers, admins, send }: { viewers: Viewer[]; admins: string[]; send: (s: any) => void }) {
     const unique_viewers = Array.from(new Set(viewers.map((p) => p.name)));

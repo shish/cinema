@@ -2,9 +2,9 @@ import SimpleMarkdown, { type ReactRules } from '@khanacademy/simple-markdown';
 import EmojiPicker, { type EmojiClickData, Theme } from 'emoji-picker-react';
 import emojilib from 'emojilib';
 import { useEffect, useRef, useState } from 'react';
-import type { ChatMessage } from '../types';
-import css from './chat.module.scss';
-import { Username } from './username';
+import type { ChatMessage } from '../../types';
+import css from './Chat.module.scss';
+import { Username } from '../user/Username';
 
 // Build emoji keyword-to-emoji mapping from emojilib
 // emojilib format: { "😀": ["keyword1", "keyword2", ...], ... }

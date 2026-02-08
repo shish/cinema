@@ -2,9 +2,9 @@ import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FAIcon } from '@shish2k/react-faicon';
 import { useSessionStorage } from 'usehooks-ts';
 
-import type { Movie } from '../types';
-import { minititle } from '../utils';
-import css from './movie_select_dialog.module.scss';
+import type { Movie } from '../../types';
+import { minititle } from '../../utils';
+import css from './MovieSelectDialog.module.scss';
 
 export function MovieSelectDialog({
     movies,
@@ -46,6 +46,7 @@ export function MovieSelectDialog({
                         onChange={(e) => setFolder(e.target.value)}
                         value={folder}
                         disabled={movieList.length === 0}
+                        aria-label="Filter movies by folder"
                     >
                         <option value="">All Folders</option>
                         {folders.map((f) => (

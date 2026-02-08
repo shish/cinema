@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
-import type { ChatMessage, MessageType } from '../types';
-import { Chat } from './chat';
-import css from './chat.module.scss';
+import type { ChatMessage, MessageType } from '../../types';
+import { Chat } from './Chat';
+import css from './Chat.module.scss';
 
 const meta: Meta<typeof Chat> = {
     title: 'Components/Chat/Autocomplete',

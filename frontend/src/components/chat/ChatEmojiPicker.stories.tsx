@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { PointerEventsCheckLevel } from '@testing-library/user-event';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
-import type { ChatMessage, MessageType } from '../types';
-import { Chat } from './chat';
+import type { ChatMessage, MessageType } from '../../types';
+import { Chat } from './Chat';
 
 const meta: Meta<typeof Chat> = {
     title: 'Components/Chat/Emoji Picker',

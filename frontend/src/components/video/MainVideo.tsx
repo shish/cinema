@@ -2,11 +2,11 @@ import { faPause, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { FAIcon } from '@shish2k/react-faicon';
 import { useContext, useEffect, useRef, useState } from 'react';
 
-import { ServerContext } from '../providers/server';
-import { SettingsContext } from '../providers/settings';
-import type { Movie, PlayingState } from '../types';
-import { HLSVideoElement } from './hls_video';
-import css from './main_video.module.scss';
+import { ServerContext } from '../../providers/server';
+import { SettingsContext } from '../../providers/settings';
+import type { Movie, PlayingState } from '../../types';
+import { HLSVideoElement } from './HlsVideo';
+import css from './MainVideo.module.scss';
 
 // Apparently we need to define the custom element here, it doesn't
 // work when done in hls_video.tsx o_O

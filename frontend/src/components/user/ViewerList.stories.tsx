@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
 import { expect } from 'storybook/test';
-import type { Viewer } from '../types';
-import { ViewerList } from './viewer_list';
-import css from './viewer_list.module.scss';
+import type { Viewer } from '../../types';
+import { ViewerList } from './ViewerList';
+import css from './ViewerList.module.scss';
 
 // Interactive wrapper component that maintains admin state
 function InteractiveViewerList({ viewers, initialAdmins }: { viewers: Viewer[]; initialAdmins: string[] }) {
@@ -22,7 +22,7 @@ function InteractiveViewerList({ viewers, initialAdmins }: { viewers: Viewer[]; 
 }
 
 const meta: Meta<typeof InteractiveViewerList> = {
-    title: 'Components/ViewerList',
+    title: 'Components/User/ViewerList',
     component: InteractiveViewerList,
     parameters: {
         layout: 'padded',

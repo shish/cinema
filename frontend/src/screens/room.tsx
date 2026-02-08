@@ -1,12 +1,7 @@
 import { faCircleInfo, faFilm, faGears, faShareFromSquare } from '@fortawesome/free-solid-svg-icons';
 import { FAIcon } from '@shish2k/react-faicon';
 import { useContext, useState } from 'react';
-import { Chat, type Commands } from '../components/chat';
-import { InfoMenu } from '../components/info';
-import { MainVideo } from '../components/main_video';
-import { MovieSelectDialog } from '../components/movie_select_dialog';
-import { SettingsMenu } from '../components/settings';
-import { ViewerList } from '../components/viewer_list';
+import { Chat, type Commands, InfoDialog, MainVideo, MovieSelectDialog, SettingsDialog, ViewerList } from '../components';
 import { RoomContext } from '../providers/room';
 import { ServerContext } from '../providers/server';
 import { SettingsContext } from '../providers/settings';
@@ -39,8 +34,8 @@ function Header({ isAdmin }: { isAdmin: boolean }) {
                 <FAIcon icon={faGears} onClick={() => setShowSettings(true)} />
             </header>
             {showCopiedNotification && <div className="notification">Room link copied to clipboard!</div>}
-            {showSettings && <SettingsMenu setShowSettings={setShowSettings} />}
-            {showInfo && <InfoMenu setShowInfo={setShowInfo} />}
+            {showSettings && <SettingsDialog setShowSettings={setShowSettings} />}
+            {showInfo && <InfoDialog setShowInfo={setShowInfo} />}
             {showMovieSelect && (
                 <MovieSelectDialog
                     selectedMovieId={room.video_state.video?.[0] || null}
