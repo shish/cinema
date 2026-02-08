@@ -33,6 +33,10 @@ export function MovieSelectDialog({
         setShowMovieSelect(false);
     };
 
+    function based(path: string): string {
+        return path.includes('://') ? path : `/files/${path}`;
+    }
+
     return (
         <div id="dialog_overlay">
             <div id="dialog" className={css.movieSelectDialog}>
@@ -76,7 +80,7 @@ export function MovieSelectDialog({
                                     className={`${css.movieItem} ${movieId === selectedMovieId ? css.selected : ''}`}
                                     onClick={() => handleMovieSelect(movieId)}
                                 >
-                                    <img src={`/files/${movie.thumbnail}`} alt={movie.title} />
+                                    <img src={based(movie.thumbnail)} alt={movie.title} />
                                     <div className={css.movieTitle} title={minititle(folder, movie.title)}>
                                         {minititle(folder, movie.title)}
                                     </div>

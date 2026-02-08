@@ -53,7 +53,7 @@ const createMovie = (id: string, title: string): Movie => ({
     title,
     video: `${id}/video.mp4`,
     subtitles: `${id}/subtitles.vtt`,
-    thumbnail: `https://via.placeholder.com/300x450/333/fff?text=${encodeURIComponent(title)}`,
+    thumbnail: `https://placecats.com/640/360`,
 });
 
 const singleFolderMovies: { [key: string]: Movie } = {

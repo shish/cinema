@@ -142,11 +142,7 @@ export function MainVideo({
         onSeek(movie.id, time);
     }
     function based(path: string): string {
-        // If path already has a protocol (like http:// or https://), return it as-is
-        if (path.includes('://')) {
-            return path;
-        }
-        return `/files/${path}`;
+        return path.includes('://') ? path : `/files/${path}`;
     }
 
     return (
