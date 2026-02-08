@@ -34,7 +34,7 @@ const mockMovie: Movie = {
     title: 'Big Buck Bunny',
     video: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
     subtitles: '',
-    thumbnail: 'https://via.placeholder.com/640x360/333/fff?text=Big+Buck+Bunny',
+    thumbnail: 'https://placecats.com/640/360',
 };
 
 // Mock callbacks
