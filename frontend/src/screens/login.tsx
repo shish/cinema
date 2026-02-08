@@ -3,11 +3,9 @@ import { FAIcon } from '@shish2k/react-faicon';
 import { useContext, useEffect, useState } from 'react';
 
 import { InfoMenu } from '../components/info';
-import { ServerContext } from '../providers/server';
 import { SettingsContext } from '../providers/settings';
 
 export function LoginScreen() {
-    const { loading } = useContext(ServerContext);
     const { user, setUser, room, setRoom } = useContext(SettingsContext);
     const [showInfo, setShowInfo] = useState(false);
     const [roomInput, setRoomInput] = useState<string>('');
@@ -60,9 +58,7 @@ export function LoginScreen() {
                         pattern="[A-Za-z0-9]{4}"
                         required={true}
                     />
-                    <button type="submit" disabled={loading}>
-                        {loading ? 'Loading...' : 'Join'}
-                    </button>
+                    <button type="submit">Join</button>
                 </form>
             </article>
             {showInfo && <InfoMenu setShowInfo={setShowInfo} />}
