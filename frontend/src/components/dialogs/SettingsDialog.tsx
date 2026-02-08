@@ -55,9 +55,12 @@ export function SettingsDialog({ setShowSettings }: { setShowSettings: (b: boole
                     <table>
                         <tbody>
                             <tr>
-                                <td>Show Chat</td>
+                                <td>
+                                    <label htmlFor="show-chat">Show Chat</label>
+                                </td>
                                 <td>
                                     <input
+                                        id="show-chat"
                                         checked={showChat}
                                         type={'checkbox'}
                                         onChange={(e) => setShowChat(e.target.checked)}
@@ -66,9 +69,12 @@ export function SettingsDialog({ setShowSettings }: { setShowSettings: (b: boole
                             </tr>
                             {document.body.requestFullscreen && (
                                 <tr>
-                                    <td>Fullscreen</td>
+                                    <td>
+                                        <label htmlFor="fullscreen">Fullscreen</label>
+                                    </td>
                                     <td>
                                         <input
+                                            id="fullscreen"
                                             checked={isFullscreen}
                                             type={'checkbox'}
                                             onChange={(_e) => {
@@ -83,9 +89,12 @@ export function SettingsDialog({ setShowSettings }: { setShowSettings: (b: boole
                                 </tr>
                             )}
                             <tr>
-                                <td>Show Subtitles</td>
+                                <td>
+                                    <label htmlFor="show-subtitles">Show Subtitles</label>
+                                </td>
                                 <td>
                                     <input
+                                        id="show-subtitles"
                                         checked={showSubs}
                                         type={'checkbox'}
                                         onChange={(e) => setShowSubs(e.target.checked)}
@@ -94,12 +103,15 @@ export function SettingsDialog({ setShowSettings }: { setShowSettings: (b: boole
                             </tr>
                             <tr>
                                 <td>
-                                    Show System
-                                    <br />
-                                    Messages
+                                    <label htmlFor="show-system">
+                                        Show System
+                                        <br />
+                                        Messages
+                                    </label>
                                 </td>
                                 <td>
                                     <input
+                                        id="show-system"
                                         checked={showSystem}
                                         type={'checkbox'}
                                         onChange={(e) => setShowSystem(e.target.checked)}

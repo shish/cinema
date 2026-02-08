@@ -15,7 +15,6 @@ const meta: Meta<typeof LoginScreen> = {
             },
         },
     },
-    tags: ['autodocs'],
     decorators: [
         (Story) => (
             <SettingsProvider>

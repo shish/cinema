@@ -41,7 +41,6 @@ const meta: Meta<typeof InteractiveMovieSelectDialog> = {
             },
         },
     },
-    tags: ['autodocs'],
 };
 
 export default meta;

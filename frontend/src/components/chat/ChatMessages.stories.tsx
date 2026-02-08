@@ -7,7 +7,7 @@ const meta: Meta<typeof Chat> = {
     component: Chat,
     parameters: {
         layout: 'padded',
-        height: '200px',
+        height: '150px',
         docs: {
             description: {
                 component:
