@@ -164,7 +164,7 @@ MAIN.room.nochat {
     }
 }
 MAIN.room.user {
-    #main_video {
+    #video {
         [data-role="controls"] {
             display: none;
         }
@@ -189,7 +189,7 @@ MAIN.room {
             / 1fr;
     }
 
-    #main_video {
+    #video {
         grid-area: video;
     }
 

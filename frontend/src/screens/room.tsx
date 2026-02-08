@@ -57,7 +57,7 @@ function Header({ isAdmin }: { isAdmin: boolean }) {
 export function RoomScreen() {
     const { movies, now } = useContext(ServerContext);
     const { room, send } = useContext(RoomContext);
-    const { showChat, user } = useContext(SettingsContext);
+    const { showChat, showSubs, user } = useContext(SettingsContext);
     const isAdmin = room.admins.includes(user);
     const { showSystem } = useContext(SettingsContext);
 
@@ -127,7 +127,11 @@ export function RoomScreen() {
                     key={room.video_state.video[0]}
                     movie={movies[room.video_state.video[0]]}
                     playingState={room.video_state.video[1]}
-                    send={send}
+                    onPause={(movieId: string, time: number) => send({ pause: [movieId, time] })}
+                    onPlay={(movieId: string, startedAt: number) => send({ play: [movieId, startedAt] })}
+                    onSeek={(movieId: string, time: number) => send({ pause: [movieId, time] })}
+                    now={now}
+                    showSubs={showSubs}
                 />
             ) : (
                 <div id="blackout" />
