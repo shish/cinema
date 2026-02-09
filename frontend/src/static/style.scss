@@ -141,15 +141,32 @@ MAIN.login {
             max-width: 30em;
             margin: auto;
         }
-
         INPUT[type="text"],
-        BUTTON,
-        SELECT {
+        BUTTON {
+            --grid-darker: oklch(from var(--grid) calc(l * 0.7) c h);
+            --grid-lighter: oklch(from var(--grid) calc(l * 1.0) c h);
+
             font-size: 2rem;
             padding: 0.5rem;
             width: 100%;
+            border: 2px solid var(--grid);
             border-radius: 0.5rem;
             margin: 0.5rem auto;
+            font-family: inherit;
+            background: #2b2a33;
+            outline: none;
+
+            &:focus {
+                border-color: var(--link);
+            }
+        }
+
+        INPUT[type="text"] {
+            border-color: var(--grid-darker) var(--grid-lighter) var(--grid-lighter) var(--grid-darker);
+        }
+
+        BUTTON {
+            border-color: var(--grid-lighter) var(--grid-darker) var(--grid-darker) var(--grid-lighter);
         }
     }
 }
