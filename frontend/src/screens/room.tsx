@@ -1,12 +1,15 @@
 import { faCircleInfo, faFilm, faGears, faShareFromSquare } from '@fortawesome/free-solid-svg-icons';
 import { FAIcon } from '@shish2k/react-faicon';
 import { useContext, useState } from 'react';
-import { Chat, type Commands } from '../components/chat';
-import { InfoMenu } from '../components/info';
-import { MainVideo } from '../components/main_video';
-import { MovieSelectDialog } from '../components/movie_select_dialog';
-import { SettingsMenu } from '../components/settings';
-import { ViewerList } from '../components/viewer_list';
+import {
+    Chat,
+    type Commands,
+    InfoDialog,
+    MainVideo,
+    MovieSelectDialog,
+    SettingsDialog,
+    ViewerList,
+} from '../components';
 import { RoomContext } from '../providers/room';
 import { ServerContext } from '../providers/server';
 import { SettingsContext } from '../providers/settings';
@@ -39,8 +42,8 @@ function Header({ isAdmin }: { isAdmin: boolean }) {
                 <FAIcon icon={faGears} onClick={() => setShowSettings(true)} />
             </header>
             {showCopiedNotification && <div className="notification">Room link copied to clipboard!</div>}
-            {showSettings && <SettingsMenu setShowSettings={setShowSettings} />}
-            {showInfo && <InfoMenu setShowInfo={setShowInfo} />}
+            {showSettings && <SettingsDialog setShowSettings={setShowSettings} />}
+            {showInfo && <InfoDialog setShowInfo={setShowInfo} />}
             {showMovieSelect && (
                 <MovieSelectDialog
                     selectedMovieId={room.video_state.video?.[0] || null}
@@ -62,7 +65,7 @@ function Header({ isAdmin }: { isAdmin: boolean }) {
 export function RoomScreen() {
     const { movies, now } = useContext(ServerContext);
     const { room, send } = useContext(RoomContext);
-    const { showChat, user } = useContext(SettingsContext);
+    const { showChat, showSubs, user } = useContext(SettingsContext);
     const isAdmin = room.admins.includes(user);
     const { showSystem } = useContext(SettingsContext);
 
@@ -132,10 +135,14 @@ export function RoomScreen() {
                     key={room.video_state.video[0]}
                     movie={movies[room.video_state.video[0]]}
                     playingState={room.video_state.video[1]}
-                    send={send}
+                    onPause={(movieId: string, time: number) => send({ pause: [movieId, time] })}
+                    onPlay={(movieId: string, startedAt: number) => send({ play: [movieId, startedAt] })}
+                    onSeek={(movieId: string, time: number) => send({ pause: [movieId, time] })}
+                    now={now}
+                    showSubs={showSubs}
                 />
             ) : (
-                <div className="blackout" />
+                <div id="blackout" />
             )}
             <Chat log={chatLog} users={[...new Set(room.viewers.map((v) => v.name))]} commands={commands} />
             <ViewerList viewers={room.viewers} admins={room.admins} send={send} />

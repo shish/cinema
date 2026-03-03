@@ -2,9 +2,10 @@ import { faRightFromBracket, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FAIcon } from '@shish2k/react-faicon';
 import { useContext, useEffect, useState } from 'react';
 
-import { SettingsContext } from '../providers/settings';
+import { SettingsContext } from '../../providers/settings';
+import css from './SettingsDialog.module.scss';
 
-export function SettingsMenu({ setShowSettings }: { setShowSettings: (b: boolean) => void }) {
+export function SettingsDialog({ setShowSettings }: { setShowSettings: (b: boolean) => void }) {
     const { showChat, setShowChat, showSystem, setShowSystem, showSubs, setShowSubs, setRoom } =
         useContext(SettingsContext);
     const [isFullscreen, setIsFullscreen] = useState(document.fullscreenElement !== null);
@@ -20,8 +21,8 @@ export function SettingsMenu({ setShowSettings }: { setShowSettings: (b: boolean
     }, []);
 
     return (
-        <div className={'dialog-overlay'}>
-            <div className={'dialog settings-dialog'}>
+        <div id="dialog_overlay">
+            <div id="dialog" className={css.settingsDialog}>
                 <h2>
                     <FAIcon
                         icon={faRightFromBracket}
@@ -54,9 +55,12 @@ export function SettingsMenu({ setShowSettings }: { setShowSettings: (b: boolean
                     <table>
                         <tbody>
                             <tr>
-                                <td>Show Chat</td>
+                                <td>
+                                    <label htmlFor="show-chat">Show Chat</label>
+                                </td>
                                 <td>
                                     <input
+                                        id="show-chat"
                                         checked={showChat}
                                         type={'checkbox'}
                                         onChange={(e) => setShowChat(e.target.checked)}
@@ -65,9 +69,12 @@ export function SettingsMenu({ setShowSettings }: { setShowSettings: (b: boolean
                             </tr>
                             {document.body.requestFullscreen && (
                                 <tr>
-                                    <td>Fullscreen</td>
+                                    <td>
+                                        <label htmlFor="fullscreen">Fullscreen</label>
+                                    </td>
                                     <td>
                                         <input
+                                            id="fullscreen"
                                             checked={isFullscreen}
                                             type={'checkbox'}
                                             onChange={(_e) => {
@@ -82,9 +89,12 @@ export function SettingsMenu({ setShowSettings }: { setShowSettings: (b: boolean
                                 </tr>
                             )}
                             <tr>
-                                <td>Show Subtitles</td>
+                                <td>
+                                    <label htmlFor="show-subtitles">Show Subtitles</label>
+                                </td>
                                 <td>
                                     <input
+                                        id="show-subtitles"
                                         checked={showSubs}
                                         type={'checkbox'}
                                         onChange={(e) => setShowSubs(e.target.checked)}
@@ -93,12 +103,15 @@ export function SettingsMenu({ setShowSettings }: { setShowSettings: (b: boolean
                             </tr>
                             <tr>
                                 <td>
-                                    Show System
-                                    <br />
-                                    Messages
+                                    <label htmlFor="show-system">
+                                        Show System
+                                        <br />
+                                        Messages
+                                    </label>
                                 </td>
                                 <td>
                                     <input
+                                        id="show-system"
                                         checked={showSystem}
                                         type={'checkbox'}
                                         onChange={(e) => setShowSystem(e.target.checked)}

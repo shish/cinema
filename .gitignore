@@ -18,3 +18,7 @@ dist
 
 # ide files
 .ropeproject
+
+# storybook
+*storybook.log
+storybook-static

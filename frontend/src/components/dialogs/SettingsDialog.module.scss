@@ -1,0 +1,14 @@
+.settingsDialog {
+    TABLE {
+        margin: auto;
+
+        TD:first-child {
+            text-align: right;
+            padding-right: 0.25rem;
+        }
+
+        TD:nth-child(2) {
+            text-align: left;
+        }
+    }
+}

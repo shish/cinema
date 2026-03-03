@@ -9,13 +9,15 @@
         "serve": "rsbuild dev",
         "format": "biome format --write",
         "preview": "rsbuild preview",
-        "test": "vitest",
-        "test:watch": "vitest --watch"
+        "test": "vitest --run",
+        "test:watch": "vitest --watch",
+        "storybook": "storybook dev -p 6006 --no-open",
+        "build-storybook": "storybook build"
     },
     "dependencies": {
         "@fortawesome/free-solid-svg-icons": "^7.0.1",
         "@khanacademy/simple-markdown": "^2",
-        "@shish2k/react-faicon": "^0.0.1",
+        "@shish2k/react-faicon": "^0.0.2",
         "@shish2k/react-use-servertime": "^0.0.6",
         "emoji-picker-react": "^4.17.4",
         "emojilib": "^4.0.2",
@@ -34,6 +36,10 @@
         "@types/react": "^18.3.3",
         "@types/react-dom": "^18.3.0",
         "typescript": "^5.9.2",
-        "vitest": "^4.0.18"
+        "vitest": "^4.0.18",
+        "storybook": "^10.2.7",
+        "storybook-react-rsbuild": "^3.2.2",
+        "@storybook/addon-a11y": "^10.2.7",
+        "@storybook/addon-docs": "^10.2.7"
     }
 }

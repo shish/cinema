@@ -2,7 +2,7 @@ import * as jsonpatch from 'jsonpatch';
 import { createContext, useContext, useRef, useState } from 'react';
 import useWebSocket from 'react-use-websocket';
 import type { RoomData } from '../types';
-import { SettingsContext } from './settings';
+import { ServerContext } from './server';
 
 export type RoomContextType = {
     room: RoomData;
@@ -32,6 +32,7 @@ export function RoomProvider({
     roomCode: string;
     children: React.ReactNode;
 }) {
+    const { movies } = useContext(ServerContext);
     const [room, setRoom] = useState<RoomData | null>(null);
     const lastRespRef = useRef<any>(null);
 
@@ -52,7 +53,7 @@ export function RoomProvider({
         retryOnError: true,
     });
 
-    if (room === null) {
+    if (room === null || Object.keys(movies).length === 0) {
         return (
             <main className="login">
                 <header>

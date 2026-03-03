@@ -1,0 +1,65 @@
+.video {
+    background: var(--blackout);
+    display: flex;
+    flex-direction: column;
+
+    // in landscape mode, we want to fit in the box that is left
+    // over after we have the header on top, the chat on the right,
+    // and the viewer list below
+    @media (orientation: landscape) {
+        // scaling a video to 100% of its container doesn't work when
+        // the container is flex-y or grid-y, but scaling a div to 100%
+        // of container, and then setting the video to "position: absolute;"
+        // within the div, seems ok...
+        .videoScaler {
+            flex: 1 1 auto;
+            width: 100%;
+            height: 100%;
+            position: relative;
+
+            VIDEO {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+            }
+        }
+    }
+    // in portrait mode, we want the video to be the width of the
+    // screen and other things can fit around it
+    @media (orientation: portrait) {
+        .videoScaler {
+            flex: 1 1 auto;
+            width: 100%;
+            VIDEO {
+                width: 100%;
+            }
+        }
+    }
+
+    .videoHint {
+        color: black;
+        background: #d44;
+        padding: 0.2em;
+        flex: 1 1 auto;
+    }
+
+    .controls {
+        flex: 1 1 auto;
+        display: flex;
+
+        INPUT {
+            flex: 1 1 auto;
+            min-width: 0px;
+        }
+
+        BUTTON {
+            flex: 0 0 auto;
+        }
+
+        SPAN {
+            flex: 0 0 auto;
+            align-self: center;
+            padding: 0 0.5rem;
+        }
+    }
+}

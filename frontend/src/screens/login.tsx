@@ -2,12 +2,10 @@ import { faCircleInfo, faCircleXmark } from '@fortawesome/free-solid-svg-icons';
 import { FAIcon } from '@shish2k/react-faicon';
 import { useContext, useEffect, useState } from 'react';
 
-import { InfoMenu } from '../components/info';
-import { ServerContext } from '../providers/server';
+import { InfoDialog } from '../components';
 import { SettingsContext } from '../providers/settings';
 
 export function LoginScreen() {
-    const { loading } = useContext(ServerContext);
     const { user, setUser, room, setRoom } = useContext(SettingsContext);
     const [showInfo, setShowInfo] = useState(false);
     const [roomInput, setRoomInput] = useState<string>('');
@@ -31,7 +29,7 @@ export function LoginScreen() {
     return (
         <main className="login">
             <header>
-                <FAIcon icon={faCircleInfo} onClick={() => setShowInfo(true)} />
+                <FAIcon icon={faCircleInfo} data-title="info" onClick={() => setShowInfo(true)} />
                 <h1>Join a Room</h1>
                 <FAIcon icon={faCircleXmark} style={{ opacity: 0 }} />
             </header>
@@ -46,6 +44,7 @@ export function LoginScreen() {
                         value={userInput}
                         autoComplete="off"
                         autoFocus={userInput.length === 0}
+                        spellCheck={false}
                         required={true}
                     />
                     <input
@@ -56,16 +55,15 @@ export function LoginScreen() {
                         value={roomInput}
                         placeholder="Enter Room Code"
                         autoComplete="off"
+                        spellCheck={false}
                         disabled={room !== null}
                         pattern="[A-Za-z0-9]{4}"
                         required={true}
                     />
-                    <button type="submit" disabled={loading}>
-                        {loading ? 'Loading...' : 'Join'}
-                    </button>
+                    <button type="submit">Join</button>
                 </form>
             </article>
-            {showInfo && <InfoMenu setShowInfo={setShowInfo} />}
+            {showInfo && <InfoDialog setShowInfo={setShowInfo} />}
         </main>
     );
 }

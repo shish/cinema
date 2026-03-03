@@ -1,11 +1,10 @@
 import { faPause, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { FAIcon } from '@shish2k/react-faicon';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-import { ServerContext } from '../providers/server';
-import { SettingsContext } from '../providers/settings';
-import type { Movie, PlayingState } from '../types';
-import { HLSVideoElement } from './hls_video';
+import type { Movie, PlayingState } from '../../types';
+import { HLSVideoElement } from './HlsVideo';
+import css from './MainVideo.module.scss';
 
 // Apparently we need to define the custom element here, it doesn't
 // work when done in hls_video.tsx o_O
@@ -20,15 +19,21 @@ function ts2hms(ts: number): string {
 export function MainVideo({
     movie,
     playingState,
-    send,
+    onPause,
+    onPlay,
+    onSeek,
+    now,
+    showSubs,
 }: {
     movie: Movie;
     playingState: PlayingState;
-    send: (data: any) => void;
+    onPause: (movieId: string, time: number) => void;
+    onPlay: (movieId: string, startedAt: number) => void;
+    onSeek: (movieId: string, time: number) => void;
+    now: number;
+    showSubs: boolean;
 }) {
     const hlsRef = useRef<HLSVideoElement>(null);
-    const { now } = useContext(ServerContext);
-    const { showSubs } = useContext(SettingsContext);
     const [currentTime, setCurrentTime] = useState<number>(0);
     const [duration, setDuration] = useState<number>(0);
     const [videoHint, setVideoHint] = useState<string | null>(null);
@@ -128,25 +133,28 @@ export function MainVideo({
     }, [showSubs]);
 
     function pause() {
-        send({ pause: [movie.id, currentTime] });
+        onPause(movie.id, currentTime);
     }
     function play() {
-        send({ play: [movie.id, now - currentTime] });
+        onPlay(movie.id, now - currentTime);
     }
     function seek(time: number) {
-        send({ pause: [movie.id, time] });
+        onSeek(movie.id, time);
+    }
+    function based(path: string): string {
+        return path.includes('://') ? path : `/files/${path}`;
     }
 
     return (
-        <div className="video">
-            <div className="videoScaler">
+        <div id="video" className={css.video}>
+            <div className={css.videoScaler}>
                 <hls-video
                     ref={hlsRef}
                     // use key to force reloading the video element when movie
                     // changes so that subtitle tracks are reloaded properly
                     key={movie.id}
-                    src={`/files/${movie.video}`}
-                    poster={`/files/${movie.thumbnail}`}
+                    src={based(movie.video)}
+                    poster={based(movie.thumbnail)}
                     plays-inline="true"
                     preload="metadata"
                     controls={`${!!videoHint}`}
@@ -154,18 +162,19 @@ export function MainVideo({
                     <track kind="captions" src={`/files/${movie.subtitles}`} default />
                 </hls-video>
             </div>
-            {videoHint && <div className="video_hint">{videoHint}</div>}
-            <form className="controls">
+            {videoHint && <div className={css.videoHint}>{videoHint}</div>}
+            <form className={css.controls} data-role="controls">
                 {playingState.playing ? (
-                    <button type="button" onClick={() => pause()}>
+                    <button title="Pause" type="button" onClick={() => pause()}>
                         <FAIcon icon={faPause} />
                     </button>
                 ) : (
-                    <button type="button" onClick={() => play()}>
+                    <button title="Play" type="button" onClick={() => play()}>
                         <FAIcon icon={faPlay} />
                     </button>
                 )}
                 <input
+                    title="Seek To"
                     id="seekbar"
                     type="range"
                     onChange={(e) => seek(e.target.valueAsNumber)}
