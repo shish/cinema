@@ -62,9 +62,9 @@ function SettingsDialogWrapper({
     }
 
     return (
-        <div style={{minHeight: '200px'}}>
-        <SettingsContext.Provider value={contextValue}>
-            <SettingsDialog setShowSettings={setShowSettings} />
+        <div style={{ minHeight: '200px' }}>
+            <SettingsContext.Provider value={contextValue}>
+                <SettingsDialog setShowSettings={setShowSettings} />
             </SettingsContext.Provider>
         </div>
     );
