@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, userEvent, within } from 'storybook/test';
 import { useState } from 'react';
+import { expect, userEvent, within } from 'storybook/test';
 import type { Movie } from '../../types';
 import { MovieSelectDialog } from './MovieSelectDialog';
 
@@ -158,7 +158,7 @@ export const SelectMovie: Story = {
         },
     },
     play: async ({ canvasElement }) => {
-        const canvas = within(canvasElement);
+        const _canvas = within(canvasElement);
 
         // Find all movie items
         const movieItems = canvasElement.querySelectorAll('[class*="movieItem"]');
@@ -245,7 +245,7 @@ export const CloseDialog: Story = {
         },
     },
     play: async ({ canvasElement }) => {
-        const canvas = within(canvasElement);
+        const _canvas = within(canvasElement);
 
         // Find the close icon (X button)
         const closeButton = canvasElement.querySelector('svg[data-icon="xmark"]')?.parentElement as HTMLElement;

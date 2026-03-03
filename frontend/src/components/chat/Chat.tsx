@@ -3,8 +3,8 @@ import EmojiPicker, { type EmojiClickData, Theme } from 'emoji-picker-react';
 import emojilib from 'emojilib';
 import { useEffect, useRef, useState } from 'react';
 import type { ChatMessage } from '../../types';
-import css from './Chat.module.scss';
 import { Username } from '../user/Username';
+import css from './Chat.module.scss';
 
 // Build emoji keyword-to-emoji mapping from emojilib
 // emojilib format: { "😀": ["keyword1", "keyword2", ...], ... }

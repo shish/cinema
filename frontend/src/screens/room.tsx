@@ -1,7 +1,15 @@
 import { faCircleInfo, faFilm, faGears, faShareFromSquare } from '@fortawesome/free-solid-svg-icons';
 import { FAIcon } from '@shish2k/react-faicon';
 import { useContext, useState } from 'react';
-import { Chat, type Commands, InfoDialog, MainVideo, MovieSelectDialog, SettingsDialog, ViewerList } from '../components';
+import {
+    Chat,
+    type Commands,
+    InfoDialog,
+    MainVideo,
+    MovieSelectDialog,
+    SettingsDialog,
+    ViewerList,
+} from '../components';
 import { RoomContext } from '../providers/room';
 import { ServerContext } from '../providers/server';
 import { SettingsContext } from '../providers/settings';

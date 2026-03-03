@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { expect, userEvent, within } from 'storybook/test';
-import { LoginScreen } from './login';
 import { SettingsProvider } from '../providers/settings';
+import { LoginScreen } from './login';
 
 const meta: Meta<typeof LoginScreen> = {
     title: 'Screens/Login',
@@ -39,25 +39,25 @@ export const Default: Story = {
 
 export const DisplayMobilePortrait: Story = {
     globals: {
-      viewport: { value: 'mobile1', isRotated: false },
+        viewport: { value: 'mobile1', isRotated: false },
     },
 };
 
 export const DisplayMobileLandscape: Story = {
     globals: {
-      viewport: { value: 'mobile1', isRotated: true },
+        viewport: { value: 'mobile1', isRotated: true },
     },
 };
 
 export const DisplayTablet: Story = {
     globals: {
-      viewport: { value: 'tablet', isRotated: true },
+        viewport: { value: 'tablet', isRotated: true },
     },
 };
 
 export const DisplayDesktop: Story = {
     globals: {
-      viewport: { value: 'desktop', isRotated: false },
+        viewport: { value: 'desktop', isRotated: false },
     },
 };
 
@@ -93,7 +93,7 @@ export const InteractiveLogin: Story = {
 
 export const InfoMenuDesktop: Story = {
     globals: {
-      viewport: { value: 'desktop', isRotated: false },
+        viewport: { value: 'desktop', isRotated: false },
     },
     parameters: {
         docs: {
@@ -122,7 +122,7 @@ export const InfoMenuDesktop: Story = {
 
 export const InfoMenuMobile: Story = {
     globals: {
-      viewport: { value: 'mobile1', isRotated: false },
+        viewport: { value: 'mobile1', isRotated: false },
     },
     parameters: {
         docs: {
@@ -132,7 +132,7 @@ export const InfoMenuMobile: Story = {
         },
     },
     play: async ({ canvasElement }) => {
-        const canvas = within(canvasElement);
+        const _canvas = within(canvasElement);
 
         // Find and click the info icon
         const infoIcon = canvasElement.querySelector('[data-title="info"]') as HTMLElement;
