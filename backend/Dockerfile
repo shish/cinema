@@ -1,4 +1,4 @@
-FROM rust:1.87 AS build-backend
+FROM rust:1.94 AS build-backend
 COPY Cargo.toml Cargo.lock /app/
 WORKDIR /app
 RUN mkdir src && echo "fn main() {println!(\"stub\")}" > /app/src/main.rs && cargo build --release && rm -rf src target/release/deps/cinema*
