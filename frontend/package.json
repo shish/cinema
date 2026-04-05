@@ -17,8 +17,8 @@
     "dependencies": {
         "@fortawesome/free-solid-svg-icons": "^7.0.1",
         "@khanacademy/simple-markdown": "^2",
-        "@shish2k/react-faicon": "^0.0.2",
-        "@shish2k/react-use-servertime": "^0.0.6",
+        "@shish2k/react-faicon": "^0.1.0",
+        "@shish2k/react-use-servertime": "^0.1.0",
         "emoji-picker-react": "^4.17.4",
         "emojilib": "^4.0.2",
         "hls.js": "^1.6.15",
