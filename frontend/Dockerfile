@@ -1,4 +1,4 @@
-FROM node:24 AS build-frontend
+FROM node:25 AS build-frontend
 COPY package.json package-lock.json rsbuild.config.ts tsconfig.json /app/
 WORKDIR /app
 RUN npm install
