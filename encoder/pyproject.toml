@@ -14,7 +14,7 @@ dependencies = [
 dev = [
     "mypy>=1.20.2",
     "pytest>=9.0.3",
-    "ruff>=0.15.10",
+    "ruff>=0.15.12",
     "types-tqdm>=4.67.3.20260408",
 ]
 
