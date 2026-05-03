@@ -19,9 +19,9 @@
         "@khanacademy/simple-markdown": "^2",
         "@shish2k/react-faicon": "^0.1.0",
         "@shish2k/react-use-servertime": "^0.1.0",
-        "emoji-picker-react": "^4.17.4",
-        "emojilib": "^4.0.2",
-        "hls.js": "^1.6.15",
+        "emoji-picker-react": "^4.19.1",
+        "emojilib": "^4.0.3",
+        "hls.js": "^1.6.16",
         "jsonpatch": "^3.1.0",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
@@ -29,17 +29,17 @@
         "usehooks-ts": "^3.1.1"
     },
     "devDependencies": {
-        "@biomejs/biome": "^2.4.11",
+        "@biomejs/biome": "^2.4.14",
         "@rsbuild/core": "^2.0.3",
         "@rsbuild/plugin-react": "^2.0.0",
-        "@rsbuild/plugin-sass": "^1.5.1",
+        "@rsbuild/plugin-sass": "^1.5.2",
         "@types/react": "^18.3.3",
         "@types/react-dom": "^18.3.0",
-        "typescript": "^6.0.2",
-        "vitest": "^4.1.4",
-        "storybook": "^10.3.5",
+        "typescript": "^6.0.3",
+        "vitest": "^4.1.5",
+        "storybook": "^10.3.6",
         "storybook-react-rsbuild": "^3.3.3",
-        "@storybook/addon-a11y": "^10.3.5",
-        "@storybook/addon-docs": "^10.3.5"
+        "@storybook/addon-a11y": "^10.3.6",
+        "@storybook/addon-docs": "^10.3.6"
     }
 }
