@@ -23,7 +23,7 @@
         "emojilib": "^4.0.3",
         "hls.js": "^1.6.16",
         "jsonpatch": "^3.1.0",
-        "react": "^18.3.1",
+        "react": "^19.2.5",
         "react-dom": "^18.3.1",
         "react-use-websocket": "^4.13.0",
         "usehooks-ts": "^3.1.1"
@@ -33,7 +33,7 @@
         "@rsbuild/core": "^2.0.3",
         "@rsbuild/plugin-react": "^2.0.0",
         "@rsbuild/plugin-sass": "^1.5.2",
-        "@types/react": "^18.3.3",
+        "@types/react": "^19.2.14",
         "@types/react-dom": "^18.3.0",
         "typescript": "^6.0.3",
         "vitest": "^4.1.5",
