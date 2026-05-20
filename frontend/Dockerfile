@@ -6,4 +6,4 @@ COPY src /app/src
 RUN npm run build
 EXPOSE 3000
 ENV CINEMA_BACKEND=http://backend:2001
-CMD ["npm", "run", "preview"]
+CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0"]
