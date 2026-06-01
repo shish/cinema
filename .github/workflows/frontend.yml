@@ -43,8 +43,9 @@ jobs:
     needs:
       - build
     steps:
-      - uses: shish/watchtower-update@main
-        with:
-          url: https://watchtower.shish.io/v1/update
-          api_token: ${{ secrets.WATCHTOWER_TOKEN }}
-          images: shish2k/cinema-frontend
+      - name: Deploy
+        run: |
+          IMG="${{ vars.DOCKER_USERNAME }}/cinema-frontend"
+          curl -sS -X POST \
+            -H "Authorization: Bearer ${{ secrets.WATCHTOWER_TOKEN }}" \
+            "https://watchtower.shish.io/v1/update?images=$IMG"
