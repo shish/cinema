@@ -29,17 +29,17 @@
         "usehooks-ts": "^3.1.1"
     },
     "devDependencies": {
-        "@biomejs/biome": "^2.4.14",
-        "@rsbuild/core": "^2.0.3",
-        "@rsbuild/plugin-react": "^2.0.0",
-        "@rsbuild/plugin-sass": "^1.5.2",
+        "@biomejs/biome": "^2.4.16",
+        "@rsbuild/core": "^2.0.10",
+        "@rsbuild/plugin-react": "^2.0.1",
+        "@rsbuild/plugin-sass": "^1.5.3",
         "@types/react": "^18.3.3",
         "@types/react-dom": "^18.3.0",
         "typescript": "^6.0.3",
-        "vitest": "^4.1.5",
-        "storybook": "^10.3.6",
-        "storybook-react-rsbuild": "^3.3.3",
-        "@storybook/addon-a11y": "^10.3.6",
-        "@storybook/addon-docs": "^10.3.6"
+        "vitest": "^4.1.8",
+        "storybook": "^10.4.2",
+        "storybook-react-rsbuild": "^3.3.4",
+        "@storybook/addon-a11y": "^10.4.2",
+        "@storybook/addon-docs": "^10.4.2"
     }
 }
