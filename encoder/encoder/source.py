@@ -19,7 +19,7 @@ class Source:
             lambda: self._get_duration(),
         )
 
-    def _get_duration(self) -> float:
+    def _get_duration(self) -> float | None:
         try:
             result = subprocess.run(
                 [
@@ -37,6 +37,5 @@ class Source:
                 text=True,
             )
             return float(result.stdout.strip())
-        except Exception as e:
-            print(f"Error probing {self.path}: {e}")
-            return 0.0
+        except Exception:
+            return None
