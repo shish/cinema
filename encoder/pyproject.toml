@@ -18,7 +18,7 @@ dev = [
     "types-tqdm>=4.67.3.20260518",
 ]
 
-[tool.ul]
+[tool.uv]
 package = true
 
 [project.scripts]

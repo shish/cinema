@@ -13,18 +13,28 @@ class Movie:
         source: Path,
         processed: Path,
     ) -> None:
+        # pull this out first so that we can sneakily hijack video.sources
+        # (otherwise we'd need to figure out for ourselves which sources
+        # have a duration)
+        video = EncodeVideo(sources, source, processed)
+
         self.id = id
-        self.title = sources[0].path.stem
+        self.title = video.sources[0].path.stem
+        self.duration = video.sources[0].duration
         self.source = source
         self.processed = processed
         self.targets: dict[str, Encoder] = {
-            "video": EncodeVideo(sources, source, processed),
+            "video": video,
             "subtitles": EncodeSubs(sources, source, processed),
             "thumbnail": EncodeThumb(sources, source, processed),
         }
 
     def to_json(self) -> dict[str, t.Any]:
-        d = {"id": self.id, "title": self.title}
+        d = {
+            "id": self.id,
+            "title": self.title,
+            "duration": self.duration,
+        }
         for n, tgt in self.targets.items():
             d[n] = str(tgt.get_output_path().relative_to(self.processed))
         return d
