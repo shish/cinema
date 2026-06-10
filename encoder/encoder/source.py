@@ -1,8 +1,8 @@
 import hashlib
-import subprocess
 from pathlib import Path
 
 from .cache import Cache
+from .encoder import ffprobe
 
 
 class Source:
@@ -21,21 +21,7 @@ class Source:
 
     def _get_duration(self) -> float | None:
         try:
-            result = subprocess.run(
-                [
-                    "ffprobe",
-                    "-v",
-                    "error",
-                    "-show_entries",
-                    "format=duration",
-                    "-of",
-                    "default=noprint_wrappers=1:nokey=1",
-                    str(self.path),
-                ],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-            )
-            return float(result.stdout.strip())
+            ffprobe_json = ffprobe(self.path)
+            return float(ffprobe_json["format"]["duration"])
         except Exception:
             return None
