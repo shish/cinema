@@ -76,6 +76,16 @@
                 border-radius: 0 0 0.5rem 0.5rem;
                 color: var(--text);
             }
+            .movieDuration {
+                background: rgba(0, 0, 0, 0.7);
+                padding: 0.25rem;
+                position: absolute;
+                top: 0.25rem;
+                right: 0.25rem;
+                border-radius: 0.5rem;
+                color: var(--text);
+                font-size: 0.75rem;
+            }
         }
     }
 }

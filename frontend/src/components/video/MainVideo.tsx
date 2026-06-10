@@ -3,6 +3,7 @@ import { FAIcon } from '@shish2k/react-faicon';
 import { useEffect, useRef, useState } from 'react';
 
 import type { Movie, PlayingState } from '../../types';
+import { ts2hms } from '../../utils';
 import { HLSVideoElement } from './HlsVideo';
 import css from './MainVideo.module.scss';
 
@@ -10,10 +11,6 @@ import css from './MainVideo.module.scss';
 // work when done in hls_video.tsx o_O
 if (!window.customElements.get('hls-video')) {
     window.customElements.define('hls-video', HLSVideoElement);
-}
-
-function ts2hms(ts: number): string {
-    return new Date(ts * 1000).toISOString().substring(11, 19);
 }
 
 export function MainVideo({

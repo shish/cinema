@@ -50,6 +50,7 @@ type Story = StoryObj<typeof InteractiveMovieSelectDialog>;
 const createMovie = (id: string, title: string): Movie => ({
     id,
     title,
+    duration: 120, // Mock duration
     video: `${id}/video.mp4`,
     subtitles: `${id}/subtitles.vtt`,
     thumbnail: `https://placecats.com/640/360`,

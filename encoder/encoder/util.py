@@ -16,8 +16,7 @@ def write_if_changed(path: Path, data: str) -> None:
     except Exception:
         old_data = None
     if data != old_data:
-        with path.open("w", encoding="utf-8") as f:
-            f.write(data)
+        path.write_text(data, encoding="utf-8")
 
 
 def get_lang(video: Path, subtitle: Path) -> str:

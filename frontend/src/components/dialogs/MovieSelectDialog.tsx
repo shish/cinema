@@ -3,7 +3,7 @@ import { FAIcon } from '@shish2k/react-faicon';
 import { useSessionStorage } from 'usehooks-ts';
 
 import type { Movie } from '../../types';
-import { minititle } from '../../utils';
+import { minititle, ts2hms } from '../../utils';
 import css from './MovieSelectDialog.module.scss';
 
 export function MovieSelectDialog({
@@ -81,6 +81,7 @@ export function MovieSelectDialog({
                                     onClick={() => handleMovieSelect(movieId)}
                                 >
                                     <img src={based(movie.thumbnail)} alt={movie.title} />
+                                    <div className={css.movieDuration}>{movie.duration ? ts2hms(movie.duration) : '??:??'}</div>
                                     <div className={css.movieTitle} title={minititle(folder, movie.title)}>
                                         {minititle(folder, movie.title)}
                                     </div>
