@@ -6,6 +6,7 @@ from inotify.adapters import InotifyTree
 
 VIDEO_EXTS = {".mp4", ".mkv", ".avi", ".mov", ".webm"}
 SUBTITLE_EXTS = {".srt", ".vtt"}
+IMAGE_EXTS = {".jpg", ".jpeg", ".png"}
 
 log = logging.getLogger(__name__)
 

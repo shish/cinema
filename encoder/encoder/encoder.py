@@ -10,7 +10,7 @@ from pathlib import Path
 from tqdm import tqdm
 
 from .source import Source
-from .util import SUBTITLE_EXTS, VIDEO_EXTS
+from .util import IMAGE_EXTS, SUBTITLE_EXTS, VIDEO_EXTS
 
 log = logging.getLogger(__name__)
 
@@ -224,9 +224,9 @@ class EncodeVideo(Encoder):
 
 class EncodeSubs(Encoder):
     def find_relevant_sources(self, sources: list[Source]) -> list[Source]:
-        return [s for s in sources if s.path.suffix in SUBTITLE_EXTS] or [
-            s for s in sources if s.path.suffix in VIDEO_EXTS
-        ]
+        subtitles = [s for s in sources if s.path.suffix in SUBTITLE_EXTS]
+        videos = [s for s in sources if s.path.suffix in VIDEO_EXTS]
+        return subtitles or videos
 
     def get_output_path(self) -> Path:
         return self.processed / Path(self.hash).with_suffix(".vtt")
@@ -246,7 +246,9 @@ class EncodeSubs(Encoder):
 
 class EncodeThumb(Encoder):
     def find_relevant_sources(self, sources: list[Source]) -> list[Source]:
-        return [s for s in sources if s.path.suffix in VIDEO_EXTS]
+        images = [s for s in sources if s.path.suffix in IMAGE_EXTS]
+        videos = [s for s in sources if s.path.suffix in VIDEO_EXTS]
+        return images or videos
 
     def get_output_path(self) -> Path:
         return self.processed / Path(self.hash).with_suffix(".jpg")
