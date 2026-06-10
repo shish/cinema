@@ -1,3 +1,4 @@
+import json
 import logging
 from pathlib import Path
 
@@ -9,6 +10,21 @@ SUBTITLE_EXTS = {".srt", ".vtt"}
 IMAGE_EXTS = {".jpg", ".jpeg", ".png"}
 
 log = logging.getLogger(__name__)
+
+
+def ffprobe(path_in: Path) -> dict:
+    # fmt: off
+    args = [
+        "ffprobe",
+        "-v", "error",
+        "-select_streams", "v:0",
+        "-show_streams",
+        "-show_format",
+        "-of", "json",
+        str(path_in),
+    ]
+    # fmt: on
+    return json.loads(subprocess.check_output(args).decode().strip())
 
 
 def write_if_changed(path: Path, data: str) -> None:

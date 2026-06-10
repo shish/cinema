@@ -2,7 +2,7 @@ import hashlib
 from pathlib import Path
 
 from .cache import Cache
-from .encoder import ffprobe
+from .util import ffprobe
 
 
 class Source:

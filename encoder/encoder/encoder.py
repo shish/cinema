@@ -1,5 +1,4 @@
 import hashlib
-import json
 import logging
 import re
 import shlex
@@ -10,24 +9,9 @@ from pathlib import Path
 from tqdm import tqdm
 
 from .source import Source
-from .util import IMAGE_EXTS, SUBTITLE_EXTS, VIDEO_EXTS
+from .util import IMAGE_EXTS, SUBTITLE_EXTS, VIDEO_EXTS, ffprobe
 
 log = logging.getLogger(__name__)
-
-
-def ffprobe(path_in: Path) -> dict:
-    # fmt: off
-    args = [
-        "ffprobe",
-        "-v", "error",
-        "-select_streams", "v:0",
-        "-show_streams",
-        "-show_format",
-        "-of", "json",
-        str(path_in),
-    ]
-    # fmt: on
-    return json.loads(subprocess.check_output(args).decode().strip())
 
 
 class Encoder(ABC):
