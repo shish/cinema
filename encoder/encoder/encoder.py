@@ -120,8 +120,7 @@ class EncodeVideo(Encoder):
     def encode(self) -> None:
         source_path = self.sources[0].path
         output_path = self.get_output_path().parent
-
-        path_stream = output_path / "stream_%v"
+        output_path.mkdir(parents=True, exist_ok=True)
 
         ffprobe_json = ffprobe(source_path)
         input_height = ffprobe_json["streams"][0]["height"]
@@ -191,16 +190,16 @@ class EncodeVideo(Encoder):
             "-f", "hls",
             "-hls_time", "2",
             "-hls_playlist_type", "vod",
-            "-hls_flags", "independent_segments",
+            "-hls_flags", "single_file",
             "-hls_segment_type", "mpegts",
-            "-hls_segment_filename", path_stream / "data%04d.ts",
+            "-hls_segment_filename", output_path / "stream_%v.ts",
             "-master_pl_name", "movie.m3u8", #path_index.name,
         ])
 
         cmd.extend([
             "-var_stream_map",
             " ".join(f"v:{n},a:{n}" for n in range(len(active_fmts))),
-            path_stream / "index.m3u8",
+            output_path / "stream_%v.m3u8",
         ])
 
         self.run(cmd, duration=input_duration)
