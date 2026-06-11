@@ -249,7 +249,7 @@ class EncodeThumb(Encoder):
         cmd = self.FFMPEG_BASE + [
             "-ss", f"{start_time:.3f}",
             "-i", source_path,
-            "-filter:v", "thumbnail",
+            "-filter:v", "thumbnail,scale=w=-1:h=360",
             "-frames:v", "1",
             "-update", "true",
             "-y",
