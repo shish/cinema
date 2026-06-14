@@ -23,6 +23,7 @@ class Args(Tap):
     threads: int = 1  # Number of parallel encode jobs
     cmd: t.Literal["all", "encode", "export", "status", "cleanup"]  # Run one step of the process
     match: str | None  # Only encode files matching this pattern
+    todo: bool = False
     # fmt: on
 
     def configure(self):
@@ -49,7 +50,7 @@ def main():
             if args.cmd in {"all", "export"} and not args.match:
                 db.export()
             if args.cmd in {"status"}:
-                db.status()
+                db.status(args.todo)
             if args.cmd in {"cleanup"} and not args.match:
                 db.cleanup(args.delete)
             cache.save()

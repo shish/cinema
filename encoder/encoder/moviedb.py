@@ -75,7 +75,7 @@ class MovieDB:
         output_file = self.processed / "movies.json"
         write_if_changed(output_file, json.dumps(data, indent=4))
 
-    def status(self) -> None:
+    def status(self, todo: bool = False) -> None:
         GREEN = "\033[92m"
         RED = "\033[91m"
         ENDC = "\033[0m"
@@ -83,11 +83,14 @@ class MovieDB:
         FAIL = RED + "✘" + ENDC
         for m in self.movies:
             line = ""
+            all_ok = True
             for name, tgt in m.targets.items():
+                all_ok = all_ok and tgt.is_encoded()
                 status = OK if tgt.is_encoded() else FAIL
                 line += f"{name[:3]}={status} "
             line += f"id={m.id}"
-            print(line)
+            if (todo and not all_ok) or (not todo):
+                print(line)
 
     def cleanup(self, delete: bool) -> None:
         # get a list of output files for each movie
