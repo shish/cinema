@@ -22,4 +22,4 @@ Accepts commands, authenticates, broadcasts state updates ([Docs](./backend/READ
 
 ## Encoder
 
-Monitors a folder for new video files and encodes them into HLS format with metadata for use with Cinema Viewer ([Docs](./encode/README.md))
+Monitors a folder for new video files and encodes them into HLS format with metadata for use with Cinema Viewer ([Docs](./encoder/README.md))

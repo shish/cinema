@@ -11,12 +11,6 @@ services:
     volumes:
       - ./media/processed:/media/processed:ro
 
-  mqtt:
-    build: ./mqtt
-    ports:
-      - "1883:1883"
-      - "9001:9001"
-
   encoder:
     build: ./encoder
     user: "1000"
