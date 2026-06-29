@@ -44,6 +44,7 @@
             cursor: pointer;
             border: 2px solid var(--grid);
             border-radius: 0.5rem;
+            overflow: hidden;
             transition: border-color 0.2s;
             aspect-ratio: 16/9;
             position: relative;
@@ -58,7 +59,6 @@
             }
 
             IMG {
-                border-radius: 0.5rem 0.5rem 0 0;
                 width: 100%;
                 height: 100%;
                 object-fit: cover;
@@ -73,7 +73,6 @@
                 position: absolute;
                 bottom: 0;
                 width: 100%;
-                border-radius: 0 0 0.5rem 0.5rem;
                 color: var(--text);
             }
             .movieDuration {
