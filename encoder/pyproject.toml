@@ -6,16 +6,16 @@ readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "inotify>=0.2.12",
-    "tqdm>=4.67.3",
+    "tqdm>=4.68.3",
     "typed-argument-parser>=1.12.0",
 ]
 
 [dependency-groups]
 dev = [
     "mypy>=2.1.0",
-    "pytest>=9.0.3",
-    "ruff>=0.15.15",
-    "types-tqdm>=4.67.3.20260518",
+    "pytest>=9.1.1",
+    "ruff>=0.15.20",
+    "types-tqdm>=4.68.0.20260608",
 ]
 
 [tool.uv]
