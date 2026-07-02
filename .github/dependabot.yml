@@ -9,37 +9,25 @@ updates:
   schedule:
     interval: monthly
   groups:
-    minor-bumps:
-      applies-to: version-updates
+    bumps:
       patterns:
       - '*'
-      update-types:
-      - minor
-      - patch
 - package-ecosystem: pip
   directory: /encoder
   schedule:
     interval: monthly
   groups:
-    minor-bumps:
-      applies-to: version-updates
+    bumps:
       patterns:
       - '*'
-      update-types:
-      - minor
-      - patch
 - package-ecosystem: cargo
   directory: /backend
   schedule:
     interval: monthly
   groups:
-    minor-bumps:
-      applies-to: version-updates
+    bumps:
       patterns:
       - '*'
-      update-types:
-      - minor
-      - patch
 - package-ecosystem: docker
   directory: /backend
   schedule:
