@@ -1,10 +1,14 @@
 version: 2
 updates:
 - package-ecosystem: github-actions
+  assignees:
+    - shish
   directory: /
   schedule:
     interval: monthly
 - package-ecosystem: npm
+  assignees:
+    - shish
   directory: /frontend
   schedule:
     interval: monthly
@@ -13,6 +17,8 @@ updates:
       patterns:
       - '*'
 - package-ecosystem: pip
+  assignees:
+    - shish
   directory: /encoder
   schedule:
     interval: monthly
@@ -21,6 +27,8 @@ updates:
       patterns:
       - '*'
 - package-ecosystem: cargo
+  assignees:
+    - shish
   directory: /backend
   schedule:
     interval: monthly
@@ -29,14 +37,20 @@ updates:
       patterns:
       - '*'
 - package-ecosystem: docker
+  assignees:
+    - shish
   directory: /backend
   schedule:
     interval: monthly
 - package-ecosystem: docker
+  assignees:
+    - shish
   directory: /encoder
   schedule:
     interval: monthly
 - package-ecosystem: docker
+  assignees:
+    - shish
   directory: /frontend
   schedule:
     interval: monthly
