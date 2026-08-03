@@ -16,7 +16,7 @@
     },
     "dependencies": {
         "@fortawesome/free-solid-svg-icons": "^7.0.1",
-        "@khanacademy/simple-markdown": "^2",
+        "@khanacademy/simple-markdown": "^3",
         "@shish2k/react-faicon": "^0.1.0",
         "@shish2k/react-use-servertime": "^0.1.0",
         "emoji-picker-react": "^4.19.1",
