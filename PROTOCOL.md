@@ -1,6 +1,8 @@
 ## Protocol
 
-* User checks `/files/movies.json` to get a list of movies
+* User connects to `/api/movies` to get a Server-Sent Events stream of available movies
+  * The server immediately sends the current `movies.json` content
+  * The server pushes updates whenever `movies.json` changes
 * User connects to `/api/room?room=...&user=...&sess=...` to get a websocket connection
   * `room` -- room code, a new room will be created if one doesn't exist
   * `user` -- username, any arbitrary text

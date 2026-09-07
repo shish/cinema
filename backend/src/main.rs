@@ -2,23 +2,27 @@ use axum::body::Bytes;
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
 use axum::extract::Query;
 use axum::extract::State;
+
 use axum::{response::IntoResponse, routing::get, Json, Router};
 use clap::Parser;
 use futures::stream::StreamExt;
 use futures::SinkExt;
 use serde::Deserialize;
 use std::collections::HashMap;
+
 use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::{Duration, SystemTime};
 use tokio::net::TcpListener;
-use tokio::sync::RwLock;
+use tokio::sync::{broadcast, RwLock};
+
 use tower_http::{services::ServeDir, trace::TraceLayer};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 mod errs;
 mod room;
+mod watcher;
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct LoginArgs {
@@ -30,6 +34,7 @@ pub struct LoginArgs {
 struct AppState {
     rooms: RwLock<HashMap<String, Arc<RwLock<room::Room>>>>,
     movie_dir: PathBuf,
+    movies_updated: broadcast::Sender<String>,
 }
 
 // A website for watching movies together (backend)
@@ -54,13 +59,27 @@ async fn main() -> anyhow::Result<()> {
         .init();
     let rooms = HashMap::new();
 
+    // Create broadcast channel for movie updates
+    let (movies_tx, _movies_rx) = broadcast::channel::<String>(100);
+
     let app_state = Arc::new(AppState {
         rooms: RwLock::new(rooms),
-        movie_dir: args.movies,
+        movie_dir: args.movies.clone(),
+        movies_updated: movies_tx.clone(),
     });
+
+    // Spawn file watcher in background
+    let movie_dir = args.movies.clone();
+    tokio::spawn(async move {
+        if let Err(e) = watcher::watch_movies_file(movie_dir, movies_tx).await {
+            tracing::error!("File watcher error: {}", e);
+        }
+    });
+
     let app = Router::new()
         .route("/api/time", get(handle_time))
         .route("/api/room", get(handle_room))
+        .route("/api/movies", get(handle_movies))
         .nest_service("/files/", ServeDir::new(&app_state.movie_dir))
         .layer(TraceLayer::new_for_http())
         .with_state(app_state);
@@ -175,7 +194,7 @@ async fn _room_websocket_loop(
                 sender.send(Message::Ping(Bytes::new())).await?;
             },
             // Receive messages from client and send them to broadcast subscribers.
-            state = receiver.next() => {
+            state = futures::StreamExt::next(&mut receiver) => {
                 let Some(msg) = state else { return Ok(()) };
                 if let Message::Text(msg) = msg? {
                     let cmd = serde_json::from_str(&msg)?;
@@ -196,6 +215,52 @@ async fn _room_websocket_loop(
                 };
                 maybe_last_state = Some(state);
                 sender.send(Message::Text(msg.into())).await?;
+            },
+        }
+    }
+}
+
+async fn handle_movies(
+    ws: WebSocketUpgrade,
+    State(state): State<Arc<AppState>>,
+) -> axum::response::Result<impl IntoResponse, errs::CustomError> {
+    Ok(ws.on_upgrade(|socket| movies_websocket(socket, state)))
+}
+
+#[tracing::instrument(name = "movies", skip_all)]
+async fn movies_websocket(socket: WebSocket, state: Arc<AppState>) {
+    _movies_websocket(socket, state)
+        .await
+        .unwrap_or_else(|e| tracing::error!("Error: {}", e));
+}
+
+async fn _movies_websocket(socket: WebSocket, state: Arc<AppState>) -> anyhow::Result<()> {
+    let (mut sender, mut receiver) = socket.split();
+
+    // Read and send initial movies.json content
+    let movies_json = state.movie_dir.join("movies.json");
+    let initial_content = tokio::fs::read_to_string(&movies_json).await?;
+    sender.send(Message::Text(initial_content.into())).await?;
+
+    // Subscribe to updates
+    let mut rx = state.movies_updated.subscribe();
+
+    loop {
+        tokio::select! {
+            // Keep connection alive
+            _ = tokio::time::sleep(Duration::from_secs(30)) => {
+                sender.send(Message::Ping(Bytes::new())).await?;
+            },
+            // Handle client messages (client shouldn't send any, but we need to detect disconnection)
+            msg = futures::StreamExt::next(&mut receiver) => {
+                if msg.is_none() {
+                    return Ok(());
+                }
+            },
+            // Receive broadcast updates and send to client
+            content = rx.recv() => {
+                let content = content?;
+                sender.send(Message::Text(content.into())).await?;
             },
         }
     }
