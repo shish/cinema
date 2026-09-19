@@ -7,6 +7,7 @@ from tap import Tap
 from .cache import Cache
 from .moviedb import MovieDB
 from .util import wait_for_changes
+from .verify import verify_movies
 
 log = logging.getLogger(__name__)
 
@@ -21,7 +22,7 @@ class Args(Tap):
     debug: bool = False  # Enable debug logging
     delete: bool = False  # Actually delete files during cleanup
     threads: int = 1  # Number of parallel encode jobs
-    cmd: t.Literal["all", "encode", "export", "status", "cleanup"]  # Run one step of the process
+    cmd: t.Literal["all", "encode", "export", "status", "cleanup", "verify"]  # Run one step of the process
     match: str | None  # Only encode files matching this pattern
     todo: bool = False
     # fmt: on
@@ -53,6 +54,8 @@ def main():
                 db.status(args.todo)
             if args.cmd in {"cleanup"} and not args.match:
                 db.cleanup(args.delete)
+            if args.cmd in {"verify"}:
+                verify_movies(db.movies)
             cache.save()
     except KeyboardInterrupt:
         log.info("Exiting on user request")
