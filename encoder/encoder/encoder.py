@@ -1,8 +1,12 @@
 import hashlib
 import logging
+import os
 import re
 import shlex
+import shutil
+import socket
 import subprocess
+import time
 from abc import ABC, abstractmethod
 from pathlib import Path
 
@@ -119,8 +123,14 @@ class EncodeVideo(Encoder):
     # fmt: off
     def encode(self) -> None:
         source_path = self.sources[0].path
-        output_path = self.get_output_path().parent
-        output_path.mkdir(parents=True, exist_ok=True)
+        final_output_path = self.get_output_path().parent
+        temp_suffix = f".tmp.{socket.gethostname()}.{time.time_ns()}.{os.getpid()}"
+        temp_output_path = final_output_path.with_name(final_output_path.name + temp_suffix)
+        
+        # Clean up any leftover temp directory from a previous failed run
+        if temp_output_path.exists():
+            shutil.rmtree(temp_output_path)
+        temp_output_path.mkdir(parents=True, exist_ok=True)
 
         ffprobe_json = ffprobe(source_path)
         input_height = ffprobe_json["streams"][0]["height"]
@@ -192,17 +202,27 @@ class EncodeVideo(Encoder):
             "-hls_playlist_type", "vod",
             "-hls_flags", "single_file",
             "-hls_segment_type", "mpegts",
-            "-hls_segment_filename", output_path / "stream_%v.ts",
+            "-hls_segment_filename", temp_output_path / "stream_%v.ts",
             "-master_pl_name", "movie.m3u8", #path_index.name,
         ])
 
         cmd.extend([
             "-var_stream_map",
             " ".join(f"v:{n},a:{n}" for n in range(len(active_fmts))),
-            output_path / "stream_%v.m3u8",
+            temp_output_path / "stream_%v.m3u8",
         ])
 
-        self.run(cmd, duration=input_duration)
+        try:
+            self.run(cmd, duration=input_duration)
+            # Atomic rename: remove old output if exists, then rename temp to final
+            if final_output_path.exists():
+                shutil.rmtree(final_output_path)
+            temp_output_path.rename(final_output_path)
+        except Exception:
+            # Clean up temp directory on failure
+            if temp_output_path.exists():
+                shutil.rmtree(temp_output_path)
+            raise
 
 
 class EncodeSubs(Encoder):
@@ -216,14 +236,21 @@ class EncodeSubs(Encoder):
 
     def encode(self) -> None:
         source_path = self.sources[0].path
-        output_path = self.get_output_path()
-        cmd = self.FFMPEG_BASE + ["-i", source_path, output_path]
+        final_output_path = self.get_output_path()
+        temp_suffix = f".tmp.{socket.gethostname()}.{time.time_ns()}.{os.getpid()}"
+        temp_output_path = final_output_path.with_suffix(final_output_path.suffix + temp_suffix)
+        
+        cmd = self.FFMPEG_BASE + ["-i", source_path, temp_output_path]
         try:
             self.run(cmd)
+            # Atomic rename on success
+            temp_output_path.rename(final_output_path)
         except subprocess.CalledProcessError:
             log.warning(f"Failed to extract subtitles from {source_path}")
-        if not output_path.exists():
-            with output_path.open("w", encoding="utf-8") as f:
+            temp_output_path.unlink(missing_ok=True)
+        
+        if not final_output_path.exists():
+            with final_output_path.open("w", encoding="utf-8") as f:
                 f.write("WEBVTT\n\n")
 
 
@@ -238,7 +265,9 @@ class EncodeThumb(Encoder):
 
     def encode(self) -> None:
         source_path = self.sources[0].path
-        output_path = self.get_output_path()
+        final_output_path = self.get_output_path()
+        temp_suffix = f".tmp.{socket.gethostname()}.{time.time_ns()}.{os.getpid()}"
+        temp_output_path = final_output_path.with_suffix(final_output_path.suffix + temp_suffix)
 
         ffprobe_json = ffprobe(source_path)
         input_duration = float(ffprobe_json["format"]["duration"])
@@ -252,6 +281,13 @@ class EncodeThumb(Encoder):
             "-frames:v", "1",
             "-update", "true",
             "-y",
-            output_path,
+            temp_output_path,
         ]
-        self.run(cmd)
+        try:
+            self.run(cmd)
+            # Atomic rename on success
+            temp_output_path.rename(final_output_path)
+        except Exception:
+            # Clean up temp file on failure
+            temp_output_path.unlink(missing_ok=True)
+            raise
