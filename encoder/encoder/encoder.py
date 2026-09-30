@@ -6,7 +6,6 @@ import shlex
 import shutil
 import socket
 import subprocess
-import time
 from abc import ABC, abstractmethod
 from pathlib import Path
 
@@ -16,6 +15,11 @@ from .source import Source
 from .util import IMAGE_EXTS, SUBTITLE_EXTS, VIDEO_EXTS, ffprobe
 
 log = logging.getLogger(__name__)
+
+
+def _temp_path(path: Path) -> Path:
+    temp_suffix = f".tmp.{socket.gethostname()}.{os.getpid()}{path.suffix}"
+    return path.with_suffix(temp_suffix)
 
 
 class Encoder(ABC):
@@ -124,8 +128,7 @@ class EncodeVideo(Encoder):
     def encode(self) -> None:
         source_path = self.sources[0].path
         final_output_path = self.get_output_path().parent
-        temp_suffix = f".tmp.{socket.gethostname()}.{os.getpid()}{final_output_path.suffix}"
-        temp_output_path = final_output_path.with_suffix(temp_suffix)
+        temp_output_path = _temp_path(final_output_path)
 
         # Clean up any leftover temp directory from a previous failed run
         if temp_output_path.exists():
@@ -237,8 +240,7 @@ class EncodeSubs(Encoder):
     def encode(self) -> None:
         source_path = self.sources[0].path
         final_output_path = self.get_output_path()
-        temp_suffix = f".tmp.{socket.gethostname()}.{time.time_ns()}.{os.getpid()}"
-        temp_output_path = final_output_path.with_suffix(final_output_path.suffix + temp_suffix)
+        temp_output_path = _temp_path(final_output_path)
 
         cmd = self.FFMPEG_BASE + ["-i", source_path, temp_output_path]
         try:
@@ -266,8 +268,7 @@ class EncodeThumb(Encoder):
     def encode(self) -> None:
         source_path = self.sources[0].path
         final_output_path = self.get_output_path()
-        temp_suffix = f".tmp.{socket.gethostname()}.{time.time_ns()}.{os.getpid()}"
-        temp_output_path = final_output_path.with_suffix(final_output_path.suffix + temp_suffix)
+        temp_output_path = _temp_path(final_output_path)
 
         ffprobe_json = ffprobe(source_path)
         input_duration = float(ffprobe_json["format"]["duration"])
