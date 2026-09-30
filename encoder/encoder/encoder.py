@@ -124,9 +124,9 @@ class EncodeVideo(Encoder):
     def encode(self) -> None:
         source_path = self.sources[0].path
         final_output_path = self.get_output_path().parent
-        temp_suffix = f".tmp.{socket.gethostname()}.{time.time_ns()}.{os.getpid()}"
-        temp_output_path = final_output_path.with_name(final_output_path.name + temp_suffix)
-        
+        temp_suffix = f".tmp.{socket.gethostname()}.{os.getpid()}{final_output_path.suffix}"
+        temp_output_path = final_output_path.with_suffix(temp_suffix)
+
         # Clean up any leftover temp directory from a previous failed run
         if temp_output_path.exists():
             shutil.rmtree(temp_output_path)
@@ -239,7 +239,7 @@ class EncodeSubs(Encoder):
         final_output_path = self.get_output_path()
         temp_suffix = f".tmp.{socket.gethostname()}.{time.time_ns()}.{os.getpid()}"
         temp_output_path = final_output_path.with_suffix(final_output_path.suffix + temp_suffix)
-        
+
         cmd = self.FFMPEG_BASE + ["-i", source_path, temp_output_path]
         try:
             self.run(cmd)
@@ -248,7 +248,7 @@ class EncodeSubs(Encoder):
         except subprocess.CalledProcessError:
             log.warning(f"Failed to extract subtitles from {source_path}")
             temp_output_path.unlink(missing_ok=True)
-        
+
         if not final_output_path.exists():
             with final_output_path.open("w", encoding="utf-8") as f:
                 f.write("WEBVTT\n\n")
