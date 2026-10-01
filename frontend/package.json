@@ -38,7 +38,7 @@
         "typescript": "^7.0",
         "vitest": "^4.1.11",
         "storybook": "^10.4.6",
-        "storybook-react-rsbuild": "^3.3.4",
+        "storybook-react-rsbuild": "^3.6.0",
         "@storybook/addon-a11y": "^10.4.2",
         "@storybook/addon-docs": "^10.4.2"
     }
