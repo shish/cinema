@@ -16,6 +16,9 @@ updates:
     bumps:
       patterns:
       - '*'
+  ignore:
+    - dependency-name: "react"
+    - dependency-name: "react-dom"
 - package-ecosystem: pip
   assignees:
     - shish
