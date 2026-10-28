@@ -98,6 +98,14 @@ function CustomSpoiler({ children }: { children: any }) {
 // some combination of ParserRules and OutputRules<ReactRule> ?
 const rules: ReactRules = {
     ...SimpleMarkdown.defaultRules,
+    link: {
+        ...SimpleMarkdown.defaultRules.link,
+        react: (node, recurseOutput) => (
+            <a href={node.target} title={node.title} target="_blank" rel="noopener noreferrer">
+                {recurseOutput(node.content)}
+            </a>
+        ),
+    },
     user: {
         order: 1, // ???
         match: (source, _state, _lookbehind) => /^(@[a-zA-Z0-9]+)/.exec(source),
