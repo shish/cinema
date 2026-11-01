@@ -1,4 +1,4 @@
-FROM python:3.14 AS base
+FROM python:3.15 AS base
 WORKDIR /app
 COPY --from=mwader/static-ffmpeg:7.1.1 /ffmpeg /ffprobe /usr/local/bin/
 RUN --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
