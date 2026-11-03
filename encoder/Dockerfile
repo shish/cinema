@@ -1,12 +1,13 @@
-FROM python:3.14 AS base
+FROM astral/uv:0.13.6-alpine
 WORKDIR /app
-COPY --from=mwader/static-ffmpeg:7.1.1 /ffmpeg /ffprobe /usr/local/bin/
+COPY --from=mwader/static-ffmpeg:9.0.2 /ffmpeg /ffprobe /usr/local/bin/
 RUN --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    pip install -e .
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    uv sync --locked --no-dev
 COPY . /app
-RUN pip install -e .
+RUN uv sync --locked --no-dev
 
 VOLUME /source
 VOLUME /processed
-ENTRYPOINT ["encoder", "--source", "/media/source", "--processed", "/media/processed"]
+ENTRYPOINT ["/app/.venv/bin/encoder", "--source", "/media/source", "--processed", "/media/processed"]
 CMD ["all", "--loop", "600"]
